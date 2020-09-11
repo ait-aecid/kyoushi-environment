@@ -1,14 +1,34 @@
 terraform {
-    source = "git@git-service.ait.ac.at:ict-caiscluster/aecid/testbed/terraform/modules/openstack-testbed-networks.git"
+    source = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-vmnets.git?ref=v1.1"
 }
 
 inputs = {
-    extnet-id = "065398c8-b3cb-48c8-8617-d72038557e66"
-    local-cidr = "172.16.0.0/24"
-    dmz-cidr = "172.16.100.0/24"
-    dns = ["8.8.8.8"]
-    fwlocalip = "172.16.0.1"
-    fwdmzip = "172.16.100.1"
+    host_name = "inet-firewall"
+    host_image = "aecid-ubuntu-bionic-amd64"
+    host_tag = "firewall"
+    host_ext_ip = "100"
+    host_userdata = "firewallinit.yml"
+    ext_subnet = "testsubnet"
+    extnet = "testnet"
+    router_name = "aecid-testbed-router"
+    sshkey = "testbed-key"
+    use_floatingip = true
+    networks = { 
+	local = { 
+                network = "local",
+                host_address_index = "1",
+		subnet = "local-subnet", 
+		cidr = "172.16.0.0/24", 
+                dns: ["8.8.8.8"] 
+	}
+        dmz = {
+                network = "dmz",
+                host_address_index = "1",
+		subnet = "dmz-subnet"
+		cidr = "172.16.100.0/24"
+                dns: ["8.8.8.8"] 
+        }
+    }
 }
 
 include {

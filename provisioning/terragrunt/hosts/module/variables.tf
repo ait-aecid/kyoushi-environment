@@ -324,6 +324,12 @@ variable "webserver_ip_index" {
   default     = null
 }
 
+variable "webserver_active" {
+  type        = bool
+  description = "boolean flag controling if the web server is present or not"
+  default     = true
+}
+
 ## Intranet Server inputs 
 
 variable "intranet_image" {

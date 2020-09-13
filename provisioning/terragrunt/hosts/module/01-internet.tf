@@ -5,7 +5,7 @@ module "remote_employees" {
   source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.3"
   host_capacity = var.remote_employee_capacity
   hostname      = "remote_employee"
-  tag           = "employee"
+  tag           = "internet, employee"
   image         = local.employee_image
   flavor        = local.employee_flavor
   sshkey        = var.sshkey
@@ -20,6 +20,7 @@ module "attackers" {
   source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.3"
   host_capacity = var.attacker_capacity
   hostname      = "attacker"
+  tag           = "internet"
   image         = local.attacker_image
   flavor        = local.attacker_flavor
   sshkey        = var.sshkey

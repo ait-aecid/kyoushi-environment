@@ -5,7 +5,7 @@ module "internal_employees" {
   source                   = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.3"
   host_capacity            = var.employee_capacity
   hostname                 = "internal_employee"
-  tag                      = "employee"
+  tag                      = "intranet, employee"
   host_address_start_index = var.employee_ip_start_index
   image                    = local.employee_image
   flavor                   = local.employee_flavor
@@ -19,7 +19,8 @@ module "internal_employees" {
 module "intranet" {
   count              = var.intranet_active ? 1 : 0
   source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3"
-  hostname           = "intranet"
+  hostname           = "intranet_server"
+  tag                = "intranet"
   host_address_index = var.intranet_ip_index
   image              = local.intranet_image
   flavor             = local.intranet_flavor
@@ -35,7 +36,7 @@ module "shares" {
   source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3"
   hostname           = "${var.shares[count.index].name}_share"
   host_address_index = var.shares[count.index].ip_index
-  tag                = "share"
+  tag                = "intranet, share"
   image              = local.share_image
   flavor             = local.share_flavor
   sshkey             = var.sshkey

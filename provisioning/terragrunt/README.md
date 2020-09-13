@@ -14,3 +14,5 @@
 
 1. Install SSH-keys: cd keys && terragrunt apply
 2. Install Basic-Infrastructure: cd bootstrap && terragrunt apply
+3. Go back to main directory: cd ..
+4. Deploy the hosts: cd hosts && terragrunt apply

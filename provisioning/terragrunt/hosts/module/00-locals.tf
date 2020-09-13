@@ -35,6 +35,20 @@ locals {
   mail_userdata_file = var.mail_userdata_file == null ? local.userdata_file : var.mail_userdata_file
   mail_userdata_vars = var.mail_userdata_vars == null ? local.userdata_vars : var.mail_userdata_vars
 
+  # cloud values
+  cloud_image         = var.cloud_image == null ? var.image : var.cloud_image
+  cloud_flavor        = var.cloud_flavor == null ? var.flavor : var.cloud_flavor
+  cloud_volume_size   = var.cloud_volume_size == null ? var.volume_size : var.cloud_volume_size
+  cloud_userdata_file = var.cloud_userdata_file == null ? local.userdata_file : var.cloud_userdata_file
+  cloud_userdata_vars = var.cloud_userdata_vars == null ? local.userdata_vars : var.cloud_userdata_vars
+
+  # webserver values
+  webserver_image         = var.webserver_image == null ? var.image : var.webserver_image
+  webserver_flavor        = var.webserver_flavor == null ? var.flavor : var.webserver_flavor
+  webserver_volume_size   = var.webserver_volume_size == null ? var.volume_size : var.webserver_volume_size
+  webserver_userdata_file = var.webserver_userdata_file == null ? local.userdata_file : var.webserver_userdata_file
+  webserver_userdata_vars = var.webserver_userdata_vars == null ? local.userdata_vars : var.webserver_userdata_vars
+
   # intranet values
   intranet_image         = var.intranet_image == null ? var.image : var.intranet_image
   intranet_flavor        = var.intranet_flavor == null ? var.flavor : var.intranet_flavor

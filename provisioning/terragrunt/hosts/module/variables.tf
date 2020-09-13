@@ -230,6 +230,82 @@ variable "mail_ip_index" {
   default     = null
 }
 
+## Cloud share inputs
+
+variable "cloud_image" {
+  type        = string
+  description = "optional name or id of the base image for the cloud server host (defaults to image)"
+  default     = null
+}
+
+variable "cloud_flavor" {
+  type        = string
+  description = "optional instance flavor for the the cloud server host (defaults to flavor)"
+  default     = null
+}
+
+variable "cloud_volume_size" {
+  type        = string
+  description = "volume_size for the the cloud server host (defaults to volume_size)"
+  default     = null
+}
+
+variable "cloud_userdata_file" {
+  type        = string
+  description = "optional override for the default userdata file for the cloud host (defaults to userdata_file')"
+  default     = null
+}
+
+variable "cloud_userdata_vars" {
+  type        = map(string)
+  description = "optional override for the variables for the userdata template for the cloud host (defaults to userdata_vars)"
+  default     = null
+}
+
+variable "cloud_ip_index" {
+  type        = number
+  description = "optional host address index for the cloud server"
+  default     = null
+}
+
+## Webserver share inputs
+
+variable "webserver_image" {
+  type        = string
+  description = "optional name or id of the base image for the webserver server host (defaults to image)"
+  default     = null
+}
+
+variable "webserver_flavor" {
+  type        = string
+  description = "optional instance flavor for the the webserver server host (defaults to flavor)"
+  default     = null
+}
+
+variable "webserver_volume_size" {
+  type        = string
+  description = "volume_size for the the webserver server host (defaults to volume_size)"
+  default     = null
+}
+
+variable "webserver_userdata_file" {
+  type        = string
+  description = "optional override for the default userdata file for the webserver host (defaults to userdata_file')"
+  default     = null
+}
+
+variable "webserver_userdata_vars" {
+  type        = map(string)
+  description = "optional override for the variables for the userdata template for the webserver host (defaults to userdata_vars)"
+  default     = null
+}
+
+variable "webserver_ip_index" {
+  type        = number
+  description = "optional host address index for the webserver server"
+  default     = null
+}
+
 ## Intranet Server inputs 
 
 variable "intranet_image" {

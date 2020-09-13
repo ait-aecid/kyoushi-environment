@@ -192,6 +192,12 @@ variable "vpn_ip_index" {
   default     = null
 }
 
+variable "vpn_active" {
+  type        = bool
+  description = "boolean flag controling if the vpn server is present or not"
+  default     = true
+}
+
 ## Mail Server inputs
 
 variable "mail_image" {
@@ -230,6 +236,12 @@ variable "mail_ip_index" {
   default     = null
 }
 
+variable "mail_active" {
+  type        = bool
+  description = "boolean flag controling if the mail server is present or not"
+  default     = true
+}
+
 ## Cloud share inputs
 
 variable "cloud_image" {
@@ -266,6 +278,12 @@ variable "cloud_ip_index" {
   type        = number
   description = "optional host address index for the cloud server"
   default     = null
+}
+
+variable "cloud_active" {
+  type        = bool
+  description = "boolean flag controling if the cloud server is present or not"
+  default     = true
 }
 
 ## Webserver share inputs
@@ -342,6 +360,12 @@ variable "intranet_ip_index" {
   type        = number
   description = "optional host address index for the intranet server"
   default     = null
+}
+
+variable "intranet_active" {
+  type        = bool
+  description = "boolean flag controling if the intranet server is present or not"
+  default     = true
 }
 
 ## Shares inputs

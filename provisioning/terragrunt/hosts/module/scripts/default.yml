@@ -1,0 +1,9 @@
+system_info:
+  default_user:
+    name: ait
+    plain_text_passwd: test
+    lock_passwd: False
+
+runcmd:
+  -  [apt-get, update]
+  -  [apt-get, install, -y, python]

@@ -1,5 +1,5 @@
 terraform {
-    source = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-vmnets.git?ref=v1.1"
+    source = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-vmnets.git?ref=v1.2"
 }
 
 inputs = {

@@ -420,3 +420,47 @@ variable "shares" {
   ]
 }
 
+## Intranet Server inputs 
+
+variable "monitoring_image" {
+  type        = string
+  description = "optional name or id of the base image for monitoring host (defaults to image)"
+  default     = null
+}
+
+variable "monitoring_flavor" {
+  type        = string
+  description = "optional instance flavor for the monitoring host (defaults to flavor)"
+  default     = null
+}
+
+variable "monitoring_volume_size" {
+  type        = string
+  description = "volume_size for the monitoring host (defaults to volume_size)"
+  default     = null
+}
+
+variable "monitoring_userdata_file" {
+  type        = string
+  description = "optional override for the default userdata file for the monitoring host (defaults to userdata_file')"
+  default     = null
+}
+
+variable "monitoring_userdata_vars" {
+  type        = map(string)
+  description = "optional override for the variables for the userdata template for the monitoring host (defaults to userdata_vars)"
+  default     = null
+}
+
+variable "monitoring_ip_index" {
+  type        = number
+  description = "optional host address index for the monitoring server"
+  default     = null
+}
+
+variable "monitoring_active" {
+  type        = bool
+  description = "boolean flag controling if the monitoring server is present or not"
+  default     = true
+}
+

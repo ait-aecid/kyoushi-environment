@@ -63,4 +63,11 @@ locals {
   share_userdata_file = var.share_userdata_file == null ? local.userdata_file : var.share_userdata_file
   share_userdata_vars = var.share_userdata_vars == null ? local.userdata_vars : var.share_userdata_vars
 
+  # monitoring values
+  monitoring_image         = var.monitoring_image == null ? var.image : var.monitoring_image
+  monitoring_flavor        = var.monitoring_flavor == null ? var.flavor : var.monitoring_flavor
+  monitoring_volume_size   = var.monitoring_volume_size == null ? var.volume_size : var.monitoring_volume_size
+  monitoring_userdata_file = var.monitoring_userdata_file == null ? local.userdata_file : var.monitoring_userdata_file
+  monitoring_userdata_vars = var.monitoring_userdata_vars == null ? local.userdata_vars : var.monitoring_userdata_vars
+
 }

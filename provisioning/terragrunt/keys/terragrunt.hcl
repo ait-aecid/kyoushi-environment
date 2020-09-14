@@ -1,5 +1,5 @@
 terraform {
-    source = "git@git-service.ait.ac.at:ict-caiscluster/aecid/testbed/terraform/modules/openstack-sshkey.git?ref=v1.0"
+    source = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-sshkey.git?ref=v1.0"
 
     # for the keys we have to use a state file per user since OpenStack keypairs are user specific ressource
     extra_arguments "custom_state_file" {

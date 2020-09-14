@@ -4,8 +4,8 @@ terraform {
 
 inputs = {
     # networks
-    internet = "testnet"
-    internet_subnet = "testsubnet"
+    internet = "internet"
+    internet_subnet = "internet-subnet"
     dmz = "dmz"
     dmz_subnet = "dmz-subnet"
     intranet = "local"

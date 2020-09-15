@@ -45,3 +45,18 @@ module "shares" {
   userdatafile       = local.share_userdata_file
   userdata_vars      = local.share_userdata_vars
 }
+
+module "monitoring" {
+  count              = var.monitoring_active ? 1 : 0
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3"
+  hostname           = "monitoring"
+  tag                = "intranet"
+  host_address_index = var.monitoring_ip_index
+  image              = local.monitoring_image
+  flavor             = local.monitoring_flavor
+  sshkey             = var.sshkey
+  network            = var.intranet
+  subnet             = var.intranet_subnet
+  userdatafile       = local.monitoring_userdata_file
+  userdata_vars      = local.monitoring_userdata_vars
+}

@@ -1,0 +1,15 @@
+---
+- hosts: all
+  vars:
+    samba_install_version: "4.5.9"
+    samba_domain_master: false
+    samba_local_master: false
+    samba_mitigate_cve_2017_7494: false
+  become: yes
+  roles:
+    - samba
+
+
+
+
+

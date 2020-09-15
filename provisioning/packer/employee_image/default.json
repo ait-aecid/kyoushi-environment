@@ -1,0 +1,7 @@
+{
+    "base_image" : "aecid-ubuntu-bionic-amd64",
+    "image_name" : "aecid-employee-bionic-amd64",
+    "security_group": "default",
+    "network": "065398c8-b3cb-48c8-8617-d72038557e66",
+    "floating_ip_pool": "provider-aecid-208"
+}

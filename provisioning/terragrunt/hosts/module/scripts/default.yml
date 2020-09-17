@@ -1,3 +1,4 @@
+#cloud-config
 system_info:
   default_user:
     name: ait
@@ -10,6 +11,6 @@ write_files:
       path: /root/ifsetup.sh
       permissions: '0700'
 runcmd:
-  -  [ /root/ifsetup.sh ]
+  - [ /root/ifsetup.sh ]
   -  [apt-get, update]
   -  [apt-get, install, -y, python]

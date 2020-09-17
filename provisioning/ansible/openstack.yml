@@ -1,0 +1,21 @@
+# openstack inventory
+plugin: openstack
+expand_hostvars: no
+fail_on_errors: yes
+private: yes
+strict: False
+compose:
+    #
+    # References to `__this_does_not_exists__` are used to force ansible to not set the specific variable.
+    # This needs to be done if you only want to define a variable in specific cases (e.g., only for employees)
+    #
+
+    # sets the employee id based on the instance number (format `m<xx>`)
+    employee_id: | 
+        'm%02d' | format(openstack.name | regex_replace('(client_employee_)(\d*)', '\2') | int) 
+        if openstack.name.startswith('client_employee_') 
+        else __this_does_not_exists__
+    employee_integer_id: | 
+        '%02d' | format(openstack.name | regex_replace('(client_employee_)(\d*)', '\2') | int) 
+        if openstack.name.startswith('client_employee_') 
+        else __this_does_not_exists__

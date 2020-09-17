@@ -1,0 +1,5 @@
+- name: Placeholder playbook
+  hosts: all
+  tasks: 
+    - debug:
+        msg: "{{ inventory_hostname }}: {{ ip }}"

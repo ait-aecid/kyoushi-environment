@@ -70,4 +70,11 @@ locals {
   monitoring_userdata_file = var.monitoring_userdata_file == null ? local.userdata_file : var.monitoring_userdata_file
   monitoring_userdata_vars = var.monitoring_userdata_vars == null ? local.userdata_vars : var.monitoring_userdata_vars
 
+  # mgmthost values
+  mgmthost_image         = var.mgmthost_image == null ? var.image : var.mgmthost_image
+  mgmthost_flavor        = var.mgmthost_flavor == null ? var.flavor : var.mgmthost_flavor
+  mgmthost_volume_size   = var.mgmthost_volume_size == null ? var.volume_size : var.mgmthost_volume_size
+  mgmthost_userdata_file = var.mgmthost_userdata_file == null ? local.userdata_file : var.mgmthost_userdata_file
+  mgmthost_userdata_vars = var.mgmthost_userdata_vars == null ? local.userdata_vars : var.mgmthost_userdata_vars
+
 }

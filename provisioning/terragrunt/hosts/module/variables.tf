@@ -420,7 +420,7 @@ variable "shares" {
   ]
 }
 
-## Intranet Server inputs 
+## Monitoring Server inputs 
 
 variable "monitoring_image" {
   type        = string
@@ -463,4 +463,55 @@ variable "monitoring_active" {
   description = "boolean flag controling if the monitoring server is present or not"
   default     = true
 }
+
+## Management Server inputs 
+
+variable "mgmthost_image" {
+  type        = string
+  description = "optional name or id of the base image for mgmthost (defaults to image)"
+  default     = null
+}
+
+variable "mgmthost_flavor" {
+  type        = string
+  description = "optional instance flavor for the mgmthost (defaults to flavor)"
+  default     = null
+}
+
+variable "mgmthost_volume_size" {
+  type        = string
+  description = "volume_size for the mgmthost (defaults to volume_size)"
+  default     = null
+}
+
+variable "mgmthost_userdata_file" {
+  type        = string
+  description = "optional override for the default userdata file for the mgmthost host (defaults to userdata_file')"
+  default     = null
+}
+
+variable "mgmthost_userdata_vars" {
+  type        = map(string)
+  description = "optional override for the variables for the userdata template for the mgmthost host (defaults to userdata_vars)"
+  default     = null
+}
+
+variable "mgmthost_ip_index" {
+  type        = number
+  description = "optional host address index for the mgmthost"
+  default     = null
+}
+
+variable "mgmthost_active" {
+  type        = bool
+  description = "boolean flag controling if the mgmthost is present or not"
+  default     = true
+}
+
+variable "floating_ip_pool" {
+  type        = string
+  description = "Floating ip pool to use for the management host"
+  default     = null
+}
+
 

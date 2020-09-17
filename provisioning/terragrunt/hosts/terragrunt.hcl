@@ -10,11 +10,12 @@ inputs = {
     dmz_subnet = "dmz-subnet"
     intranet = "local"
     intranet_subnet = "local-subnet"
+    floating_ip_pool = "provider-aecid-208"
 
     # image configuration
     image = "aecid-ubuntu-bionic-amd64"
-    employee_image = "aecid-employee-bionic-amd64-2020-09-15T20:46:23Z"
-    share_image = "aecid-samba-4.5.9-bionic-amd64-2020-09-15T21:20:23Z"
+    employee_image = "aecid-employee-bionic-amd64-2020-09-15T20-46-23Z"
+    share_image = "aecid-samba-4.5.9-bionic-amd64-2020-09-15T21-20-23Z"
 
     sshkey = "testbed-key"
 

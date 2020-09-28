@@ -1,0 +1,11 @@
+- src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/cifs-mounts.git
+  scm: git
+  version: v1.0
+- src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/mate-desktop.git
+  scm: git
+  version: v1.0
+- src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/x2go-server.git
+  scm: git
+  version: v1.0
+- src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/manage_unattended_upgrades.git
+  scm: git

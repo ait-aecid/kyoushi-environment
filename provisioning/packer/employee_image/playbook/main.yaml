@@ -1,0 +1,64 @@
+---
+  - hosts: all
+    vars:
+      client_basic_software:
+        # basic utilities
+        - openssh-server
+        - iputils-ping
+        - dnsutils
+        - net-tools
+        - curl
+        - git
+        - unzip
+        - netcat
+        - vim
+        - nano
+        - sudo
+        - bash-completion
+        - firefox
+        - thunderbird
+        # office tools 
+        - libreoffice
+        - evince
+        - file-roller
+        - pluma
+    tasks:
+    - name: Update repositories cache 
+      apt:
+        update_cache: yes
+      become: yes
+      
+    - name: Disable unattended upgrade
+      include_role:
+        name: manage_unattended_upgrades
+      vars:
+        ansible_become: yes
+      tags: [install, config]
+      
+    - name: Install mate desktop
+      include_role:
+        name: mate-desktop
+      tags: [install]
+  
+    - name: Install basic software
+      apt:
+        name: "{{ client_basic_software }}"
+        state: present
+      tags: [install]
+      become: yes
+  
+    - name: Install cifs mounting tools
+      include_role:
+        name: cifs-mounts
+      tags: [install, config]
+  
+    - name: Install x2go server as remote desktop
+      include_role:
+        name: x2go-server
+      tags: [install]
+  
+  
+  
+  
+  
+  

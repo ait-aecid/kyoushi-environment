@@ -1,0 +1,5 @@
+---
+- src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/samba.git
+  scm: git
+  version: master
+  name: samba

@@ -7,8 +7,10 @@
 
 ## Prerequisites
 
-1. an external network(Self-Service Network)
+1. An external network(Self-Service Network)
 2. Disable port-security on external network
+3. Required base images uploaded (e.g., ubuntu, debian)
+4. Custom packer images built and available in the OpenStack project
 
 ## Bootstrap Sequence
 

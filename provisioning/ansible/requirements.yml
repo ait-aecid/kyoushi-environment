@@ -1,1 +1,65 @@
+# Ansible Collection  requirements 
+collections:
+  # openstack modules for inventory src
+  - name: openstack.cloud
+  # community collection for various community modules
+  - name: community.general
+  # ait custom owncloud role and modules
+  - name: git@git-service.ait.ac.at:sct-cyberrange/ansible-collections/owncloud.git
+    type: git
+    version: v0.3.1
 # Ansible Role requirements
+roles:
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/apache2.git
+    scm: git
+    version: v1.1
+    name: apache2
+  
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/samba.git
+    scm: git
+    version: master
+    name: samba
+  
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/cifs-mounts.git
+    scm: git
+    version: v1.0
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/dnsmasq.git
+    scm: git
+    version: master
+    name: dnsmasq
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/dovecot.git
+    scm: git
+    version: master
+    name: dovecot
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/postfix.git
+    scm: git
+    version: master
+    name: postfix
+
+  - src: https://github.com/GROG/ansible-role-user.git
+    scm: git
+    version: master
+    name: grog.user
+
+  - src: https://github.com/GROG/ansible-role-group.git
+    scm: git
+    version: master
+    name: grog.group
+
+  - src: https://github.com/GROG/ansible-role-sudo.git
+    scm: git
+    version: master
+    name: grog.sudo
+
+  - src: https://github.com/GROG/ansible-role-authorized-key.git
+    scm: git
+    version: master
+    name: grog.authorized-key
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/maradns.git
+    scm: git
+    version: master
+    name: maradns

@@ -1,5 +1,5 @@
 # openstack inventory
-plugin: openstack
+plugin: openstack.cloud.openstack
 expand_hostvars: no
 fail_on_errors: yes
 private: yes

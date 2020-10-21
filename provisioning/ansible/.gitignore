@@ -1,3 +1,5 @@
 # Ignore roles directory containing our dependent roles
 roles/*
 !roles/.gitkeep
+collections/*
+!collections/.gitkeep

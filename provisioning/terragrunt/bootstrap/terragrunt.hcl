@@ -21,7 +21,6 @@ inputs = {
     extnet = "internet"
     extnet_create = true
     ext_dns_address_index = 13370
-    ext_additional_dns = ["8.8.8.8"]
     router_name = "aecid-testbed-router"
     sshkey = "testbed-key"
     floating_ip_pool = "provider-aecid-208"
@@ -31,7 +30,7 @@ inputs = {
                 host_address_index = "1",
 		subnet = "local-subnet", 
 		cidr = "172.16.0.0/24", 
-                dns = ["8.8.8.8"],
+                dns = [],
                 host_as_dns = true
 	}
         dmz = {
@@ -39,7 +38,7 @@ inputs = {
                 host_address_index = "1",
 		subnet = "dmz-subnet"
 		cidr = "172.16.100.0/24"
-                dns = ["8.8.8.8"],
+                dns = [],
                 host_as_dns = true
         }
     }

@@ -6,14 +6,14 @@ inputs = {
     # firewall host
     host_name = "inet-firewall"
     host_image = "aecid-ubuntu-bionic-amd64"
-    host_tag = "firewall"
+    host_tag = "firewall, dnsservers"
     host_ext_address_index = 42420
     host_size  = 40
 
     # external dns server
     ext_dns_name = "inet-dns"
     ext_dns_image = "aecid-ubuntu-bionic-amd64"
-    ext_dns_tag = "internet, dnservers"
+    ext_dns_tag = "internet, dnsservers"
     ext_dns_ext_address_index = 22
     ext_dns_size = 20
 

@@ -3,5 +3,7 @@ dnat_name: mailserver
 dns_domains: 
   - domain: company
     hostname: mailserver
+    certificate: yes
   - domain: dmz
+    certificate: yes
       

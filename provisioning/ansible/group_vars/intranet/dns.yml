@@ -1,0 +1,5 @@
+dns_domains: 
+  - domain: intranet
+    hostname: "{{ dns_hostname | default(ansible_nodename) }}"
+    certificate: "{{ dns_certificate | default(False, True) | bool }}"
+    aliases: "{{ dns_aliases | default([]) }}"

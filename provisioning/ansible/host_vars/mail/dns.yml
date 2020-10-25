@@ -1,0 +1,7 @@
+dnat_name: mailserver
+
+dns_domains: 
+  - domain: company
+    hostname: mailserver
+  - domain: dmz
+      

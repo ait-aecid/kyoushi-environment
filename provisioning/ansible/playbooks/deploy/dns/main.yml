@@ -1,0 +1,11 @@
+
+- name: Fact gathering pre dns server conifguration
+  hosts: all
+  gather_facts: yes
+
+- name: Configure the dns servers
+  hosts: dnsservers
+  become: true
+  roles:
+      - dnsmasq
+      - maradns

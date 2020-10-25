@@ -1,0 +1,27 @@
+dns_server_name: company
+dns_server_admin: admin@{{ domains.company.domain }}
+dns_upstream_server: "{{ hostvars['inet-dns'].ansible_default_ipv4['address'] }}"
+
+
+dnat_aliases_list: |
+  [
+    {% for host in groups['dnat'] %}
+    {
+      "dnat_host": "{{ host }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+
+
+dns_domains:
+  - domain: company
+    hostname: gateway
+  - domain: dmz
+    hostname: gateway
+    ip: "{{ openstack.addresses.dmz[0].addr }}"
+  - domain: intranet
+    hostname: gateway
+    ip: "{{ openstack.addresses.local[0].addr }}"
+  - domain: company_external
+    hostname: null
+    aliases: "{{ dnat_aliases_list }}"

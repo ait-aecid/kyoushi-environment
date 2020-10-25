@@ -1,0 +1,1 @@
+dns_hostname: "employee{{ '%02d' | format((ansible_hostname | regex_replace('(internal-employee-)(\\d*)','\\g<2>') | int)) }}"

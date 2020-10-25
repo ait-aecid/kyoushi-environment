@@ -1,0 +1,108 @@
+dnsmasq_config:
+    - name: custom
+      content: except-interface=lo
+      prio: 0
+    - name: "{{ dns_server_name }}"
+      content: |
+        {%- for entry in domains.values() %}
+        {%- if entry.server == inventory_hostname %}
+        server=/{{ entry.domain }}/127.0.0.1
+        {% endif %}
+        {% endfor %}
+        {% if dns_upstream_server is defined %}
+        server={{ dns_upstream_server }}
+        {% endif %}
+
+
+#
+# About dnat_hosts and proxy_hosts 
+# We have to use this special host referencing technique since ansible templates do not allow us to access hostvars 
+# in an templated variable if it is already being access through hostvars i.e., suppose we have host A, B and C with the following wars
+# Host A
+# foo: bar
+#
+# Host B
+# foo_ref: "{{ hostvars['A'].foo }}"
+#
+# Host C
+# foo_double_ref: "{{ hostvars['B'].foo_ref }}"
+# 
+# In this example foo_ref would render without any problem, but foo_double_ref would not.
+# This is because when foo_double_ref is rendered the inner render of foo_ref has no access to hostvars.
+# 
+
+# Beware scary code below
+maradns_zones: |
+  [
+  {# we only loop through domains that have be set to be managed by the current inventory host #}
+  {% for entry in (domains.values() | selectattr('server', 'equalto', inventory_hostname)) %}
+    {
+      "name": "{{ entry.domain }}",
+      "email": "{{ dns_server_admin }}",
+      {# fqdn4 entries akA A entry + reverse are still simple. #}
+      {# we simply get all dns entries of all hosts for the current domain and add the set hostname and ip #}
+      "fqdn4": [
+        {%- for dns_entry in (hostvars.values() | selectattr('dns','defined') | map(attribute='dns') | selectattr(entry.id,'defined') | map(attribute=entry.id)) %}
+        {
+          {%- if dns_entry.hostname is defined and dns_entry.hostname|length %}"domain": "{{ dns_entry.hostname }}",{% endif %}
+          "ip": "{{ dns_entry.ip }}"
+        }{%- if not loop.last %},{% endif %}
+        {% endfor %}
+      ],
+      "a": [
+        {# the same loop as above, but now we also loop through the alias entries in an inner loop#}
+        {%- for dns_entry in (hostvars.values() | selectattr('dns','defined') | map(attribute='dns') | selectattr(entry.id,'defined') | map(attribute=entry.id)) %}
+        {%- set dns_loop = loop %}
+        {%- for alias in dns_entry.aliases %}
+
+        {# if the alias entry is a dnat_host we have to get the actual info from another hostvars entry #}
+        {% if alias.dnat_host is defined %}
+        {% set alias_loop = loop %}
+        {# first we set the main host name for dnat host #}
+        {
+          "domain": "{{ hostvars[alias.dnat_host].dnat.dns.hostname }}",
+          "ip": "{{ alias.ip if alias.ip is defined else dns_entry.ip }}"
+        }{% if not dns_loop.last or not alias_loop.last or (hostvars[alias.dnat_host].dnat.dns.aliases is defined and hostvars[alias.dnat_host].dnat.dns.aliases|length) %},{% endif %}
+
+        {# if the dnat host defines additional aliases we also have to add them here so we loop again #}
+        {% if hostvars[alias.dnat_host].dnat.dns.aliases is defined %}
+        {% for dnat_alias in hostvars[alias.dnat_host].dnat.dns.aliases %}
+        {
+          {# when the current dnat_alias has a hostname we can simply set it #}
+          {%- if dnat_alias.hostname is defined and dnat_alias.hostname|length %}
+          "domain": "{{ dnat_alias.hostname }}",
+          {# but if it is a proxy_host we again have to load the information from another hosts hostvars #}
+          {% elif dnat_alias.proxy_host is defined and hostvars[dnat_alias.proxy_host].proxied_name|length %}
+          "domain": "{{ hostvars[dnat_alias.proxy_host].proxied_name }}",
+          {% endif %}
+          "ip": "{{ dnat_alias.ip if dnat_alias.ip is defined else dns_entry.ip }}"
+        }{% if not dns_loop.last or not alias_loop.last or loop.last %},{% endif%}
+        {% endfor %}
+        {% endif %}
+        {% else %}
+        {
+          {# for non dnat hosts we also have to differentiate between normal entries and proxy_host entries #}
+          {%- if alias.hostname is defined and alias.hostname|length %}
+          "domain": "{{ alias.hostname }}",
+          {% elif alias.proxy_host is defined and hostvars[alias.proxy_host].proxied_name|length %}
+          "domain": "{{ hostvars[alias.proxy_host].proxied_name }}",
+          {% endif %}
+          "ip": "{{ alias.ip if alias.ip is defined else dns_entry.ip }}"
+        }{% if not dns_loop.last or not loop.last %},{% endif %}
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+      ]{%- if entry.mx is defined %},
+      "mx": [
+        {%- for mx in entry.mx %}
+        {  
+          "prio": {{ mx.priority }}, 
+          "rec": "{{ mx.record }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ]
+      {% endif %}
+    }{%- if not loop.last %},{% endif %}
+  {% endfor %}
+  ]
+

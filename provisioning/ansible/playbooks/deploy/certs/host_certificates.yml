@@ -1,0 +1,86 @@
+- set_fact:
+    ca_host_path: "{{ ca_servers_path }}/{{ host }}"
+
+- name: Create the host certificates directory for {{ host }}
+  file:
+    name: "{{ ca_host_path }}"
+    state: directory
+
+- name: Create the certificate directories for {{ host }}
+  file:
+    name: "{{ ca_host_path }}/{{ site.name }}"
+    state: directory
+  loop: "{{ lookup('list', certificates) }}"
+  loop_control:
+    loop_var: site
+
+- name: Generate the private keys for {{ host }}
+  openssl_privatekey:
+    path: "{{ ca_host_path }}/{{ site.name }}//{{ site.name }}.key"
+    type: RSA
+    size: 4096
+    state: present
+  loop: "{{ lookup('list', certificates) }}"
+  loop_control:
+    loop_var: site
+
+- name: Generate the certificate signing requests for {{ host }}
+  openssl_csr:
+    use_common_name_for_san: yes
+    path: "{{ ca_host_path }}/{{ site.name }}//{{ site.name }}.csr"
+    privatekey_path: "{{ ca_host_path }}/{{ site.name }}//{{ site.name }}.key"
+    country_name: "{{ site.country | default(omit) }}"
+    state_or_province_name: "{{ site.state | default(omit) }}"
+    locality_name: "{{ site.locality | default(omit) }}"
+    organization_name: "{{ site.organization | default(omit) }}"
+    organization_unit_name: "{{ site.organization_unit | default(omit) }}" 
+    email_address: "{{ site.email | default(omit) }}"
+    subject_alt_name: "{{ site.subject_alt_name | default(omit) }}"
+    # we at least need a common name
+    common_name: "{{ site.common_name }}"
+  loop: "{{ lookup('list', certificates) }}"
+  loop_control:
+    loop_var: site
+
+- name: Check for already existing certificates for {{ host }}
+  stat:
+    path: "{{ ca_host_path }}/{{ site.name }}/{{ site.name }}.crt"
+  loop: "{{ lookup('list', certificates) }}"
+  loop_control:
+    loop_var: site
+  register: file_check
+
+- name: Check state of currently existing certificates for {{ host }}
+  openssl_certificate_info:
+    path: "{{ ca_host_path }}/{{ fcheck.site.name }}/{{ fcheck.site.name }}.crt"
+    valid_at:
+        check: "{{ ca_check_valid_till }}"
+  when: fcheck.stat.exists == true
+  loop: "{{ file_check.results }}"
+  loop_control:
+    loop_var: fcheck
+  register: certificate_check
+
+- name: Delete about to expire certificate authority certificate  for {{ host }}
+  file:
+    name: "{{ ca_host_path }}/{{ validity_check.fcheck.site.name }}/{{ validity_check.fcheck.site.name }}.crt"
+    state: absent
+  loop: "{{ certificate_check.results }}"
+  loop_control:
+    loop_var: validity_check
+  when: not (validity_check.skipped is defined and validity_check.skipped) and not validity_check.valid_at.check
+
+- name: Sign certificate
+  openssl_certificate:
+    path: "{{ ca_host_path }}/{{ site.name }}/{{ site.name }}.crt"
+    csr_path: "{{ ca_host_path }}/{{ site.name }}/{{ site.name }}.csr"
+    ownca_path: "{{ ca_cert }}"
+    ownca_privatekey_path: "{{ ca_key }}"
+    ownca_privatekey_passphrase: "{{ ca_pw }}"
+    ownca_not_before: "{{ ca_info.valid_from | default(omit) }}"
+    ownca_not_after:  "{{ ca_info.valid_till | default(omit) }}"
+    provider: ownca
+  loop: "{{ lookup('list', certificates) }}"
+  loop_control:
+    loop_var: site
+

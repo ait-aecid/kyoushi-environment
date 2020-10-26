@@ -4,6 +4,8 @@ dns_domains:
   - domain: company
     hostname: mailserver
     certificate: yes
+    certificate_info: "{{ dns_certificate_info }}"
   - domain: dmz
     certificate: yes
+    certificate_info: "{{ dns_certificate_info }}"
       

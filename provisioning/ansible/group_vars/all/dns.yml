@@ -35,7 +35,8 @@ dns: |
         "domain": "{{ dns_domain.domain }}",
         "fqdn": "{{ (dns_domain.hostname | default(ansible_nodename))+"." if (dns_domain.hostname | default(ansible_nodename)) is not none }}{{ domains[dns_domain.domain].domain }}",
         "ip": "{{ dns_domain.ip | default(ansible_default_ipv4['address'], True) }}",
-        "certificate": "{{ dns_domain.certificate | default(False, True) | bool }}",
+        "certificate": {{ dns_domain.certificate | default(False, True) | bool }},
+        "certificate_info": {{ dns_domain.certificate_info | default({}) }},
         "aliases": {{ dns_domain.aliases | default([]) }}
     }{% if not loop.last %},{% endif %}
   {% endfor %}

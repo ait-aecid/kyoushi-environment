@@ -1,0 +1,139 @@
+# basic certificate information and validity
+ca_info:
+    country: AT
+    state: Vienna
+    locality: Vienna 
+    organization: Cyberrange Certificate Authority GmbH
+    email: control@cyberrange.at
+    common_name: Cyberrange CA
+    # valid_till: +24w # 6 months
+    # valid_from: +1m # 1 minute 
+
+ca_cert: "{{ ca_base_path}}/ca.crt"
+ca_csr: "{{ ca_base_path }}/ca.csr"
+ca_key: "{{ ca_base_path}}/ca.key"
+ca_pw: "6^PcDXfVrs~y4n3V"
+
+# can be used to automatically regenerate the CA certificate if it is about to expire
+ca_check_valid_till: +8w
+
+_dns_hosts: "{{ hostvars.values() | selectattr('dns','defined') }}"
+
+cert_configs: |
+  {
+  {% for host_entry in  _dns_hosts %}
+    {% set hosts_loop = loop %}
+    "{{ host_entry.inventory_hostname }}": [
+      {% for dns_entry in (host_entry.dns.values() | selectattr('certificate', 'defined') | selectattr('certificate', 'truthy')) %}
+      {% set alias_certs = (dns_entry.aliases | selectattr('certificate', 'defined') | selectattr('certificate', 'truthy')) %}
+      { 
+        {% if dns_entry.certificate_info is defined and dns_entry.certificate_info is mapping %}
+        {% if dns_entry.certificate_info.country is defined %}
+        "country": "{{ dns_entry.certificate_info.country }}",
+        {% endif %}
+
+        {% if dns_entry.certificate_info.state is defined %}
+        "state": "{{ dns_entry.certificate_info.state }}",
+        {% endif %}
+
+        {% if dns_entry.certificate_info.locality is defined %}
+        "locality": "{{ dns_entry.certificate_info.locality }}",
+        {% endif %}
+
+        {% if dns_entry.certificate_info.organization is defined %}
+        "organization": "{{ dns_entry.certificate_info.organization }}",
+        {% endif %}
+
+        {% if dns_entry.certificate_info.organization_unit is defined %}
+        "organization_unit": "{{ dns_entry.certificate_info.organization_unit }}",
+        {% endif %}
+
+        {% if dns_entry.certificate_info.email is defined %}
+        "email": "{{ dns_entry.certificate_info.email }}",
+        {% endif %}   
+        {% endif %}
+
+        "subject_alt_name": [
+          {% if dns_entry.certificate_info is mapping and dns_entry.certificate_info.subject_alt_name is defined %}
+          {% for alt_name in dns_entry.certificate_info.subject_alt_name %}
+          "{{ alt_name }}"{% if not loop.last or (dns_entry.aliases | selectattr('certificate_alt_name', 'defined'))|length %},{% endif %}
+          {% endfor %}
+          {% endif %}
+          {% for alias in (dns_entry.aliases | selectattr('certificate_alt_name', 'defined')) %}
+            {% if alias.hostname is defined and alias.hostname|length %}
+            "{{alias.certificate_alt_name}}: {{ alias.hostname }}.{{ domains[dns_entry.domain].domain }}"
+            {% elif alias.proxy_host is defined and hostvars[alias.proxy_host].proxied_name|length %}
+            "{{alias.certificate_alt_name}}: {{ hostvars[alias.proxy_host].proxied_name }}.{{ domains[dns_entry.domain].domain }}"
+            {% else %}
+            "{{alias.certificate_alt_name}}: {{ domains[dns_entry.domain].domain }}"
+            {% endif %}{% if not loop.last %},{% endif %}
+          {% endfor %}
+        ],
+
+        {%- if dns_entry.hostname is defined and dns_entry.hostname|length %}
+        "name": "{{ dns_entry.hostname }}.{{ dns_entry.domain }}",
+        "common_name": "{{ dns_entry.hostname }}.{{ domains[dns_entry.domain].domain }}"
+        {% elif dns_entry.proxy_host is defined and hostvars[dns_entry.proxy_host].proxied_name|length %}
+        "name": "{{ hostvars[dns_entry.proxy_host].proxied_name }}.{{ dns_entry.domain }}",
+        "common_name": "{{ hostvars[dns_entry.proxy_host].proxied_name }}.{{ domains[dns_entry.domain].domain }}"
+        {% else %}
+        "name": "{{ dns_entry.domain }}",
+        "common_name": "{{ domains[dns_entry.domain].domain }}"
+        {% endif %}
+      }{% if not hosts_loop.last or not loop.last or alias_certs|length %},{% endif %}
+
+      {# we do the same as above for all aliases #}
+      {% for alias in alias_certs %}
+      { 
+        {% if dns_entry.certificate_info is defined and dns_entry.certificate_info is mapping %}
+        {% if dns_entry.certificate_info.country is defined %}
+        "country": "{{ dns_entry.certificate_info.country }}",
+        {% endif %}
+
+        {% if dns_entry.certificate_info.state is defined %}
+        "state": "{{ dns_entry.certificate_info.state }}",
+        {% endif %}
+
+        {% if dns_entry.certificate_info.locality is defined %}
+        "locality": "{{ dns_entry.certificate_info.locality }}",
+        {% endif %}
+
+        {% if dns_entry.certificate_info.organization is defined %}
+        "organization": "{{ dns_entry.certificate_info.organization }}",
+        {% endif %}
+
+        {% if dns_entry.certificate_info.organization_unit is defined %}
+        "organization_unit": "{{ dns_entry.certificate_info.organization_unit }}",
+        {% endif %}
+
+        {% if dns_entry.certificate_info.email is defined %}
+        "email": "{{ dns_entry.certificate_info.email }}",
+        {% endif %}   
+        {% endif %}
+
+        "subject_alt_name": [
+          {% if alias.subject_alt_names is defined %}
+          {% for alt_name in alias.subject_alt_names %}
+          "{{ alt_name }}"{% if not loop.last %},{% endif %}
+          {% endfor %}
+          {% endif %}
+        ],
+
+        {%- if alias.hostname is defined and alias.hostname|length %}
+        "name": "{{ alias.hostname }}.{{ dns_entry.domain }}",
+        "common_name": "{{ alias.hostname }}.{{ domains[dns_entry.domain].domain }}"
+        {% elif alias.proxy_host is defined and hostvars[alias.proxy_host].proxied_name|length %}
+        "name": "{{ hostvars[alias.proxy_host].proxied_name }}.{{ dns_entry.domain }}",
+        "common_name": "{{ hostvars[alias.proxy_host].proxied_name }}.{{ domains[dns_entry.domain].domain }}"
+        {% else %}
+        "name": "{{ dns_entry.domain }}",
+        "common_name": "{{ domains[dns_entry.domain].domain }}"
+        {% endif %}
+      }{% if not hosts_loop.last or not loop.last %},{% endif %}
+      {% endfor %}
+
+      {% endfor %}
+    ]{% if not loop.last %},{% endif %}
+  {% endfor %}
+  }
+

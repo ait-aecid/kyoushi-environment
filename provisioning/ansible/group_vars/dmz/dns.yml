@@ -1,5 +1,13 @@
+dns_certificate_info:
+  country: AT
+  state: Vienna
+  locality: Vienna
+  organization: Company
+  subject_alt_name: "{{ dns_certificate_subject_alt_names | default([]) }}"
+  
 dns_domains: 
   - domain: dmz
     hostname: "{{ dns_hostname | default(ansible_nodename) }}"
     certificate: "{{ dns_certificate | default(False, True) | bool }}"
+    certificate_info: "{{ dns_certificate_info | default({}) }}"
     aliases: "{{ dns_aliases | default([]) }}"

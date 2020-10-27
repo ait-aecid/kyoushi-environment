@@ -1,0 +1,22 @@
+- name: Manage CA authority
+  import_playbook: ./certificate_authority.yml
+  tags: [ca]
+
+- name: Gather facts abouts other hosts
+  hosts: all
+  gather_facts: yes
+
+- name: Manage host certificates
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Manage host certificates 
+      include_tasks: ./host_certificates.yml
+      vars:
+        host: "{{ host_cert_config.key }}"
+        certificates: "{{ host_cert_config.value }}"
+      when: certificates is iterable and certificates|length
+      loop: "{{ lookup('dict', cert_configs) }}"
+      loop_control:
+        loop_var: host_cert_config
+  tags: [certs]

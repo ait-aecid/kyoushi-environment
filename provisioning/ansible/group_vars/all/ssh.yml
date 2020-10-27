@@ -1,0 +1,18 @@
+ansible_user: ait
+
+# Note that SSH will also try other keys if this key does not work
+ait_ssh_key: ~/.ssh/aecid-testbed
+ait_ssh_use_proxy: yes
+ait_ssh_proxy_user: ait
+# management host is used for proxying by default
+ait_ssh_proxy_host: |
+    {{ 
+        hostvars['mgmthost'].openstack.public_v4  if hostvars['mgmthost'] is defined and hostvars['mgmthost'].openstack is defined else 'localhost' 
+    }}
+
+# we build the proxy command based on proxy host, user and ssh key
+# the command will be an empty string 
+ait_ssh_proxy_command: -o ProxyCommand="ssh -i {{ ait_ssh_key }} -o StrictHostKeyChecking=no -W %h:%p {{ ait_ssh_proxy_user }}@{{ ait_ssh_proxy_host }}"
+# only append proxy command if it is enabled
+ansible_ssh_common_args:  -i {{ ait_ssh_key }} -o ControlMaster=auto -o ControlPersist=30m -o StrictHostKeyChecking=no {{ ait_ssh_proxy_command if ait_ssh_use_proxy|bool else '' }}
+

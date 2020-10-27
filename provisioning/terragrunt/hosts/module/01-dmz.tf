@@ -2,12 +2,14 @@
 
 module "vpn" {
   count              = var.vpn_active ? 1 : 0
-  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
   hostname           = "vpn"
   tag                = "dmz"
   host_address_index = var.vpn_ip_index
   image              = local.vpn_image
   flavor             = local.vpn_flavor
+  volume_size        = local.vpn_volume_size
+  config_drive       = true
   sshkey             = var.sshkey
   network            = var.dmz
   subnet             = var.dmz_subnet
@@ -17,12 +19,14 @@ module "vpn" {
 
 module "mail" {
   count              = var.mail_active ? 1 : 0
-  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
   hostname           = "mail"
   tag                = "dmz"
   host_address_index = var.mail_ip_index
   image              = local.mail_image
   flavor             = local.mail_flavor
+  volume_size        = local.mail_volume_size
+  config_drive       = true
   sshkey             = var.sshkey
   network            = var.dmz
   subnet             = var.dmz_subnet
@@ -32,12 +36,14 @@ module "mail" {
 
 module "cloud_share" {
   count              = var.cloud_active ? 1 : 0
-  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
   hostname           = "cloud_share"
   tag                = "dmz"
   host_address_index = var.cloud_ip_index
   image              = local.cloud_image
   flavor             = local.cloud_flavor
+  volume_size        = local.cloud_volume_size
+  config_drive       = true
   sshkey             = var.sshkey
   network            = var.dmz
   subnet             = var.dmz_subnet
@@ -47,12 +53,14 @@ module "cloud_share" {
 
 module "webserver" {
   count              = var.webserver_active ? 1 : 0
-  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
   hostname           = "webserver"
   tag                = "dmz"
   host_address_index = var.webserver_ip_index
   image              = local.webserver_image
   flavor             = local.webserver_flavor
+  volume_size        = local.webserver_volume_size
+  config_drive       = true
   sshkey             = var.sshkey
   network            = var.dmz
   subnet             = var.dmz_subnet

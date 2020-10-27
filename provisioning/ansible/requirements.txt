@@ -1,0 +1,4 @@
+# Python Requirements
+jmespath>=0.9.4
+openstacksdk>=0.11.3
+netaddr>=0.8.0

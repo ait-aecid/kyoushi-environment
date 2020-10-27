@@ -1,0 +1,9 @@
+dnat_name: "{{ dns.company.hostname }}"
+dnat_aliases: "{{ dns.company.aliases }}"
+
+dnat:
+  server: inet-firewall
+  dns: 
+    hostname: "{{ dnat_name }}"
+    aliases:  "{{ dnat_aliases }}"
+  rules: "{{ dnat_rules | default([], True) }}"

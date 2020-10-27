@@ -155,6 +155,6 @@ variable "ext_dns_userdata_vars" {
 variable "ext_additional_dns" {
   type        = list(string)
   description = "addtional external dns servers to configure for the internet"
-  default     = ["8.8.8.8"]
+  default     = []
 }
 

@@ -1,0 +1,40 @@
+apache2_additional_packages: 
+  - libxml2-dev
+
+# modules needed for reverse proxy
+apache2_modules:
+  - name: proxy
+  - name: proxy_ajp
+  - name: proxy_http
+  - name: rewrite
+  - name: deflate
+  - name: headers
+  - name: ssl
+  - name: proxy_connect
+  - name: proxy_html
+  - name: authz_host
+
+apache2_proxy_vhosts: |
+  [
+    {% for host in groups['proxied'] %}
+    {
+      "name": "{{ hostvars[host].reverse_proxy.fqdn }}",
+      "enabled": {{ hostvars[host].reverse_proxy.enabled | default(True) }},
+      "proxy_target": "{{ hostvars[host].dns.fqdn }}"
+      "vhost_template": "templates/reverse_vhost.conf.j2"
+      "cert": "{{ ca_servers_path }}/{{ hostvars[host].reverse_proxy.fqdn }}/{{ hostvars[host].reverse_proxy.fqdn }}.crt"
+      "key": "{{ ca_servers_path }}/{{ hostvars[host].reverse_proxy.fqdn }}/{{ hostvars[host].reverse_proxy.fqdn }}.key"
+      "copycerts": true
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+
+apache2_webserver_vhosts:
+  # catch all vhost
+  - name: 000-catch-all
+    vhost_dir: false
+    vhost_template: "templates/catch_all_vhost.conf.j2"
+  
+
+apache2_vhosts: "{{ apache2_proxy_vhosts + apache2_webserver_vhosts }}"
+    

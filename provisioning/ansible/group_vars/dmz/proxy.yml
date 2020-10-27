@@ -1,0 +1,1 @@
+proxied_name: "{{ dns.dmz.hostname }}"

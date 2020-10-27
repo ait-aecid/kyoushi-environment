@@ -21,7 +21,7 @@ module "mail" {
   count              = var.mail_active ? 1 : 0
   source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
   hostname           = "mail"
-  tag                = "dmz"
+  tag                = "dmz, proxied"
   host_address_index = var.mail_ip_index
   image              = local.mail_image
   flavor             = local.mail_flavor
@@ -38,7 +38,7 @@ module "cloud_share" {
   count              = var.cloud_active ? 1 : 0
   source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
   hostname           = "cloud_share"
-  tag                = "dmz"
+  tag                = "dmz, proxied"
   host_address_index = var.cloud_ip_index
   image              = local.cloud_image
   flavor             = local.cloud_flavor

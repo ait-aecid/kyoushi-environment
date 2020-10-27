@@ -1,0 +1,17 @@
+proxied_name: www
+proxy_aliases: |
+  [
+    {% for host in groups['proxied'] %}
+    {
+      "proxy_host": "{{ host }}",
+      "certificate": true
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+
+dns_domains: 
+  - domain: company
+    hostname: proxy
+    certificate: yes
+    aliases: "{{ proxy_aliases }}"
+      

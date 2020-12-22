@@ -11,7 +11,9 @@ write_files:
 runcmd:
   -  [apt-get, update]
   -  [apt-get, install, -y, python, dnsmasq]
+  -  "echo 'bind-interfaces' > /etc/dnsmasq.d/bind-interfaces"
   -  [iptables, -P, FORWARD, ACCEPT]
   -  [iptables, -t, nat, -A, POSTROUTING, -o, ens3, -j, MASQUERADE]
   -  [ /root/ifsetup.sh ]
   -  "echo 1 > /proc/sys/net/ipv4/ip_forward"
+  -  [systemctl, restart, dnsmasq]

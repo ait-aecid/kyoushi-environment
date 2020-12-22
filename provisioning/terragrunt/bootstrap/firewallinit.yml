@@ -1,0 +1,17 @@
+password: toor
+chpasswd: { expire: False }
+
+write_files: 
+-  encoding: b64     
+   content: IyEvYmluL2Jhc2gKCk5FVFBMQU49Ii9ldGMvbmV0cGxhbi81MC1jbG91ZC1pbml0LnlhbWwiCgpNQUlOSUY9YGlwIGxpbmsgc2hvdyB8IGdyZXAgVVAgfCBncmVwIC12IExPT1BCQUNLIHwgYXdrICd7cHJpbnQgJDJ9JyB8IHJldiB8IGN1dCAtYyAyLSB8IHJldmAKTUFJTk1BQz1gY2F0IC9zeXMvY2xhc3MvbmV0LyRNQUlOSUYvYWRkcmVzc2AKCmZ1bmN0aW9uIHByaW50bmV0Y29uZmlnKCkKewogICAgZWNobyAiICAgICAgICAgICAgbWF0Y2g6IgogICAgZWNobyAiICAgICAgICAgICAgICAgIG1hY2FkZHJlc3M6ICckMSciCgllY2hvICIgICAgICAgICAgICBkaGNwNDogdHJ1ZSIKCWVjaG8gIiAgICAgICAgICAgIGRoY3A0LW92ZXJyaWRlczoiCgllY2hvICIgICAgICAgICAgICAgICAgdXNlLXJvdXRlczogZmFsc2UiCn0KCmVjaG8gIm5ldHdvcms6IiA+ICRORVRQTEFOCmVjaG8gIiAgICBldGhlcm5ldHM6IiA+PiAkTkVUUExBTgplY2hvICIgICAgICAgICRNQUlOSUY6IiA+PiAkTkVUUExBTgplY2hvICIgICAgICAgICAgICBkaGNwNDogdHJ1ZSIgPj4gJE5FVFBMQU4KZWNobyAiICAgICAgICAgICAgbWF0Y2g6IiA+PiAkTkVUUExBTgplY2hvICIgICAgICAgICAgICAgICAgbWFjYWRkcmVzczogJyRNQUlOTUFDJyIgPj4gJE5FVFBMQU4KZm9yIElGIGluIGBpcCBsaW5rIHNob3cgfCBncmVwIERPV04gfCBhd2sgJ3twcmludCAkMn0nIHwgcmV2IHwgY3V0IC1jIDItIHwgcmV2YApkbwplY2hvICIgICAgICAgICRJRjoiID4+ICRORVRQTEFOCnByaW50bmV0Y29uZmlnICQoY2F0IC9zeXMvY2xhc3MvbmV0LyRJRi9hZGRyZXNzKSA+PiAkTkVUUExBTgpkb25lCmVjaG8gIiAgICB2ZXJzaW9uOiAyIiA+PiAkTkVUUExBTgoKZWNobyAibmV0d29yazoge2NvbmZpZzogZGlzYWJsZWR9IiA+IC9ldGMvY2xvdWQvY2xvdWQuY2ZnLmQvOTktZGlzYWJsZS1uZXR3b3JrLWNvbmZpZy5jZmcKCi91c3Ivc2Jpbi9uZXRwbGFuIGFwcGx5Cg==     
+   owner: root:root     
+   path: /root/ifsetup.sh     
+   permissions: '0700'
+
+runcmd:
+  -  [apt-get, update]
+  -  [apt-get, install, -y, python, dnsmasq]
+  -  [iptables, -P, FORWARD, ACCEPT]
+  -  [iptables, -t, nat, -A, POSTROUTING, -o, ens3, -j, MASQUERADE]
+  -  [ /root/ifsetup.sh ]
+  -  "echo 1 > /proc/sys/net/ipv4/ip_forward"

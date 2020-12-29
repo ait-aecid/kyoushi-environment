@@ -17,4 +17,11 @@
       loop_control:
         loop_var: host
   tags: [certs]
-  
+
+- name: Configure OpenVPN on remote employees
+  hosts: remote_employee
+  become: yes
+  roles:
+    - openvpn-client
+  tags: [openvpn]
+      

@@ -1,0 +1,15 @@
+openvpn_user_cert_src: "{{ openvpn_ca_certs_path }}/{{ inventory_hostname }}"
+
+
+openvpn_client_user: "{{ employee.username }}"
+openvpn_client_group: "{{ employee.username }}"
+
+openvpn_client_ca: "{{ lookup('file', openvpn_ca_base_path+'/ca.crt') }}"
+openvpn_client_configs:
+  - name: work
+    remote: "{{ hostvars['inet-firewall'].openstack.addresses.internet[0].addr }}"
+    instances:
+      - port: 1194
+        proto: udp
+    cert: "{{ lookup('file', openvpn_user_cert_src+'/openvpn.crt') }}"
+    key: "{{ lookup('file', openvpn_user_cert_src+'/openvpn.key') }}"

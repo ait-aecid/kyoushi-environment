@@ -1,0 +1,69 @@
+- name: Manage certificate authority
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Create the certificate authority directory
+      file:
+        name: "{{ openvpn_ca_base_path }}"
+        state: directory
+     
+    - name: Create the server certificates directory
+      file:
+        name: "{{ openvpn_ca_certs_path }}"
+        state: directory
+
+    - name: Generate the certificate authority private key
+      openssl_privatekey:
+        path: "{{ openvpn_ca_key }}"
+        passphrase: "{{ openvpn_ca_pw | default(omit) }}"
+        cipher: auto
+        type: RSA
+        size: 4096
+        state: present
+
+    - name: Generate the certificate signing request for self signing
+      openssl_csr:
+        use_common_name_for_san: no # avoid using common name as DNS field
+        path: "{{ openvpn_ca_csr }}"
+        privatekey_path: "{{ openvpn_ca_key }}"
+        privatekey_passphrase: "{{ openvpn_ca_pw }}"
+        basic_constraints:
+            - CA:TRUE
+        country_name: "{{ openvpn_ca_info.country | default(omit) }}"
+        state_or_province_name: "{{ openvpn_ca_info.state | default(omit) }}"
+        locality_name: "{{ openvpn_ca_info.locality | default(omit) }}"
+        organization_name: "{{ openvpn_ca_info.organization | default(omit) }}"
+        organization_unit_name: "{{ openvpn_ca_info.organization_unit | default(omit) }}" 
+        email_address: "{{ openvpn_ca_info.email | default(omit) }}"
+        # we at least need a common name
+        common_name: "{{ openvpn_ca_info.common_name }}"
+
+    - name: Check if the certificate authority certificate already exists
+      stat:
+        path: "{{ openvpn_ca_cert }}"
+      register: check
+         
+    - name: Check state of currently existing certificate authority certificate
+      openssl_certificate_info:
+        path: "{{ openvpn_ca_cert }}"
+        valid_at:
+            check: "{{ openvpn_ca_check_valid_till }}"
+      register: certificate_check
+      when: check.stat.exists == true
+
+    - name: Delete about to expire certificate authority certificate 
+      file:
+        name: "{{ openvpn_ca_cert }}"
+        state: absent
+      when: check.stat.exists == true and not certificate_check.valid_at.check
+
+    - name: Generate and sign certificate authority certificate
+      openssl_certificate:
+        path: "{{ openvpn_ca_cert }}"
+        csr_path: "{{ openvpn_ca_csr }}"
+        privatekey_path: "{{ openvpn_ca_key }}"
+        privatekey_passphrase: "{{ openvpn_ca_pw }}"
+        selfsigned_not_before: "{{ openvpn_ca_info.valid_from | default(omit) }}"
+        selfsigned_not_after:  "{{ openvpn_ca_info.valid_till | default(omit) }}"
+        provider: selfsigned
+

@@ -1,0 +1,18 @@
+openvpn_ca_cert: "{{ openvpn_ca_base_path}}/ca.crt"
+openvpn_ca_csr: "{{ openvpn_ca_base_path }}/ca.csr"
+openvpn_ca_key: "{{ openvpn_ca_base_path}}/ca.key"
+openvpn_ca_pw: "6^PcDXfVrs~y4n3V"
+
+# can be used to automatically regenerate the CA certificate if it is about to expire
+openvpn_ca_check_valid_till: +8w
+
+# basic certificate information and validity
+openvpn_ca_info:
+    country: AT
+    state: Vienna
+    locality: Vienna 
+    organization: Some Organisation GmbH
+    email: admin@organisation.cyberrange.at
+    common_name: OpenVPN CA
+    # valid_till: +24w # 6 months
+    # valid_from: +1m # 1 minute 

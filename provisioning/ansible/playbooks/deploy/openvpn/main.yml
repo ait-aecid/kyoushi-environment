@@ -1,0 +1,20 @@
+- name: Manage CA authority
+  import_playbook: ./certificate_authority.yml
+  tags: [ca]
+
+- name: Gather facts about remote employees
+  hosts: remote_employee
+  gather_facts: yes
+  tags: [certs]
+
+- name: Manage host certificates
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Manage host certificates 
+      include_tasks: ./host_certificates.yml
+      loop: "{{ groups['remote_employee'] }}"
+      loop_control:
+        loop_var: host
+  tags: [certs]
+  

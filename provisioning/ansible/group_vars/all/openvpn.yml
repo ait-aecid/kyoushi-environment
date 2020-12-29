@@ -1,0 +1,3 @@
+openvpn_ca_base_path: "{{ lookup('env','LOCAL_PACKAGE_ANSIBLE_PATH') }}/data/openvpn"
+openvpn_ca_certs_path: "{{ openvpn_ca_base_path }}/certs"
+

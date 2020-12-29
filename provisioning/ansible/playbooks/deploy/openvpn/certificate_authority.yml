@@ -13,7 +13,7 @@
         state: directory
 
     - name: Generate the certificate authority private key
-      openssl_privatekey:
+      community.crypto.openssl_privatekey:
         path: "{{ openvpn_ca_key }}"
         passphrase: "{{ openvpn_ca_pw | default(omit) }}"
         cipher: auto
@@ -22,7 +22,7 @@
         state: present
 
     - name: Generate the certificate signing request for self signing
-      openssl_csr:
+      community.crypto.openssl_csr:
         use_common_name_for_san: no # avoid using common name as DNS field
         path: "{{ openvpn_ca_csr }}"
         privatekey_path: "{{ openvpn_ca_key }}"
@@ -44,7 +44,7 @@
       register: check
          
     - name: Check state of currently existing certificate authority certificate
-      openssl_certificate_info:
+      community.crypto.x509_certificate_info:
         path: "{{ openvpn_ca_cert }}"
         valid_at:
             check: "{{ openvpn_ca_check_valid_till }}"
@@ -58,7 +58,7 @@
       when: check.stat.exists == true and not certificate_check.valid_at.check
 
     - name: Generate and sign certificate authority certificate
-      openssl_certificate:
+      community.crypto.x509_certificate:
         path: "{{ openvpn_ca_cert }}"
         csr_path: "{{ openvpn_ca_csr }}"
         privatekey_path: "{{ openvpn_ca_key }}"

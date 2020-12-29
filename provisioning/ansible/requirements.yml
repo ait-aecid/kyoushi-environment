@@ -4,6 +4,8 @@ collections:
   - name: openstack.cloud
   # community collection for various community modules
   - name: community.general
+  # for CA and cert management
+  - name: community.crypto
   # ait custom owncloud role and modules
   - name: git@git-service.ait.ac.at:sct-cyberrange/ansible-collections/owncloud.git
     type: git

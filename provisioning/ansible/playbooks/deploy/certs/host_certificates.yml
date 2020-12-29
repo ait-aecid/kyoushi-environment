@@ -15,7 +15,7 @@
     loop_var: site
 
 - name: Generate the private keys for {{ host }}
-  openssl_privatekey:
+  community.crypto.openssl_privatekey:
     path: "{{ ca_host_path }}/{{ site.name }}//{{ site.name }}.key"
     type: RSA
     size: 4096
@@ -25,7 +25,7 @@
     loop_var: site
 
 - name: Generate the certificate signing requests for {{ host }}
-  openssl_csr:
+  community.crypto.openssl_csr:
     use_common_name_for_san: yes
     path: "{{ ca_host_path }}/{{ site.name }}//{{ site.name }}.csr"
     privatekey_path: "{{ ca_host_path }}/{{ site.name }}//{{ site.name }}.key"
@@ -51,7 +51,7 @@
   register: file_check
 
 - name: Check state of currently existing certificates for {{ host }}
-  openssl_certificate_info:
+  community.crypto.x509_certificate_info:
     path: "{{ ca_host_path }}/{{ fcheck.site.name }}/{{ fcheck.site.name }}.crt"
     valid_at:
         check: "{{ ca_check_valid_till }}"
@@ -71,7 +71,7 @@
   when: not (validity_check.skipped is defined and validity_check.skipped) and not validity_check.valid_at.check
 
 - name: Sign certificate
-  openssl_certificate:
+  community.crypto.x509_certificate:
     path: "{{ ca_host_path }}/{{ site.name }}/{{ site.name }}.crt"
     csr_path: "{{ ca_host_path }}/{{ site.name }}/{{ site.name }}.csr"
     ownca_path: "{{ ca_cert }}"

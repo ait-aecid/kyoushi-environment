@@ -1,0 +1,26 @@
+- name: Setup employee users and packages
+  hosts: employee
+  roles:
+    - python
+    - role: grog.user
+      become: yes
+      vars:
+        user_list: "{{ [ employee_user ] }}"
+    - role: grog.authorized-key
+      become: yes
+      vars:
+        authorized_key_list: "{{ [ employee_user ] }}"
+    - role: grog.sudo
+      become: yes
+      vars:
+        sudo_list: "{{ [ employee_user ] }}"
+    - cifs-mounts
+  tasks:
+    - name: Install employee packages
+      become: yes
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600
+      loop: "{{ employee_packages }}"

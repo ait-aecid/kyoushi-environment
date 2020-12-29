@@ -63,3 +63,8 @@ roles:
     scm: git
     version: master
     name: maradns
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/python.git
+    scm: git
+    version: v1.0
+    name: python

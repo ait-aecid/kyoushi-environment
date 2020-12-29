@@ -1,0 +1,18 @@
+employee_packages:
+  - firefox
+  - chromium-browser
+
+
+management_user_key: "{{ lookup('file', ait_ssh_key_pub) }}"
+
+employee: "{{ employees[employee_id] }}"
+
+employee_user:
+  name: "{{ employee.username }}"
+  comment: "{{ employee.first_name }} {{ employee.last_name }}"
+  shell: '/bin/bash'
+  password: "{{ employee.password | password_hash('sha512', employee.password_salt) }}"
+  authorized_keys:
+    - key: "{{ management_user_key }}"
+      exclusive: no
+  sudo: "{{ employee.sudo | default([], True) }}"

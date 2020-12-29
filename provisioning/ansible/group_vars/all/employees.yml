@@ -1,0 +1,113 @@
+employees:
+  m01:
+    username: kbraun
+    email_user: konstantin.braun
+    first_name: Konstantin
+    last_name: Braun
+    password: 5fBsSLvm5D
+    password_salt: 4b3b325e709d4067
+
+  m02:
+    username: lwood
+    email_user: lewis.wood
+    first_name: Lewis
+    last_name: Wood
+    password: RwlFjgki9D
+    password_salt: 3497789abd7d4f98
+
+  m03:
+    username: snowak
+    email_user: stefanie.nowak
+    first_name: Stefanie
+    last_name: Nowak
+    password: Rd19X9EFE8
+    password_salt: 5c5bdcfa99b04372
+
+  m04:
+    username: hkern
+    email_user: helena.kern
+    first_name: Helena
+    last_name: Kern
+    password: 37oYZptrmv
+    password_salt: d1401d3b1ddf4bf9
+
+  m05:
+    username: egeier
+    email_user: emma.geier
+    first_name: Emma
+    last_name: Geier
+    password: uGE2FbDf99
+    password_salt: 22bf050be4a14874
+
+  m06:
+    username: nleithner
+    email_user: naomi.leithner
+    first_name: Naomi
+    last_name: Leithner
+    password: P6ZsIVq7hN
+    password_salt: 50cc3e2c27fb4ab2
+
+  m07:
+    username: msperl
+    email_user: marius.sperl
+    first_name: Marius
+    last_name: Sperl
+    password: SddFmTwn61
+    password_salt: 71633a42587943ce
+
+  m08:
+    username: efletcher
+    email_user: elliot.fletcher
+    first_name: Elliot
+    last_name: Fletcher
+    password: bhigoc5u5R
+    password_salt: c03c3a1b962d4f78
+
+  m09:
+    username: eburger
+    email_user: emmanuel.burger
+    first_name: Emmanuel
+    last_name: Burger
+    password: hPv6Dpf9V2
+    password_salt: 1a4996e3c8f24151
+
+  m10:
+    username: ffeichtner
+    email_user: felicitas.feichtner
+    first_name: Felicitas
+    last_name: Feichtner
+    password: XrDVcwZx2k
+    password_salt: 5692d76bd96447e7
+
+internal_employees:
+  - m01
+  - m02
+  - m03
+  - m04
+  - m05
+  - m06
+  - m07
+
+remote_employees:
+  - m08
+  - m09
+  - m10
+
+groups:
+  accounting:
+      name: accounting
+      members:
+        - m01
+        - m02
+        - m08
+  management:
+      name: management
+      members:
+        - m05
+        - m09
+  admin:
+      name: admin
+      members:
+        - m07
+        - m10
+      owncloud_shares:

@@ -1,0 +1,3 @@
+openvpn_server_ca_cert_src: "{{ openvpn_ca_base_path }}/ca.crt"
+openvpn_server_cert_src: "{{ openvpn_ca_base_path }}/server.crt"
+openvpn_server_key_src: "{{ openvpn_ca_base_path }}/server.key"

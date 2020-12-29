@@ -2,7 +2,7 @@
   import_playbook: ./certificate_authority.yml
   tags: [ca]
 
-- name: Manage OpenVPn server cert
+- name: Manage OpenVPN server cert
   import_playbook: ./server_certificate.yml
   tags: [server]
 
@@ -21,6 +21,10 @@
       loop_control:
         loop_var: host
   tags: [certs]
+
+- name: Install and configure OpenVPN server
+  import_playbook: ./server.yml
+  tags: [openvpn, server]
 
 - name: Configure OpenVPN on remote employees
   hosts: remote_employee

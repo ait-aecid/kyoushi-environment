@@ -54,6 +54,7 @@ employees:
     last_name: Sperl
     password: SddFmTwn61
     password_salt: 71633a42587943ce
+    ssh_key: yes
 
   m08:
     username: efletcher
@@ -78,6 +79,7 @@ employees:
     last_name: Feichtner
     password: XrDVcwZx2k
     password_salt: 5692d76bd96447e7
+    ssh_key: yes
 
 internal_employees:
   - m01

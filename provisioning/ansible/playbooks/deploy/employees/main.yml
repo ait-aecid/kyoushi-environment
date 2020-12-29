@@ -24,3 +24,30 @@
         update_cache: yes
         cache_valid_time: 3600
       loop: "{{ employee_packages }}"
+
+    - name: Ensure ssh directory exists
+      file:
+        name: "/home/{{ employee_user.name }}/.ssh"
+        state: directory
+        owner: "{{ employee_user.name }}"
+        group: "{{ employee_user.name }}"
+      when: employee.ssh_key is defined and employee.ssh_key|bool
+
+    - name: Deploy SSH keys
+      become: yes
+      copy:
+        src: "{{ ssh_keys_base_path }}/{{ employee_id }}/id_rsa"
+        dest: "/home/{{ employee_user.name }}/.ssh/id_rsa"
+        owner: "{{ employee_user.name }}"
+        group: "{{ employee_user.name }}"
+        mode: "0600"
+      when: employee.ssh_key is defined and employee.ssh_key|bool
+
+    - name: Deploy SSH public keys
+      become: yes
+      copy:
+        src: "{{ ssh_keys_base_path }}/{{ employee_id }}/id_rsa.pub"
+        dest: "/home/{{ employee_user.name }}/.ssh/id_rsa.pub"
+        owner: "{{ employee_user.name }}"
+        group: "{{ employee_user.name }}"
+      when: employee.ssh_key is defined and employee.ssh_key|bool

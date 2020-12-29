@@ -55,6 +55,11 @@ employees:
     password: SddFmTwn61
     password_salt: 71633a42587943ce
     ssh_key: yes
+    sudo:
+      hosts: ALL
+      as: ALL
+      commands: ALL
+      nopasswd: yes
 
   m08:
     username: efletcher
@@ -80,6 +85,11 @@ employees:
     password: XrDVcwZx2k
     password_salt: 5692d76bd96447e7
     ssh_key: yes
+    sudo:
+      hosts: ALL
+      as: ALL
+      commands: ALL
+      nopasswd: yes
 
 internal_employees:
   - m01

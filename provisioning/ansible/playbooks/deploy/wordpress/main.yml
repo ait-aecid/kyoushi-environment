@@ -1,0 +1,5 @@
+- name: Setup and configure the intranet wordpress server
+  hosts: intranet_server
+  become: true
+  roles:
+    - role: wordpress

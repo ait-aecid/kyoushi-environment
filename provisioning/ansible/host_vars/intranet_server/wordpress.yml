@@ -1,0 +1,67 @@
+---
+# vars file for intranet
+
+libapache2_mod_version: 'libapache2-mod-php7.2' # Ubuntu 18.04
+wp_company_domain: "{{ domains.intranet.domain }}"
+
+wp_apache_ssl: yes
+wp_apache_ssl_cert: "{{ ca_servers_path }}/{{ inventory_hostname }}/intranet/intranet.crt"
+wp_apache_ssl_key: "{{ ca_servers_path }}/{{ inventory_hostname }}/intranet/intranet.key"
+wp_apache_ssl_copycerts: yes
+
+wp_admin_password: 'eiY4teenae4eep9'
+wp_mysqldb_user: 'wordpress'
+wp_mysqldb_password: 'tainoox3aedeeSh'
+
+wp_title: 'Intranet'
+wp_tagline: 'Information Platform'
+wp_host: "{{ hostvars['intranet_server'].openstack.addresses.local[0].addr }}"
+wp_apache_hostname: '{{ wp_company_domain }}'
+wp_apache_aliases: []
+
+wp_options:
+  comment_moderation: '0'
+  comment_previously_approved: '0'
+  comments_notify: '0'
+  default_comment_status: 'open'
+  blogdescription: '{{ wp_tagline }}'
+  siteurl: 'https://{{ wp_company_domain }}'
+  home: 'https://{{ wp_company_domain }}'
+
+
+# --------------------- wp_users ------------------------
+
+wp_users: |
+  [
+  {% for wp_user in (employees.values() | selectattr('wp_role', 'defined') | list)%}
+    {
+      "name": "{{ wp_user.username }}",
+      "displayname": "{{ wp_user.first_name }} {{ wp_user.last_name }}",
+      "email": "{{ wp_user.email_user }}@{{ domains.company.domain }}",
+      "password": "{{ wp_user.password }}",
+      "role": "{{ wp_user.wp_role }}"
+    }{% if not loop.last %},{% endif %}
+  {% endfor %}
+  ]
+
+# -------------------------------------------------------
+
+wp_categories:
+  - { name: 'Company News', description: 'Internal News and Information' }
+
+wp_posts: 
+  - title: "Company far far away!"
+    author: "{{ wp_users[0].name }}"
+    category: "Company News"
+    date: "2020-12-27 12:41:13"
+    content: | 
+      Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.
+      Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean.
+      A small river named Duden flows by their place and supplies it with the necessary regelialia.
+      It is a paradisematic country, in which roasted parts of sentences fly into your mouth.
+      Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.
+      The Big Oxmox advised her not to do so, because there were thousands of bad Commas, wild Question Marks and devious Semikoli, but the Little Blind Text didn’t listen.
+      She packed her seven versalia, put her initial into the belt and made herself on the way.
+      When she reached the first hills of the Italic Mountains, she had a last view back on the skyline of her hometown Bookmarksgrove, the headline of Alphabet Village and the subline of her own road, the Line Lane.
+      Pityful a rethoric question ran over her cheek, then she continued her way.
+      On her way she met a copy.

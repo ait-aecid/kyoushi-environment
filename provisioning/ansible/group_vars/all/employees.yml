@@ -6,6 +6,8 @@ employees:
     last_name: Braun
     password: 5fBsSLvm5D
     password_salt: 4b3b325e709d4067
+    samba_groups:
+      - accounting
 
   m02:
     username: lwood
@@ -15,6 +17,8 @@ employees:
     password: RwlFjgki9D
     password_salt: 3497789abd7d4f98
     wp_role: editor
+    samba_groups:
+      - accounting
 
   m03:
     username: snowak
@@ -40,6 +44,8 @@ employees:
     last_name: Geier
     password: uGE2FbDf99
     password_salt: 22bf050be4a14874
+    samba_groups:
+      - management
 
   m06:
     username: nleithner
@@ -58,6 +64,8 @@ employees:
     password_salt: 71633a42587943ce
     ssh_key: yes
     wp_role: administrator
+    samba_groups:
+      - admin
     sudo:
       hosts: ALL
       as: ALL
@@ -71,6 +79,8 @@ employees:
     last_name: Fletcher
     password: bhigoc5u5R
     password_salt: c03c3a1b962d4f78
+    samba_groups:
+      - accounting
 
   m09:
     username: eburger
@@ -79,6 +89,8 @@ employees:
     last_name: Burger
     password: hPv6Dpf9V2
     password_salt: 1a4996e3c8f24151
+    samba_groups:
+      - management
 
   m10:
     username: ffeichtner
@@ -87,6 +99,8 @@ employees:
     last_name: Feichtner
     password: XrDVcwZx2k
     password_salt: 5692d76bd96447e7
+    samba_groups:
+      - admin
     ssh_key: yes
     sudo:
       hosts: ALL
@@ -107,22 +121,3 @@ remote_employees:
   - m08
   - m09
   - m10
-
-groups:
-  accounting:
-      name: accounting
-      members:
-        - m01
-        - m02
-        - m08
-  management:
-      name: management
-      members:
-        - m05
-        - m09
-  admin:
-      name: admin
-      members:
-        - m07
-        - m10
-      owncloud_shares:

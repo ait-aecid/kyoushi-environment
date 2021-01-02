@@ -1,0 +1,52 @@
+samba_install_version: "4.5.9"
+samba_domain_master: false
+samba_local_master: false
+samba_mitigate_cve_2017_7494: false
+
+samba_groups: {}
+samba_shares: []
+smb_extra_files: {}
+
+# list of unix groups to create
+group_list_host: |
+  [
+    {% for group in (samba_groups.values() | list | flatten | unique ) %}
+    {
+      "name": "{{ group }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+
+# list of samba users with their unix groups
+# according to their samba groups
+samba_users: |
+    [
+    {% for user in game_users.values() | selectattr('samba_groups', 'defined') %}
+      {% set ns = namespace(groups=[]) %}
+      {# get samba groups for the user based in their samba_groups info #}
+      {% for group_key, group_list in samba_groups.items() %}
+        {% if group_key in user.samba_groups %}
+          {% set ns.groups = ns.groups + group_list %}
+        {% endif %}
+      {% endfor %}
+
+      {# update user.groups and add user to samba user list #}
+      {% do user.update({"groups": (ns.groups | unique)}) %}
+      {# set username as 'name' attribute #}
+      {% do user.update({'name' : user.username}) %}
+
+      {{ user | to_json }}{% if not loop.last %},{% endif %}
+    {% endfor %} 
+    ]
+
+# user list for the grog users role 
+# (hashes the passwords)
+user_list_host: |
+  [
+  {% for samba_user in samba_users %}
+    {% do samba_user.update({'password' : (samba_user.password | password_hash('sha512', samba_user.password_salt)) }) %}
+    {{ samba_user | to_json }}{% if not loop.last%},{% endif %}
+  {% endfor %}
+  ]
+
+

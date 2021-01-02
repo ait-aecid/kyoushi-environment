@@ -1,0 +1,84 @@
+
+# samba groups unix groups definitions
+samba_groups:
+    management:
+      - management_r
+      - management_w
+      - reports_r
+      - reports_w
+    management_ro:
+      - management_r
+      - reports_r
+    accounting:
+      - billing_r
+      - billing_w
+      - customers_r
+      - customers_w
+    accounting_ro:
+      - billing_r
+      - customers_r
+    admin:
+      - management_r
+      - management_w
+      - reports_r
+      - reports_w
+      - billing_r
+      - billing_w
+      - customers_r
+      - customers_w
+
+# samba shares definition
+samba_shares:
+  - name: Billing
+    comment: This share holds billing information for the company
+    group: billing_w
+    valid_users: +billing_r, +billing_w
+    write_list: +billing_w
+
+  - name: Customers
+    comment: This share holds customer information for the company
+    group: customers_w
+    valid_users: +customers_r, +customers_w
+    write_list: +customers_w
+
+  - name: Management
+    comment: This share is used by the company management to share files and collaborate
+    group: management_w
+    valid_users: +management_r, +management_w
+    write_list: +management_w
+
+  - name: Reports
+    comment: This share holds customer information for the company
+    group: reports_w
+    valid_users: +reports_r, +reports_w
+    write_list: +reports_w
+
+
+# base directory for pre-defined files for this share server
+smb_extra_files_base: files/internal
+
+smb_extra_files:
+  Billing:
+    - src: Billing
+      directory: true
+      recursive: yes
+      #owner: m03
+
+  Customers:
+    - src: Customers
+      directory: true
+      recursive: yes
+      #owner: m03
+
+  Management:
+    - src: Management
+      directory: true
+      recursive: yes
+      #owner: m05
+
+  Reports:
+    - src: Reports
+      directory: true
+      recursive: yes
+      #owner: m05
+  

@@ -1,0 +1,7 @@
+service_users:
+  owncloud_samba:
+    username: owncloud
+    password: ePVFmeYh6y7Z
+    password_salt: 37f889a2cee54e15
+    samba_groups:
+      - management

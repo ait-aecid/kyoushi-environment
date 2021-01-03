@@ -1,0 +1,153 @@
+owncloud_deploy_path: /var/www/owncloud
+
+# allow configuring multiple owncloud instances 
+owncloud_setup_run_once: false
+
+# db config
+mariadb_root_password: "{{ service_users.owncloud.password }}"
+
+mariadb_users:
+  - name: "{{ service_users.owncloud.username }}"
+    host: localhost
+    password: "{{ service_users.owncloud.password }}"
+    priv: "owncloud.*:ALL"
+
+
+# owncloud install config
+
+owncloud_version: "10.5.0"
+owncloud_fqdn: "{{ dns.dmz.fqdn }}"
+
+# apps config
+owncloud_apps:
+  - name: files_external
+    state: present
+    enabled: 'yes'
+  - name: firstrunwizard
+    state: present
+    enabled: 'no'
+
+owncloud_apps_config:
+  - name: core
+    parameters:
+      - attribute: enable_external_storage
+        value: "yes"
+  - name: files_external
+    parameters:
+      - attribute: allow_user_mounting
+        value: "yes"
+      - attribute: user_mounting_backends
+        value: 'googledrive,owncloud,sftp,smb,dav,\OC\Files\Storage\SFTP_Key,\OC\Files\Storage\SMB_OC'
+
+# If you would like to access your ownCloud by IP
+# you can add it to trusted domains.
+owncloud_trusted_domains:
+  - "{{ owncloud_fqdn }}"
+  - "{{ ansible_default_ipv4.address }}"
+  - "{{ owncloud_proxy_fqdn }}"
+
+# Adjust these variable to the same values defined in
+# group_vars/database.yml
+owncloud_db_name: owncloud
+owncloud_db_user: "{{ service_users.owncloud.username }}"
+owncloud_db_password: "{{ service_users.owncloud.password }}"
+
+# You can also adjust the default ownCloud user.
+# For security reasons you should set a strong password!
+owncloud_admin_username: admin
+owncloud_admin_password: "{{ service_users.owncloud.password }}"
+
+owncloud_log_timezone: "Etc/UTC"
+owncloud_log_dateformat: "Y-m-d H:i:s.u"
+
+php_date_timezone: "{{ owncloud_log_timezone }}"
+
+apache_vhosts:
+  - servername: "{{ owncloud_fqdn }}"
+    documentroot: "{{ owncloud_deploy_path }}"
+
+owncloud_server_name: "{{ dns_hostname }}.dmz"
+
+apache_vhosts_ssl:
+  - servername: "{{ owncloud_fqdn }}"
+    documentroot: "{{ owncloud_deploy_path }}"
+    certificate_file: "/etc/ssl/certs/owncloud.crt"
+    certificate_file_source: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ owncloud_server_name }}/{{ owncloud_server_name }}.crt"
+    certificate_key_file: "/etc/ssl/private/owncloud.key"
+    certificate_key_source: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ owncloud_server_name }}/{{ owncloud_server_name }}.key"
+
+
+# owncloud extra files config
+owncloud_prepared_files_dest: "/mnt/data/local"
+
+# owncloud user, groups and mount config
+owncloud_mount_options:
+  previews: yes
+  read_only: no
+  enable_sharing: yes
+
+owncloud_users_group: |
+  [
+  {% for user in game_users.values() | selectattr('owncloud_groups', 'defined') %}
+  {
+    "user": "{{ user.username }}",
+    "password": "{{ user.password }}",
+    "display_name": "{{ user.first_name }} {{ user.last_name }}",
+    "groups": {{ user.owncloud_groups | to_json }},
+    "email": "{{ user.email_user }}@{{ user.email_domain }}"
+  }{% if not loop.last %},{% endif %}
+  {% endfor %}
+  ]
+
+
+owncloud_groups_group: 
+  - group: employees
+  - group: accounting
+  - group: management
+  - group: admin
+
+
+owncloud_prepared_files_src: "files/internal_share"
+owncloud_proxy_fqdn: "{{ dns_hostname }}.{{ domains.company_external.domain }}"
+
+owncloud_mounts_host: 
+  - mount_point: /Management
+    groups:
+      - management
+    authentication_backend: password
+    storage_backend: smb
+    smb_config:
+      host: "{{ hostvars['internal_share'].ansible_default_ipv4['address'] }}"
+      share: "Management"
+    authentication_user: "{{ service_users.owncloud_samba.username }}"
+    authentication_password: "{{ service_users.owncloud_samba.password }}"
+    options:
+      read_only: False
+      enable_sharing: True
+
+  - mount_point: /Reports
+    groups:
+      - management
+    authentication_backend: password
+    storage_backend: smb
+    smb_config:
+      host: "{{ hostvars['internal_share'].ansible_default_ipv4['address'] }}"
+      share: "Reports"
+    authentication_user: "{{ service_users.owncloud_samba.username }}"
+    authentication_password: "{{ service_users.owncloud_samba.password }}"
+    options:
+      read_only: False
+      enable_sharing: True
+  
+  - mount_point: /Marketing
+    groups:
+      - employees
+    authentication_backend: none
+    storage_backend: local
+    local_config:
+      datadir: "{{ owncloud_prepared_files_dest }}/Marketing"
+    options:
+      read_only: False
+      enable_sharing: True
+
+  

@@ -5,3 +5,7 @@ service_users:
     password_salt: 37f889a2cee54e15
     samba_groups:
       - management
+  owncloud:
+    username: owncloud
+    password: rCnXg3vs4SEP
+    password_salt: 0a74bef6840d4079

@@ -1,0 +1,53 @@
+NameVirtualHost *:80
+NameVirtualHost *:443
+
+<VirtualHost *:80>
+	ServerName {{ item.name }}
+{% if item.aliases is defined %}
+	ServerAlias {{ item.aliases|join(' ') }}
+{% endif %}
+	ErrorLog ${APACHE_LOG_DIR}/{{ item.name }}-error.log
+	CustomLog ${APACHE_LOG_DIR}/{{ item.name }}-access.log combined
+
+{% if item.redirect_ssl is defined and item.redirect_ssl|bool %}
+	# redirect to ssl
+	Redirect / https://{{ item.name }}/
+{% else %}
+	# reverse proxy config
+	ProxyRequests Off
+	ProxyPreserveHost Off
+	ProxyHTMLInterp On
+	ProxyHTMLExtended On
+	RequestHeader set X-Forwarded-Proto http
+
+	ProxyPass / http://{{ item.proxy_target }}/
+	ProxyPassReverse / http://{{ item.proxy_target }}/
+{% endif %}
+</VirtualHost>
+
+<VirtualHost *:443>
+	ServerName {{ item.name }}
+{% if item.aliases is defined %}
+	ServerAlias {{ item.aliases|join(' ') }}
+{% endif %}
+	SSLEngine on
+	SSLCertificateFile  {{ apache2_ssl_cert_path }}/{{ item.cert|default("ssl-cert-snakeoil.pem")  | basename  }}
+	SSLCertificateKeyFile {{ apache2_ssl_key_path }}/{{ item.key|default("ssl-cert-snakeoil.key")  | basename  }}
+{% if item.certchain is defined %}
+	SSLCertificateChainFile {{ apache2_ssl_cert_path }}/{{ item.certchain }}
+{% endif %}
+	ErrorLog ${APACHE_LOG_DIR}/{{ item.name }}-error.log
+	CustomLog ${APACHE_LOG_DIR}/{{ item.name }}-access.log combined
+
+	# reverse proxy config
+	ProxyRequests Off
+	ProxyPreserveHost Off
+	ProxyHTMLInterp On
+	ProxyHTMLExtended On
+	SSLProxyEngine On
+	RequestHeader set X-Forwarded-Proto https
+
+
+	ProxyPass / https://{{ item.proxy_target }}/
+	ProxyPassReverse / https://{{ item.proxy_target }}/
+</VirtualHost>

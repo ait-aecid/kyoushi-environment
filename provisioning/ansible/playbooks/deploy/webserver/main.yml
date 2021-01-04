@@ -1,0 +1,9 @@
+- name: Gather facts about proxied servers and dns server
+  hosts: proxied
+  gather_facts: yes
+
+- name: Setup and configure the organisation reverse proxy
+  hosts: webserver
+  become: true
+  roles:
+    - apache2

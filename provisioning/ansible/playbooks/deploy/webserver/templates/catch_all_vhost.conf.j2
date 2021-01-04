@@ -1,0 +1,43 @@
+NameVirtualHost *:80
+NameVirtualHost *:443
+
+<VirtualHost *:80>
+{% if item.server_name is defined %}
+	ServerName {{ item.name }}
+	ServerAlias localhost
+{% else %}
+	ServerName localhost
+{% endif %}
+
+	ErrorLog ${APACHE_LOG_DIR}/proxy-error.log
+	CustomLog ${APACHE_LOG_DIR}/proxy-access.log combined
+
+	# don't allow access via unkown hostname or ip
+	<Location />
+		Require all denied
+	</Location>
+</VirtualHost>
+
+<VirtualHost *:443>
+{% if item.server_name is defined %}
+	ServerName {{ item.name }}
+	ServerAlias localhost
+{% else %}
+	ServerName localhost
+{% endif %}
+	
+	SSLEngine on
+	SSLCertificateFile  {{ apache2_ssl_cert_path }}/{{ item.cert|default("ssl-cert-snakeoil.pem")  | basename  }}
+	SSLCertificateKeyFile {{ apache2_ssl_key_path }}/{{ item.key|default("ssl-cert-snakeoil.key")  | basename  }}
+{% if item.certchain is defined %}
+	SSLCertificateChainFile {{ apache2_ssl_cert_path }}/{{ item.certchain }}
+{% endif %}
+	ErrorLog ${APACHE_LOG_DIR}/proxy-error.log
+	CustomLog ${APACHE_LOG_DIR}/proxy-access.log combined
+
+	# don't allow access via unkown hostname or ip
+	<Location />
+		Require all denied
+	</Location>
+
+</VirtualHost>

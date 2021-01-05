@@ -5,7 +5,7 @@
     - debiansnapshot
 
 - name: Configure mailservers
-  hosts: exim
+  hosts: mailserver
   become: true
   roles: 
     - exim

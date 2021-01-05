@@ -91,6 +91,7 @@ employees:
     owncloud_groups:
       - employees
       - admin
+    shell: /bin/bash
     sudo:
       hosts: ALL
       as: ALL
@@ -139,6 +140,7 @@ employees:
       - employees
       - admin
     ssh_key: yes
+    shell: /bin/bash
     sudo:
       hosts: ALL
       as: ALL

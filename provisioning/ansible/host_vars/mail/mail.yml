@@ -1,0 +1,6 @@
+mail_users: "{{ employees.values() | list }}"
+
+# exim version suspectable to CVE-2019-10149
+exim_package_version: "4.89-2+deb9u3"
+# snapshot required so that the version is available
+debsnap_timestamp: 20190412T204517Z

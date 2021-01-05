@@ -1,5 +1,8 @@
-password: toor
-chpasswd: { expire: False }
+system_info:
+  default_user:
+    name: ait
+    plain_text_passwd: test
+    lock_passwd: False
 
 write_files: 
 -  encoding: b64     

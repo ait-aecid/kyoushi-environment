@@ -9,6 +9,7 @@ inputs = {
     host_tag = "firewall, dnsservers"
     host_ext_address_index = 42420
     host_size  = 40
+    host_userdata = "firewallinit.yml"
 
     # external dns server
     ext_dns_name = "inet-dns"

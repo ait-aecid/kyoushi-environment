@@ -3,6 +3,27 @@ domains:
     id: cyberrange
     server: inet-dns
     domain: cyberrange.at
+  xyz: 
+    id: xyz
+    server: inet-dns
+    domain: xyz.cyberrange.at
+    mx:
+      - priority: 5
+        record: mail.%
+  umbrella: 
+    id: umbrella
+    server: inet-dns
+    domain: umbrella.cyberrange.at
+    mx:
+      - priority: 5
+        record: mailserver.%
+  acme: 
+    id: acme
+    server: inet-dns
+    domain: acme.cyberrange.at
+    mx:
+      - priority: 5
+        record: smtp.%
   company_external: 
     id: company_external
     server: inet-dns
@@ -21,6 +42,7 @@ domains:
     id: dmz
     server: inet-firewall
     domain: dmz.company.cyberrange.at
+
   intranet: 
     id: intranet
     server: inet-firewall

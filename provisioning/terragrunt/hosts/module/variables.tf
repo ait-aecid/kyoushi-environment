@@ -203,7 +203,7 @@ variable "vpn_active" {
 variable "mail_image" {
   type        = string
   description = "optional name or id of the base image for the mail server host (defaults to image)"
-  default     = "aecid-debian-stretch-amd64"
+  default     = null
 }
 
 variable "mail_flavor" {

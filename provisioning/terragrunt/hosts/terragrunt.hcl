@@ -16,6 +16,7 @@ inputs = {
     image = "aecid-ubuntu-bionic-amd64"
     employee_image = "aecid-employee-bionic-amd64-2020-09-15T20-46-23Z"
     share_image = "aecid-samba-4.5.9-bionic-amd64-2020-09-15T21-20-23Z"
+    mail_image = "aecid-debian-stretch-amd64"
 
     employee_volume_size = 20
     share_volume_size = 20

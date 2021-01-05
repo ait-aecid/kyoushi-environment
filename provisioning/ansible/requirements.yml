@@ -130,3 +130,8 @@ roles:
     scm: git
     version: v1.0
     name: debiansnapshot
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/clamav.git
+    scm: git
+    version: v1.0
+    name: clamav

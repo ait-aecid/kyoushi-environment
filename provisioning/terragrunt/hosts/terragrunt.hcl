@@ -32,6 +32,22 @@ inputs = {
             ip_index = null
         }
     ]
+
+
+    ext_mail = [
+        {
+            name     = "xyz"
+            ip_index = null
+        },
+        {
+            name     = "acme"
+            ip_index = null
+        },
+        {
+            name     = "umbrella"
+            ip_index = null
+        }
+    ]
 }
 
 include {

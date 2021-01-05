@@ -38,8 +38,8 @@ roles:
 
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/postfix.git
     scm: git
-    version: master
-    name: postfix
+    version: v1.0
+    name: exim
 
   - src: https://github.com/GROG/ansible-role-user.git
     scm: git
@@ -120,3 +120,13 @@ roles:
     scm: git
     version: master
     name: owncloud-redis
+  
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/horde.git
+    scm: git
+    version: v1.0
+    name: horde
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/debiansnapshot.git
+    scm: git
+    version: v1.0
+    name: debiansnapshot

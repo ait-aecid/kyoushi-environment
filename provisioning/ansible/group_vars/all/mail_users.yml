@@ -1,0 +1,80 @@
+ext_mail_users:
+  - first_name: Eleanor
+    last_name: Rossmann
+    password: L8JKPlWknt
+    password_salt: 268e3374143a42cf
+    email_domain: "{{ domains.acme.domain }}"
+    email_user: rossmanne
+    username: rossmanne
+  
+  - first_name: Lorraine
+    last_name: Mitteregger
+    password: MR2pPCbC4U
+    password_salt: b369e1b96b3a4051
+    email_domain: "{{ domains.umbrella.domain }}"
+    email_user: lorraine.mitteregger
+    username: lorraine.mitteregger
+  
+  - first_name: Connor
+    last_name: Kreidl
+    password: 7iMSsajysA
+    password_salt: 84682e622be04d2f
+    email_domain: "{{ domains.xyz.domain }}"
+    email_user: ckreidl
+    username: ckreidl
+  
+  - first_name: Eva
+    last_name: Reynolds
+    password: u3oDu3Fvpo
+    password_salt: 6842aa7b1d794cb2
+    email_domain: "{{ domains.acme.domain }}"
+    email_user: reynoldse
+    username: reynoldse
+  
+  - first_name: Mira
+    last_name: Eichhorn
+    password: L23lJBqy1P
+    password_salt: acd1b8fa6f954895
+    email_domain: "{{ domains.acme.domain }}"
+    email_user: eichhornm
+    username: eichhornm
+  
+  - first_name: Kayleigh
+    last_name: Maier
+    password: 8x6FfOKqn8
+    password_salt: b969b34f52bc412d
+    email_domain: "{{ domains.umbrella.domain }}"
+    email_user: kayleigh.maier
+    username: kayleigh.maier
+  
+  - first_name: Marilyn
+    last_name: Kirk
+    password: 8AdYWjCH3Q
+    password_salt: 9692509b05d942b6
+    email_domain: "{{ domains.acme.domain }}"
+    email_user: kirkm
+    username: kirkm
+  
+  - first_name: Erina
+    last_name: Zimmermann
+    password: 7VwL6ItVNx
+    password_salt: f66dd598403e426d
+    email_domain: "{{ domains.xyz.domain }}"
+    email_user: ezimmermann
+    username: ezimmermann
+  
+  - first_name: Caroline
+    last_name: Rottensteiner
+    password: A2W7ZbtcLr
+    password_salt: 9f033cab2c4b41a5
+    email_domain: "{{ domains.umbrella.domain }}"
+    email_user: caroline.rottensteiner
+    username: caroline.rottensteiner
+  
+  - first_name: Katherine
+    last_name: Forstner
+    password: l1n6PuNe3J
+    password_salt: b2a1dafe306e446a
+    email_domain: "{{ domains.umbrella.domain }}"
+    email_user: katherine.forstner
+    username: katherine.forstner

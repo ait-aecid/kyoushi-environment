@@ -49,3 +49,19 @@ module "ext_mail" {
   userdatafile       = local.ext_mail_userdata_file
   userdata_vars      = local.ext_mail_userdata_vars
 }
+
+## External Users 
+module "ext_users" {
+  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.3.1"
+  host_capacity = var.ext_user_capacity
+  hostname      = "ext_user"
+  tag           = "internet"
+  image         = local.ext_user_image
+  flavor        = local.ext_user_flavor
+  volume_size   = local.ext_user_volume_size
+  sshkey        = var.sshkey
+  network       = var.internet
+  subnet        = var.internet_subnet
+  userdatafile  = local.ext_user_userdata_file
+  userdata_vars = local.ext_user_userdata_vars
+}

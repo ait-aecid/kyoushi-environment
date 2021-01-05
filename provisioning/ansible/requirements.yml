@@ -36,7 +36,7 @@ roles:
     version: master
     name: dovecot
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/postfix.git
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/exim.git
     scm: git
     version: v1.0
     name: exim

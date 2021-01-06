@@ -38,7 +38,7 @@ roles:
 
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/exim.git
     scm: git
-    version: v1.0
+    version: v1.1
     name: exim
 
   - src: https://github.com/GROG/ansible-role-user.git
@@ -123,7 +123,7 @@ roles:
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/horde.git
     scm: git
-    version: v1.0
+    version: v1.1
     name: horde
 
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/debiansnapshot.git

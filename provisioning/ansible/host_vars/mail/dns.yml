@@ -1,6 +1,7 @@
 dnat_name: mailserver
 
 dns_domain: company
+dns_hostname: mailserver
 dns_domains: 
   - domain: company
     hostname: mailserver

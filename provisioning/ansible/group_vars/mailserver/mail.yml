@@ -21,8 +21,18 @@ exim_ip: "{{ ansible_default_ipv4.address }}"
 exim_maildomain: "{{ domains[dns_domain].domain }}"
 exim_domain: "{{ domains[dns_domain].domain }}"
 
+# delivery option
+exim_localdelivery: maildir_home
+exim_maildir_path: $home/.mail
+
+exim_tls_enable: yes
+exim_tls_cert: /etc/exim4/exim.crt
+exim_tls_cert_src: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ mailserver_cert_name }}/{{ mailserver_cert_name }}.crt"
+exim_tls_key: /etc/exim4/exim.key
+exim_tls_key_src: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ mailserver_cert_name }}/{{ mailserver_cert_name }}.key"
+
 ## dovecot
-dovecot_postfix_auth: yes
+dovecot_postfix_auth: no
 dovecot_ssl_cert_src: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ mailserver_cert_name }}/{{ mailserver_cert_name }}.crt"
 dovecot_ssl_cert: /etc/dovecot/private/dovecot.pem
 

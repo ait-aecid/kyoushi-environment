@@ -5,8 +5,11 @@ dnsmasq_config:
     - name: "{{ dns_server_name }}"
       content: |
         {%- for entry in domains.values() %}
-        {%- if entry.server == inventory_hostname %}
+        {% if entry.server == inventory_hostname %}
         server=/{{ entry.domain }}/127.0.0.1
+        {% if entry.ptr_cidr is defined %}
+        server=/{{ entry.ptr_cidr }}.in-addr.arpa/127.0.0.1
+        {% endif %}
         {% endif %}
         {% endfor %}
         {% if dns_upstream_server is defined %}

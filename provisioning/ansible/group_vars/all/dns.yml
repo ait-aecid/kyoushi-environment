@@ -3,6 +3,7 @@ domains:
     id: cyberrange
     server: inet-dns
     domain: cyberrange.at
+    ptr_cidr: 42.192
   xyz: 
     id: xyz
     server: inet-dns
@@ -42,11 +43,13 @@ domains:
     id: dmz
     server: inet-firewall
     domain: dmz.company.cyberrange.at
+    ptr_cidr: 172.16.100.0/24
 
   intranet: 
     id: intranet
     server: inet-firewall
     domain: intranet.company.cyberrange.at
+    ptr_cidr: 172.16.0.0/24
 
 dns_domains: []
 dns: |

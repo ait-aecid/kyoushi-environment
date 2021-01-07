@@ -21,6 +21,21 @@ exim_ip: "{{ ansible_default_ipv4.address }}"
 exim_maildomain: "{{ domains[dns_domain].domain }}"
 exim_domain: "{{ domains[dns_domain].domain }}"
 
+exim_local_interfaces:
+  - "127.0.0.1"
+  - "::1"
+  - "{{ exim_ip }}"
+  - "127.0.0.1.465"
+  - "::1.465"
+  - "{{ exim_ip }}.465"
+  - "127.0.0.1.587"
+  - "::1.587"
+  - "{{ exim_ip }}.587"
+
+exim_tls_ports:
+  - 465
+  - 587
+
 # delivery option
 exim_localdelivery: maildir_home
 exim_maildir_path: $home/.mail

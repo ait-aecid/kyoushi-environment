@@ -1,0 +1,2 @@
+horde_service_user: "{{ service_users.ext_mail }}"
+horde_cert_name: "{{ mailserver_cert_name }}"

@@ -1,0 +1,3 @@
+horde_service_user: "{{ service_users.mail }}"
+horde_cert_name: "{{ dns.dmz.hostname }}.dmz"
+horde_vhost_server_name: "{{ dns.dmz.fqdn }}"

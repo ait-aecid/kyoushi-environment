@@ -19,12 +19,12 @@ horde_mail_imap_port: 143
 horde_mail_imap_secure: "tls"
 horde_mail_protocol: "imap"
 horde_mail_smtp_server: "{{ exim_mailname }}"
-horde_mail_smtp_port: 25
-horde_mail_smtp_secure: "false"
+horde_mail_smtp_port: 465
+horde_mail_smtp_secure: "tls"
 
 # Database
-horde_db_user: "horde"
-horde_db_pass: "horde"
+horde_db_user: "{{ horde_service_user.username }}"
+horde_db_pass: "{{ horde_service_user.password }}"
 horde_db_name: "horde"
 horde_db:
   - name: "{{ horde_db_name }}"
@@ -36,13 +36,13 @@ horde_certificate:
   - "{{ horde_cert_key }}"
 
 horde_cert:
-  src: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ mailserver_cert_name }}/{{ mailserver_cert_name }}.crt"
+  src: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ horde_cert_name }}/{{ horde_cert_name }}.crt"
   dest: /etc/ssl/certs/mailserver.crt
   mode: 644
   group: root
 
 horde_cert_key:
-  src: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ mailserver_cert_name }}/{{ mailserver_cert_name }}.key"
+  src: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ horde_cert_name }}/{{ horde_cert_name }}.key"
   dest: /etc/ssl/certs/mailserver.key
   mode: 640
   group: ssl-cert

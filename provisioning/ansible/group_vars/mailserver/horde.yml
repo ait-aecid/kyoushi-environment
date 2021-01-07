@@ -12,6 +12,7 @@ exim_relay_nets:
 horde_vhost_server_name: "{{ exim_mailname }}"
 
 # mail config
+horde_admin_users: "{{ mail_users | selectattr('horde_admin', 'defined') | selectattr('horde_admin', 'true') | map(attribute='email_user') | list }}"
 horde_mail_domain: "{{ exim_domain }}"
 horde_mail_imap_servername: "mailserver"
 horde_mail_imap_server: "{{ exim_mailname }}"

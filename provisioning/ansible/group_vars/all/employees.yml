@@ -91,6 +91,7 @@ employees:
     owncloud_groups:
       - employees
       - admin
+    horde_admin: yes
     shell: /bin/bash
     sudo:
       hosts: ALL
@@ -140,6 +141,7 @@ employees:
       - employees
       - admin
     ssh_key: yes
+    horde_admin: yes
     shell: /bin/bash
     sudo:
       hosts: ALL

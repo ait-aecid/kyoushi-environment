@@ -20,3 +20,7 @@
       loop_control:
         loop_var: host_cert_config
   tags: [certs]
+
+- name: Install CA authority on hosts
+  import_playbook: ./install_certificate_authority.yml
+  tags: [ca, install]

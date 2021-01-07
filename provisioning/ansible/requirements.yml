@@ -135,3 +135,8 @@ roles:
     scm: git
     version: v1.0
     name: clamav
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/ca-certs.git
+    scm: git
+    version: master
+    name: ca-certs

@@ -1,4 +1,5 @@
 ca_base_path: "{{ lookup('env','LOCAL_PACKAGE_ANSIBLE_PATH') }}/data/certs"
 ca_smimes_path: "{{ ca_base_path }}/mails"
 ca_servers_path: "{{ ca_base_path }}/sites"
+ca_cert: "{{ ca_base_path}}/ca.crt"
 

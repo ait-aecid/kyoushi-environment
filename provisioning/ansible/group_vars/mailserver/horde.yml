@@ -20,7 +20,7 @@ horde_mail_imap_port: 143
 horde_mail_imap_secure: "tls"
 horde_mail_protocol: "imap"
 horde_mail_smtp_server: "{{ exim_mailname }}"
-horde_mail_smtp_port: 465
+horde_mail_smtp_port: 25
 horde_mail_smtp_secure: "tls"
 
 # Database

@@ -14,7 +14,7 @@ collections:
 roles:
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/apache2.git
     scm: git
-    version: v1.1
+    version: v1.2
     name: apache2
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/samba.git
@@ -80,3 +80,13 @@ roles:
     scm: git
     version: v1.0
     name: openvpn-server
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/mariadb.git
+    scm: git
+    version: master
+    name: mariadb
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/wordpress.git
+    scm: git
+    version: v1.1.2
+    name: wordpress

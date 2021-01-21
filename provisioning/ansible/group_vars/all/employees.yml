@@ -14,6 +14,7 @@ employees:
     last_name: Wood
     password: RwlFjgki9D
     password_salt: 3497789abd7d4f98
+    wp_role: editor
 
   m03:
     username: snowak
@@ -22,6 +23,7 @@ employees:
     last_name: Nowak
     password: Rd19X9EFE8
     password_salt: 5c5bdcfa99b04372
+    wp_role: editor
 
   m04:
     username: hkern
@@ -55,6 +57,7 @@ employees:
     password: SddFmTwn61
     password_salt: 71633a42587943ce
     ssh_key: yes
+    wp_role: administrator
     sudo:
       hosts: ALL
       as: ALL

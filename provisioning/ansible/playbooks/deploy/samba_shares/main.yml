@@ -1,0 +1,21 @@
+- name: Setup and configure samba shares
+  hosts: share
+  become: true
+  roles:
+    - grog.group
+    - role: grog.user
+      vars:
+          user_createhome: false
+          user_shell: /usr/sbin/nologin
+    - samba
+
+
+  tasks:
+    - name: Copy extra files
+      include:  copy_smb_files.yml 
+                share={{ file_list.key }}
+                extra_files={{ file_list.value }} 
+      loop: "{{ smb_extra_files | default({}) | dict2items }}"
+      loop_control:
+        loop_var: file_list
+      when: smb_extra_files is defined

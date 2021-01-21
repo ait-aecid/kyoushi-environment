@@ -1,0 +1,61 @@
+- name: Gather facts about samba shares
+  hosts: share
+  gather_facts: yes
+
+- name: Add php ppa and update apt
+  hosts: cloud_share
+  become: true
+  tasks:
+    - name: Add PHP ppa repo
+      apt_repository:
+        repo: ppa:ondrej/php
+        state: present
+    - name: Install additional packages
+      apt:
+        pkg:
+          - php7.3-apcu # required for owncloud on ubuntu bionic
+          - smbclient # required for smb storage backend
+
+- name: Install owncloud and required services
+  hosts: cloud_share
+  become: true
+  roles:
+    - owncloud-mariadb
+    - owncloud-redis
+    - owncloud-apache
+    - owncloud-php
+    - owncloud
+
+- name: Prepare local files
+  hosts: cloud_share
+  become: true
+  tasks:
+    - name: Ensure destination directory exists
+      file:
+        path: "{{ owncloud_prepared_files_dest }}"
+        state: directory
+        owner: www-data
+        group: root
+    - name: Ensure directories exist
+      file:
+        path: "{{ owncloud_prepared_files_dest }}/{{ item.path }}"
+        state: directory
+        owner: www-data
+        group: root
+      with_filetree: "{{ owncloud_prepared_files_src }}"
+      when: item.state == 'directory'
+    - name: Copy additional files
+      copy: 
+        src: "{{ item.src }}" 
+        dest: "{{ owncloud_prepared_files_dest }}/{{ item.path }}" 
+        owner: www-data
+        group: root
+      with_filetree: "{{ owncloud_prepared_files_src }}"
+      when: item.state == 'file'
+
+- name: Prepare user, group and mount configuration
+  hosts: cloud_share
+  become: true
+  roles:
+    - ait.owncloud.config
+        

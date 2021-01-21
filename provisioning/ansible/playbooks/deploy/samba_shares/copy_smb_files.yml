@@ -1,0 +1,23 @@
+
+- name: Ensure all directories exist
+  file:
+    path: "/srv/shares/{{ elem.src }}"
+    owner: "{{ elem.owner | default('root') }}"
+    group: "{{ elem.group | default((samba_shares | selectattr('name', 'match', share ) | map(attribute='group'))[0]) }}"
+    state: directory
+  loop: "{{ extra_files }}"
+  loop_control:
+    loop_var: elem
+  when: elem.directory | default(False) 
+
+- name: Copy content
+  copy: 
+    src: "{{smb_extra_files_base}}/{{ elem.src }}{{ '/' if (elem.directory | default(False)) }}"  
+    dest: "/srv/shares/{{ elem.dst | default(elem.src) }}"
+    owner: "{{ elem.owner | default('root') }}"
+    group: "{{ elem.group | default((samba_shares | selectattr('name', 'match', share ) | map(attribute='group'))[0]) }}"
+  loop: "{{ extra_files }}"
+  loop_control:
+    loop_var: elem
+  when: (elem.recursive | default(False)) or 
+        (elem.directory is not defined or elem.directory != true)

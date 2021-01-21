@@ -90,3 +90,33 @@ roles:
     scm: git
     version: v1.1.2
     name: wordpress
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/samba.git
+    scm: git
+    version: master
+    name: samba
+
+  - src: https://github.com/owncloud-ansible/owncloud.git
+    scm: git
+    version: master
+    name: owncloud
+
+  - src: https://github.com/owncloud-ansible/php.git
+    scm: git
+    version: master
+    name: owncloud-php
+
+  - src: https://github.com/owncloud-ansible/apache.git
+    scm: git
+    version: master
+    name: owncloud-apache
+
+  - src: https://github.com/owncloud-ansible/mariadb.git
+    scm: git
+    version: master
+    name: owncloud-mariadb
+
+  - src: https://github.com/owncloud-ansible/redis.git
+    scm: git
+    version: master
+    name: owncloud-redis

@@ -1,4 +1,4 @@
 ssh_keys_base_path: "{{ lookup('env','LOCAL_PACKAGE_ANSIBLE_PATH') }}/data/ssh-keys"
 
 # combine user dicts into one for convenience
-game_users: "{{ employees }}"
+game_users: "{{ employees | combine(service_users) }}"

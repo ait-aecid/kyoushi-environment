@@ -1,0 +1,4 @@
+- name: Install and configure OpenVPN server
+  hosts: vpn
+  roles:
+    - openvpn-server

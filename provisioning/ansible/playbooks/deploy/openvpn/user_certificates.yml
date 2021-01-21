@@ -9,17 +9,25 @@
     state: directory
 
 - name: Generate the private keys for {{ host }}
-  openssl_privatekey:
-    path: "{{ openvpn_ca_certs_path }}/{{ host }}//openvpn.key"
+  community.crypto.openssl_privatekey:
+    path: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.key"
     type: RSA
     size: 4096
     state: present
 
 - name: Generate the certificate signing requests for {{ host }}
-  openssl_csr:
+  community.crypto.openssl_csr:
     use_common_name_for_san: yes
-    path: "{{ openvpn_ca_certs_path }}/{{ host }}//openvpn.csr"
-    privatekey_path: "{{ openvpn_ca_certs_path }}/{{ host }}//openvpn.key"
+    path: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.csr"
+    privatekey_path: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.key"
+    key_usage:
+      - nonRepudiation
+      - digitalSignature
+      - keyEncipherment
+    key_usage_critical: yes
+    extended_key_usage:
+      - clientAuth
+    extended_key_usage_critical: yes
     common_name: "{{ hostvars[host].employee.username }}"
 
 - name: Check for already existing certificates for {{ host }}
@@ -28,7 +36,7 @@
   register: file_check
 
 - name: Check state of currently existing certificates for {{ host }}
-  openssl_certificate_info:
+  community.crypto.x509_certificate_info:
     path: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.crt"
     valid_at:
         check: "{{ openvpn_ca_check_valid_till }}"
@@ -42,7 +50,7 @@
   when: not (certificate_check.skipped is defined and certificate_check.skipped) and not certificate_check.valid_at.check
 
 - name: Sign certificate
-  openssl_certificate:
+  community.crypto.x509_certificate:
     path: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.crt"
     csr_path: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.csr"
     ownca_path: "{{ openvpn_ca_cert }}"

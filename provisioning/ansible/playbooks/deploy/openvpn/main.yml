@@ -2,26 +2,34 @@
   import_playbook: ./certificate_authority.yml
   tags: [ca]
 
+- name: Manage OpenVPN server cert
+  import_playbook: ./server_certificate.yml
+  tags: [server]
+
 - name: Gather facts about remote employees
   hosts: remote_employee
   gather_facts: yes
   tags: [certs]
 
-- name: Manage host certificates
+- name: Manage user certificates
   hosts: localhost
   connection: local
   tasks:
-    - name: Manage host certificates 
-      include_tasks: ./host_certificates.yml
+    - name: Manage user certificates
+      include_tasks: ./user_certificates.yml
       loop: "{{ groups['remote_employee'] }}"
       loop_control:
         loop_var: host
   tags: [certs]
+
+- name: Install and configure OpenVPN server
+  import_playbook: ./server.yml
+  tags: [openvpn, server]
 
 - name: Configure OpenVPN on remote employees
   hosts: remote_employee
   become: yes
   roles:
     - openvpn-client
-  tags: [openvpn]
+  tags: [openvpn, client]
       

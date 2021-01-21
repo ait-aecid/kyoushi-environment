@@ -4,6 +4,8 @@ collections:
   - name: openstack.cloud
   # community collection for various community modules
   - name: community.general
+  # for CA and cert management
+  - name: community.crypto
   # ait custom owncloud role and modules
   - name: git@git-service.ait.ac.at:sct-cyberrange/ansible-collections/owncloud.git
     type: git
@@ -71,5 +73,10 @@ roles:
 
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/openvpn-client.git
     scm: git
-    version: v1.0
+    version: v1.1
     name: openvpn-client
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/openvpn-server.git
+    scm: git
+    version: v1.0
+    name: openvpn-server

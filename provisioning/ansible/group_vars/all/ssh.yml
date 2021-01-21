@@ -2,6 +2,7 @@ ansible_user: ait
 
 # Note that SSH will also try other keys if this key does not work
 ait_ssh_key: ~/.ssh/aecid-testbed
+ait_ssh_key_pub: ~/.ssh/aecid-testbed.pub
 ait_ssh_use_proxy: yes
 ait_ssh_proxy_user: ait
 # management host is used for proxying by default

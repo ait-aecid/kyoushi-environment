@@ -1,0 +1,54 @@
+- name: Create the host certificates directory for {{ host }}
+  file:
+    name: "{{ openvpn_ca_certs_path }}"
+    state: directory
+
+- name: Create the certificate directories for {{ host }}
+  file:
+    name: "{{ openvpn_ca_certs_path }}/{{ host }}"
+    state: directory
+
+- name: Generate the private keys for {{ host }}
+  openssl_privatekey:
+    path: "{{ openvpn_ca_certs_path }}/{{ host }}//openvpn.key"
+    type: RSA
+    size: 4096
+    state: present
+
+- name: Generate the certificate signing requests for {{ host }}
+  openssl_csr:
+    use_common_name_for_san: yes
+    path: "{{ openvpn_ca_certs_path }}/{{ host }}//openvpn.csr"
+    privatekey_path: "{{ openvpn_ca_certs_path }}/{{ host }}//openvpn.key"
+    common_name: "{{ hostvars[host].employee.username }}"
+
+- name: Check for already existing certificates for {{ host }}
+  stat:
+    path: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.crt"
+  register: file_check
+
+- name: Check state of currently existing certificates for {{ host }}
+  openssl_certificate_info:
+    path: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.crt"
+    valid_at:
+        check: "{{ openvpn_ca_check_valid_till }}"
+  when: file_check.stat.exists == true
+  register: certificate_check
+
+- name: Delete about to expire certificate authority certificate  for {{ host }}
+  file:
+    name: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.crt"
+    state: absent
+  when: not (certificate_check.skipped is defined and certificate_check.skipped) and not certificate_check.valid_at.check
+
+- name: Sign certificate
+  openssl_certificate:
+    path: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.crt"
+    csr_path: "{{ openvpn_ca_certs_path }}/{{ host }}/openvpn.csr"
+    ownca_path: "{{ openvpn_ca_cert }}"
+    ownca_privatekey_path: "{{ openvpn_ca_key }}"
+    ownca_privatekey_passphrase: "{{ openvpn_ca_pw }}"
+    ownca_not_before: "{{ openvpn_ca_info.valid_from | default(omit) }}"
+    ownca_not_after:  "{{ openvpn_ca_info.valid_till | default(omit) }}"
+    provider: ownca
+

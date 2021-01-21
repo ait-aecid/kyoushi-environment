@@ -1,0 +1,35 @@
+- name: Manage ssh-keys for all users
+  hosts: localhost
+  connection: local
+  tags: [ssh_keys, ssh_keys_create]
+  tasks:
+    # sadly this does not support passwords
+    - name: Create ssh-keys directory
+      file:
+        state: directory
+        path: "{{ ssh_keys_base_path }}"
+
+    - name: Create ssh-keys directories and ensure file mode of existing keys for users
+      file:
+        state: directory
+        path: "{{ ssh_keys_base_path }}/{{ user.key }}/"
+        recurse: yes
+        mode: "u=rwX,g=X,o=X" # we have to set the whole directory to rwX since git will set it to RW-R-R 
+      when: user.value.ssh_key is defined and user.value.ssh_key|bool
+      loop: "{{ game_users | dict2items  }}"
+      loop_control:
+        loop_var: user  
+
+    - name: Generate ssh-key pair
+      openssh_keypair:
+        path: "{{ ssh_keys_base_path }}/{{ user.key }}/id_rsa"
+        type: rsa
+        size: 4096
+        mode: "0600"
+        comment: "{{ user.value.username }}"
+        state: present
+        force: no
+      when: user.value.ssh_key is defined and user.value.ssh_key|bool
+      loop: "{{ game_users | dict2items  }}"
+      loop_control:
+        loop_var: user

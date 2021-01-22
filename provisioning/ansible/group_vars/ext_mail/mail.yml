@@ -1,6 +1,1 @@
-mail_users: |
-  [
-  {% for user in (ext_mail_users | selectattr("email_domain", "eq", domains[dns_domain].domain)) %}
-  "{{ user.email_user }}@{{ user.email_domain }}"{% if not loop.last %},{% endif %}
-  {% endfor %}
-  ]
+mail_users: "{{ ext_mail_users | selectattr('email_domain', 'eq', domains[dns_domain].domain) | list }}"

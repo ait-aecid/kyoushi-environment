@@ -1,0 +1,15 @@
+- name: Configure debiansnapshot for company mail server
+  hosts: mail
+  become: true
+  roles:
+    - debiansnapshot
+
+- name: Configure mailservers
+  hosts: mailserver
+  become: true
+  roles: 
+    - exim
+    - dovecot
+    - grog.user
+    - horde
+    - clamav

@@ -9,3 +9,11 @@ service_users:
     username: owncloud
     password: rCnXg3vs4SEP
     password_salt: 0a74bef6840d4079
+  ext_mail:
+    username: horde
+    password: VnSt57LRpmEK
+    password_salt: 8f84b8a27ec0437a
+  mail:
+    username: horde
+    password: bJT5sfXE55g3
+    password_salt: 767e927da2ef41fb

@@ -1,0 +1,10 @@
+- name: Manage ca cert for all hosts
+  hosts: all
+  become: yes 
+  tags: [ca, certs]
+  roles:
+    - role: ca-certs
+      vars:
+        ca_certs:
+          - "{{ ca_cert }}"
+        ca_certs_update_certifi: yes

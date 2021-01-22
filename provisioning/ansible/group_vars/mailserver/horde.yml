@@ -1,0 +1,68 @@
+horde_php_version: 7.0
+
+exim_mailname: "{{ dns[dns_domain].fqdn }}"
+exim_ip: "{{ ansible_default_ipv4.address }}"
+exim_maildomain: "{{ domains[dns_domain].domain }}"
+exim_domain: "{{ domains[dns_domain].domain }}"
+exim_relay_nets:
+  - 127.0.0.1/32
+  - "{{ exim_ip }}/32"
+
+# Horde install
+horde_vhost_server_name: "{{ exim_mailname }}"
+
+# mail config
+horde_admin_users: "{{ mail_users | selectattr('horde_admin', 'defined') | selectattr('horde_admin', 'true') | map(attribute='email_user') | list }}"
+horde_mail_domain: "{{ exim_domain }}"
+horde_mail_imap_servername: "mailserver"
+horde_mail_imap_server: "{{ exim_mailname }}"
+horde_mail_imap_port: 143
+horde_mail_imap_secure: "tls"
+horde_mail_protocol: "imap"
+horde_mail_smtp_server: "{{ exim_mailname }}"
+horde_mail_smtp_port: 25
+horde_mail_smtp_secure: "tls"
+
+# Database
+horde_db_user: "{{ horde_service_user.username }}"
+horde_db_pass: "{{ horde_service_user.password }}"
+horde_db_name: "horde"
+horde_db:
+  - name: "{{ horde_db_name }}"
+horde_db_users:
+  - { name: "{{ horde_db_user }}", password: "{{ horde_db_pass }}" }
+
+horde_certificate: 
+  - "{{ horde_cert }}"
+  - "{{ horde_cert_key }}"
+
+horde_cert:
+  src: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ horde_cert_name }}/{{ horde_cert_name }}.crt"
+  dest: /etc/ssl/certs/mailserver.crt
+  mode: 644
+  group: root
+
+horde_cert_key:
+  src: "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ horde_cert_name }}/{{ horde_cert_name }}.key"
+  dest: /etc/ssl/certs/mailserver.key
+  mode: 640
+  group: ssl-cert
+
+horde_webmail_ssl: 0
+horde_webmail_ca: ""
+
+# expect responses for webinstall horde version 5.2.17
+horde_webinstall_responses:
+    (.*)What database backend should we use?(.*): "{{ horde_webmail_db_backend }}"
+    (.*)Username to connect to the database as(.*): "{{ horde_webmail_user }}"
+    (.*)Password to connect with(.*): "{{ horde_webmail_pass }}"
+    (.*)How should we connect to the database?(.*): "{{ horde_webmail_db_connect }}"
+    (.*)Location of UNIX socket(.*): "{{ horde_webmail_unix_socket }}"
+    (.*)Database name to use(.*): "{{ horde_webmail_db_name }}"
+    (.*)Internally used charset(.*): "{{ horde_webmail_db_charset }}"
+    (.*)Use SSL to connect to the server?(.*): "{{ horde_webmail_ssl }}"
+    (.*)Certification Authority to use for SSL connections(.*): "{{ horde_webmail_ca }}"
+    (.*)Split reads to a different server?(.*): "{{ horde_webmail_split_reads }}"
+    (.*)(optional)(.*): "{{ horde_webmail_existing_email_to_admin }}"
+
+horde_sender_service: exim4

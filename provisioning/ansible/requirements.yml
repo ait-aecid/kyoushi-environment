@@ -36,10 +36,10 @@ roles:
     version: master
     name: dovecot
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/postfix.git
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/exim.git
     scm: git
-    version: master
-    name: postfix
+    version: v1.1
+    name: exim
 
   - src: https://github.com/GROG/ansible-role-user.git
     scm: git
@@ -120,3 +120,23 @@ roles:
     scm: git
     version: master
     name: owncloud-redis
+  
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/horde.git
+    scm: git
+    version: v1.1
+    name: horde
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/debiansnapshot.git
+    scm: git
+    version: v1.0
+    name: debiansnapshot
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/clamav.git
+    scm: git
+    version: v1.0
+    name: clamav
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/ca-certs.git
+    scm: git
+    version: master
+    name: ca-certs

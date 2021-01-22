@@ -5,8 +5,14 @@ dnsmasq_config:
     - name: "{{ dns_server_name }}"
       content: |
         {%- for entry in domains.values() %}
-        {%- if entry.server == inventory_hostname %}
+        {% if entry.server == inventory_hostname %}
         server=/{{ entry.domain }}/127.0.0.1
+        {# the below loop sets a server directive for each FQDN4 record #}
+        {# this is done since maradns will timeout on PTR queries for IPs it does not know significantly slowing down certain systems #}
+        {# by configuring it like this we can avoid such a situation #}
+        {% for dns_entry in (hostvars.values() | selectattr('dns','defined') | map(attribute='dns') | selectattr(entry.id,'defined') | map(attribute=entry.id)) %}
+        server=/{{ dns_entry.ip.split('.') | reverse | join('.') }}.in-addr.arpa/127.0.0.1
+        {% endfor %}
         {% endif %}
         {% endfor %}
         {% if dns_upstream_server is defined %}

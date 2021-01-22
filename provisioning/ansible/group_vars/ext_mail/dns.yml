@@ -1,0 +1,6 @@
+dns_domains: 
+  - domain: "{{ dns_domain }}"
+    hostname: "{{ dns_hostname | default(ansible_nodename) }}"
+    certificate: "{{ dns_certificate | default(True, True) | bool }}"
+    certificate_info: "{{ dns_certificate_info | default({}) }}"
+    aliases: "{{ dns_aliases | default([]) }}"

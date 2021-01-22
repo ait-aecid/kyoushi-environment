@@ -77,4 +77,18 @@ locals {
   mgmthost_userdata_file = var.mgmthost_userdata_file == null ? local.userdata_file : var.mgmthost_userdata_file
   mgmthost_userdata_vars = var.mgmthost_userdata_vars == null ? local.userdata_vars : var.mgmthost_userdata_vars
 
+  # external mail servers values
+  ext_mail_image         = var.ext_mail_image == null ? var.image : var.ext_mail_image
+  ext_mail_flavor        = var.ext_mail_flavor == null ? var.flavor : var.ext_mail_flavor
+  ext_mail_volume_size   = var.ext_mail_volume_size == null ? var.volume_size : var.ext_mail_volume_size
+  ext_mail_userdata_file = var.ext_mail_userdata_file == null ? local.userdata_file : var.ext_mail_userdata_file
+  ext_mail_userdata_vars = var.ext_mail_userdata_vars == null ? local.userdata_vars : var.ext_mail_userdata_vars
+
+  # external users values
+  ext_user_image         = var.ext_user_image == null ? var.image : var.ext_user_image
+  ext_user_flavor        = var.ext_user_flavor == null ? var.flavor : var.ext_user_flavor
+  ext_user_volume_size   = var.ext_user_volume_size == null ? var.volume_size : var.ext_user_volume_size
+  ext_user_userdata_file = var.ext_user_userdata_file == null ? local.userdata_file : var.ext_user_userdata_file
+  ext_user_userdata_vars = var.ext_user_userdata_vars == null ? local.userdata_vars : var.ext_user_userdata_vars
+
 }

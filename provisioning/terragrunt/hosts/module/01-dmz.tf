@@ -21,7 +21,7 @@ module "mail" {
   count              = var.mail_active ? 1 : 0
   source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
   hostname           = "mail"
-  tag                = "dmz, proxied"
+  tag                = "dmz, proxied, mailserver"
   host_address_index = var.mail_ip_index
   image              = local.mail_image
   flavor             = local.mail_flavor

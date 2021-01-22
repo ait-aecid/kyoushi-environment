@@ -514,4 +514,83 @@ variable "floating_ip_pool" {
   default     = null
 }
 
+## External Mail Server inputs
+
+variable "ext_mail_image" {
+  type        = string
+  description = "optional name or id of the base image for ext_mail hosts (defaults to image)"
+  default     = null
+}
+
+variable "ext_mail_flavor" {
+  type        = string
+  description = "optional instance flavor for the ext_mail hosts (defaults to flavor)"
+  default     = null
+}
+
+variable "ext_mail_volume_size" {
+  type        = string
+  description = "volume_size for the ext_mail hosts (defaults to volume_size)"
+  default     = null
+}
+
+variable "ext_mail_userdata_file" {
+  type        = string
+  description = "optional override for the default userdata file for ext_mail hosts (defaults to userdata_file')"
+  default     = null
+}
+
+variable "ext_mail_userdata_vars" {
+  type        = map(string)
+  description = "optional override for the variables for the userdata template for ext_mail hosts (defaults to userdata_vars)"
+  default     = null
+}
+
+# external mail server names and ip config
+variable "ext_mail" {
+  type = list(object({
+    name     = string
+    ip_index = number
+  }))
+  default = []
+}
+
+# External Users inputs
+
+variable "ext_user_image" {
+  type        = string
+  description = "optional name or id of the base image for ext_user hosts (defaults to image)"
+  default     = null
+}
+
+variable "ext_user_flavor" {
+  type        = string
+  description = "optional instance flavor for the ext_user hosts (defaults to flavor)"
+  default     = null
+}
+
+variable "ext_user_volume_size" {
+  type        = string
+  description = "volume_size for the ext_user hosts (defaults to volume_size)"
+  default     = null
+}
+
+variable "ext_user_userdata_file" {
+  type        = string
+  description = "optional override for the default userdata file for ext_user hosts (defaults to userdata_file')"
+  default     = null
+}
+
+variable "ext_user_userdata_vars" {
+  type        = map(string)
+  description = "optional override for the variables for the userdata template for ext_user hosts (defaults to userdata_vars)"
+  default     = null
+}
+
+variable "ext_user_capacity" {
+  type        = number
+  description = "number of ext_user clients in the intranet"
+  default     = 1
+}
+
 

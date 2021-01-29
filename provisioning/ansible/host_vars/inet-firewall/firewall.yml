@@ -1,0 +1,41 @@
+shorewall_startup: 1
+shorewall_ipforward: "On"
+shorewall_configs_dir: /etc/shorewall
+
+shorewall_configs:
+  zones:
+    - { name: inet,
+        type: ipv4,
+        interface: { name: $INETIF, broadcast: detect, options: "nosmurfs" }
+      }
+    - {
+        name: lan,
+        type: ipv4,
+        interface: { name: $LANIF, broadcast: detect, options: "routeback" }
+      }
+    - {
+        name: dmz,
+        type: ipv4,
+        interface: { name: $DMZIF, broadcast: detect, options: "routeback" }
+      }
+  policy:
+    - { source: fw,    dest: all,   policy: ACCEPT }
+    - { source: lan,   dest: inet,  policy: ACCEPT }
+    - THIS POLICY HAS TO BE THE LAST
+    - { source: all,   dest: all,   policy: REJECT, log: info }
+  rules:
+    - { action: DNAT, source: inet, dest: "lan:172.17.0.02:22", proto: tcp, dest_port: 10022 }
+    - Permit access to SSH
+    - { action: SSH/ACCEPT,  source: inet, dest: fw }
+    - { action: SSH/ACCEPT,  source: lan, dest: fw }
+    - { action: DNS/ACCEPT,  source: lan, dest: fw }
+    - { action: DNS/ACCEPT,  source: dmz, dest: fw }
+    - PING Rules
+    - { action: Ping/ACCEPT, source: all, dest: all }
+  snat:
+    - { dest: $INETIF, source: 172.16.0.0/16 }
+  params:
+    - Interfaces
+    - { name: INETIF, value: ens3 }
+    - { name: LANIF, value: ens6 }
+    - { name: DMZIF, value: ens7 }

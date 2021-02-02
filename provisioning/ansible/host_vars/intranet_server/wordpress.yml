@@ -1,6 +1,15 @@
 ---
 # vars file for intranet
 
+# we cannot use remove samples
+# as it uses wp-cli site empty which also deletes the
+# special post used by wpdiscuz
+wp_remove_samples: no
+wp_remove_posts:
+  - post
+  - page
+  - attachment
+
 libapache2_mod_version: 'libapache2-mod-php7.2' # Ubuntu 18.04
 wp_company_domain: "{{ domains.intranet.domain }}"
 
@@ -45,6 +54,13 @@ wp_users: |
   ]
 
 # -------------------------------------------------------
+
+wp_plugins:
+  - name: wpdiscuz
+    activate: yes
+    version: 7.0.4
+
+wp_plugins_update: no
 
 wp_categories:
   - { name: 'Company News', description: 'Internal News and Information' }

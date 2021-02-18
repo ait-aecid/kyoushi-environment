@@ -21,6 +21,8 @@ shorewall_configs:
   policy:
     - { source: fw,    dest: all,   policy: ACCEPT }
     - { source: lan,   dest: inet,  policy: ACCEPT }
+    - { source: lan,   dest: dmz,   policy: ACCEPT }
+    - { source: dmz,   dest: inet,  policy: ACCEPT }
     - THIS POLICY HAS TO BE THE LAST
     - { source: all,   dest: all,   policy: REJECT, log: info }
   rules:
@@ -34,6 +36,8 @@ shorewall_configs:
     - { action: DNS/ACCEPT,  source: dmz, dest: fw }
     - PING Rules
     - { action: Ping/ACCEPT, source: all, dest: all }
+    - DMZ Rules
+    - { action: ACCEPT, source: dmz:$vpn, dest: lan, proto: all }
   snat:
     - { dest: $INETIF, source: 172.16.0.0/16 }
   params:

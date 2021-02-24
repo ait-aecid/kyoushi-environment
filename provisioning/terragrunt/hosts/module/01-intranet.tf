@@ -22,7 +22,7 @@ module "intranet" {
   count              = var.intranet_active ? 1 : 0
   source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
   hostname           = "intranet_server"
-  tag                = "intranet"
+  tag                = "intranet, servers"
   host_address_index = var.intranet_ip_index
   image              = local.intranet_image
   flavor             = local.intranet_flavor
@@ -40,7 +40,7 @@ module "shares" {
   source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
   hostname           = "${var.shares[count.index].name}_share"
   host_address_index = var.shares[count.index].ip_index
-  tag                = "intranet, share"
+  tag                = "intranet, share, servers"
   image              = local.share_image
   flavor             = local.share_flavor
   volume_size        = local.share_volume_size
@@ -56,7 +56,7 @@ module "monitoring" {
   count              = var.monitoring_active ? 1 : 0
   source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
   hostname           = "monitoring"
-  tag                = "intranet"
+  tag                = "intranet, servers"
   host_address_index = var.monitoring_ip_index
   image              = local.monitoring_image
   flavor             = local.monitoring_flavor

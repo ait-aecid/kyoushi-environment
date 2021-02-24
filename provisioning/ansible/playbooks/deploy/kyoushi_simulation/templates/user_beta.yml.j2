@@ -245,10 +245,17 @@ wpdiscuz:
 # states configuration
 
 states:
-  activities: {{ kyoushi_sm_states_activities | to_json }}
-  horde: {{ kyoushi_sm_states_horde | to_json }}
-  owncloud: {{ kyoushi_sm_states_owncloud | to_json }}
-  ssh_user: {{ kyoushi_sm_states_ssh_user | to_json }}
-  web_browser: {{ kyoushi_sm_states_web_browser | to_json }}
-  wp_editor: {{ kyoushi_sm_states_wp_editor | to_json }}
-  wpdiscuz: {{ kyoushi_sm_states_wpdiscuz | to_json }}
+  activities:
+{{ kyoushi_sm_states_activities | normalize_distribution | to_nice_yaml(indent=2) | indent(4, True) }}
+  horde:
+{{ kyoushi_sm_states_horde | normalize_distributions(skip=['logout_choice', 'login_page']) | to_nice_yaml(indent=2) | indent(4, True) }}
+  owncloud: 
+{{ kyoushi_sm_states_owncloud | normalize_distributions(skip=['logout_choice', 'login_page']) | to_nice_yaml(indent=2) | indent(4, True) }}
+  ssh_user: 
+{{ kyoushi_sm_states_ssh_user | normalize_distributions | to_nice_yaml(indent=2) | indent(4, True) }}
+  web_browser: 
+{{ kyoushi_sm_states_web_browser | normalize_distributions | to_nice_yaml(indent=2) | indent(4, True) }}
+  wp_editor: 
+{{ kyoushi_sm_states_wp_editor | normalize_distributions(skip=['logout_choice', 'login_page']) | to_nice_yaml(indent=2) | indent(4, True) }}
+  wpdiscuz: 
+{{ kyoushi_sm_states_wpdiscuz | normalize_distributions | to_nice_yaml(indent=2) | indent(4, True) }}

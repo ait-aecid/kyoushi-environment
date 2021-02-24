@@ -56,7 +56,7 @@ selenium:
 {% else %}
     #cache_valid_range: 1
 {% endif %}
-    
+
   proxy:
     enabled: {{ kyoushi_sm_browser_proxy_enabled | default(False) }}
     host: "{{ kyoushi_sm_browser_proxy_host | default('localhost') }}"
@@ -83,7 +83,7 @@ selenium:
 {% else %}
     autosave: []
 {% endif %}
-  
+
   # Additional commandline arguments for the webdriver
 {% if kyoushi_sm_browser_arguments | default([]) | length > 0 %}
   arguments:
@@ -135,24 +135,44 @@ vpn:
 states:
   activities:
 {{ kyoushi_sm_states_activities | normalize_distribution | to_nice_yaml(indent=2) | indent(4, True) }}
+{% if kyoushi_sm_states_activities.horde > 0 %}
   horde:
 {{ kyoushi_sm_states_horde | normalize_distributions(skip=['logout_choice', 'login_page']) | to_nice_yaml(indent=2) | indent(4, True) }}
-  owncloud: 
+{% endif %}
+{% if kyoushi_sm_states_activities.owncloud > 0 %}
+  owncloud:
 {{ kyoushi_sm_states_owncloud | normalize_distributions(skip=['logout_choice', 'login_page']) | to_nice_yaml(indent=2) | indent(4, True) }}
-  ssh_user: 
+{% endif %}
+{% if kyoushi_sm_states_activities.ssh_user > 0 %}
+  ssh_user:
 {{ kyoushi_sm_states_ssh_user | normalize_distributions | to_nice_yaml(indent=2) | indent(4, True) }}
-  web_browser: 
+{% endif %}
+{% if kyoushi_sm_states_activities.web_browser > 0 %}
+  web_browser:
 {{ kyoushi_sm_states_web_browser | normalize_distributions | to_nice_yaml(indent=2) | indent(4, True) }}
-  wp_editor: 
+{% endif %}
+{% if kyoushi_sm_states_activities.wp_editor > 0 %}
+  wp_editor:
 {{ kyoushi_sm_states_wp_editor | normalize_distributions(skip=['logout_choice', 'login_page']) | to_nice_yaml(indent=2) | indent(4, True) }}
-  wpdiscuz: 
+{% endif %}
+{% if kyoushi_sm_states_activities.wpdiscuz > 0 %}
+  wpdiscuz:
 {{ kyoushi_sm_states_wpdiscuz | normalize_distributions | to_nice_yaml(indent=2) | indent(4, True) }}
+{% endif %}
+  # Disabled activities
+{# We print commented out keys for disabled activities in a loop so we dont need an else block for each #}
+{% for name, p in kyoushi_sm_states_activities.items() %}
+{% if p <= 0 %}
+  #{{ name }}:
+{% endif %}
+{% endfor %}
+
 
 # activity user configurations
 
 # Horde User
-
-horde: 
+{% if kyoushi_sm_states_activities.horde > 0 %}
+horde:
   # The maximum amount of times the horde activity will be entered per day
   max_daily: {{ kyoushi_sm_horde_max_daily | default(10) }}
   # The horde servers base URL
@@ -189,9 +209,42 @@ horde:
     attachment: {{ kyoushi_sm_horde_attachment | default(0.2) }}
     # The propability that an attachment is added to a reply
     attachment_reply: {{ kyoushi_sm_horde_attachment_reply | default(0.1) }}
+{% else %}
+#horde:
+  # The maximum amount of times the horde activity will be entered per day
+  #max_daily: 10
+  # The horde servers base URL
+  #url: http://horde
+  # The firstname of the horde user
+  #first_name: Fancy
+  #The lastname of the horde user
+  #last_name: Name
+  # The horde user
+  #username: fancy_user
+  # The horde users password
+  #password: secret
+  #mail:
+    # The email contacts for the horde user
+    # <email>: <probability>
+    #contacts:
+    #  contact@example.at: 0.5
+    #  contact2@example.at: 0.5
+    # A dict of attachment files the user might send
+    #attachments:
+    #  /home/fancy_user/example.png: 0.5
+    #  ~/example.pdf: 0.5
+    #The propability that an additional recipient is added to a mail
+    #extra_recipient: 0.1
+    # The maximum amount of recipients
+    #max_recipients: 10
+    # The propability that an attachment is added to a new email
+    #attachment: 0.2
+    # The propability that an attachment is added to a reply
+    #attachment_reply: 0.1
+{% endif %}
 
 # OwnCloud User
-
+{% if kyoushi_sm_states_activities.owncloud > 0 %}
 owncloud:
   # The maximum amount of times the owncloud user activity will be entered per day
   max_daily: {{ kyoushi_sm_owncloud_max_daily | default(10) }}
@@ -227,9 +280,36 @@ owncloud:
   favor_factor: {{ kyoushi_sm_owncloud_favor_factor | default(1.0) }}
   # The minimum amount of scroll space that has to be available for the user to consider scrolling down.
   min_scroll_space: 200.0
+{% else %}
+#owncloud:
+  # The maximum amount of times the owncloud user activity will be entered per day
+  #max_daily: 10
+  # The owncloud servers url
+  #url: http://owncloud
+  #username: fancy_user
+  #password: secret
+  # Files the user might upload mapped to their propabilities
+  #  <path>:<probability>
+  #upload_files:
+  #  /home/fancy_user/example.png: 0.5
+  #  ~/example.pdf: 0.5
+  # List of regular expresions used to control which directories can be modified. i.e., dir create, file upload, delete
+  # (default means any directory other than root)
+  #modify_directories:
+  #  - '\/.+'
+  # The maximum directory level to create sub directories in.
+  #max_directory_create_depth: 3
+  # The maximum sub directories to create.
+  #max_directory_count: 3
+  # Factor used to decrease favorite and remove_favorite chance.
+  #favor_factor: 1.0
+  # The minimum amount of scroll space that has to be available for the user to consider scrolling down.
+  #min_scroll_space: 200.0
+{% endif %}
 
 # SSH User
 
+{% if kyoushi_sm_states_activities.ssh_user > 0 %}
 ssh_user:
   # The maximum amount of times the ssh user activity will be entered per day
   max_daily: {{ kyoushi_sm_ssh_max_daily | default(10) }}
@@ -276,17 +356,58 @@ ssh_user:
   hosts: {}
 {% endif %}
 
+{% else %}
+#ssh_user:
+  # The maximum amount of times the ssh user activity will be entered per day
+  #max_daily: 10
+  #username: fancy_user
+  #password: secret
+  # the default ssh key
+  #ssh_key: /home/fancy_user/.ssh/id_rsa
+
+  # If the user should verify the SSH servers host key by default
+  #verify_host: yes
+
+  # The host or IP of the default SSH proxy server
+  #proxy_host: proxy.host
+  #proxy_port: 22
+  #proxy_username: proxy
+  #proxy_ssh_key: /home/fancy_user/.ssh/id_rsa
+  # If the SSH host key should be verified or not
+  #proxy_verify_host: yes
+
+  # Default list of command chains the user can execute on the hosts.
+  #commands:
+  #  - - cmd: top
+  #          expect: "avail Mem"
+  #          idle_after: small
+  #        - "\x03" # sigint
+  #  - cmd: ls -la
+  #    chdir: /tmp
+  #  - cmd: apt-get update
+  #    sudo: yes
+  #  - whoami
+
+  # Mapping of host identifiers to the probabilities of them being selected.
+  #   <host id>:<probability>
+  #hosts:
+  #  example: 1.0
+
   # Mapping of host identifiers to their configurations.
   # <host id>:<HostConfig>
-{% if kyoushi_sm_ssh_host_configs | default({}) | length > 0 %}
-  host_configs:
-{{ kyoushi_sm_ssh_host_configs | to_nice_yaml(indent=2) | indent(4, True) }}
-{% else %}
-  host_configs: {}
+  #host_configs:
+  #  example:
+  #    host: 172.16.100.111
+  #    commands:
+  #      - id
+  #      - cmd: apt-get update
+  #        sudo: yes
+  #
+  #    include_default_commands: yes
 {% endif %}
 
 # WP Editor Config
-
+{% if kyoushi_sm_states_activities.wp_editor > 0 %}
 wp_editor:
   # The maximum amount of times the wp editor activity will be entered per day
   max_daily: {{ kyoushi_sm_wp_editor_max_daily | default(10) }}
@@ -294,9 +415,18 @@ wp_editor:
   url: {{ kyoushi_sm_wp_editor_url }}
   username: {{ kyoushi_sm_wp_editor_username | default(employee.username) }}
   password: {{ kyoushi_sm_wp_editor_password | default(employee.password) }}
+{% else %}
+#wp_editor:
+  # The maximum amount of times the wp editor activity will be entered per day
+  #max_daily: 10
+  # The wp-admin url
+  #url: http://wordpress/wp-admin/
+  #username: fancy_user
+  #password: secret
+{% endif %}
 
 # WP Reader Config
-
+{% if kyoushi_sm_states_activities.wpdiscuz > 0 %}
 wpdiscuz:
   # The maximum amount of times the wpdiscuz activity will be entered per day
   max_daily: {{ kyoushi_sm_wpdiscuz_max_daily | default(10) }}
@@ -305,11 +435,23 @@ wpdiscuz:
   # The comment authors name and email
   author: {{ kyoushi_sm_wpdiscuz_author | default(employee.first_name+" "+employee.last_name) }}
   email: {{ kyoushi_sm_wpdiscuz_email | default(employee.email_user+"@"+employee.email_domain) }}
-  # The wordpress instances expected page title  
+  # The wordpress instances expected page title
   page_title: {{ kyoushi_sm_wpdiscuz_page_title }}
+{% else %}
+#wpdiscuz:
+  # The maximum amount of times the wpdiscuz activity will be entered per day
+  #max_daily: 10
+  # The wordpress servers base URL
+  #url: http://wordpress
+  # The comment authors name and email
+  #author: Max Mustermann
+  #email: max.mustermann@example.at
+  # The wordpress instances expected page title
+  #page_title: Blog
+{% endif %}
 
 # Web Browser
-
+{% if kyoushi_sm_states_activities.web_browser > 0 %}
 web_browser:
   # The maximum websites to visit per day
   max_daily: {{ kyoushi_sm_web_browser_max_daily | default(10) }}
@@ -321,4 +463,13 @@ web_browser:
 {{ kyoushi_sm_web_browser_websites | to_nice_yaml(indent=2) | indent(4, True) }}
 {% else %}
   websites: []
+{% endif %}
+{% else %}
+#web_browser:
+  # The maximum websites to visit per day
+  #max_daily: 10
+  # The maximum link depth the user will browse to on a website
+  #max_depth: 2
+  # The web site URLs the user can visit
+  #websites: ["http://some.websites.example"]
 {% endif %}

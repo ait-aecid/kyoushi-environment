@@ -1,5 +1,6 @@
 *.retry
 .idea/
+.vscode/
 
 # For Terragrunt/Terraform
 .terragrunt-cache

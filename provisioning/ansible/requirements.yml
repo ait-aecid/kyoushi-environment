@@ -148,5 +148,5 @@ roles:
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kyoushi-simulation.git
     scm: git
-    version: v1.0
+    version: v1.0.1
     name: kyoushi-simulation

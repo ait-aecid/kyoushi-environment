@@ -117,7 +117,8 @@ kyoushi_sm_vpn_enabled: False
 #kyoushi_sm_vpn_config: "/home/{{ kyoushi_user_name }}/.openvpn/work.ovpn"
 # eager means the user will connect as soon as they start working
 # otherwise they only connect once they want to execute a VPN activity
-kyoushi_sm_vpn_eager: True
+# by default we use a coin flip to decide if a user is eager or not
+kyoushi_sm_vpn_eager: "{{ True if (2 | random(seed=inventory_hostname)) == 1 else False}}"
 # VPN activities config
 kyoushi_sm_vpn_horde: False
 kyoushi_sm_vpn_owncloud: False
@@ -142,7 +143,15 @@ kyoushi_sm_horde_username: "{{ employee.email_user }}"
 kyoushi_sm_horde_password: "{{ employee.password }}"
 # The email contacts for the horde user
 #  <email>:<probability>
-kyoushi_sm_horde_contacts: {}
+kyoushi_sm_horde_contacts: |
+  {
+  {# By default a employee has all employees (other than themself) and mail users as contacts #}
+  {% for contact in (employees.values() | rejectattr('email_user', 'equalto', employee.email_user) | list + ext_mail_users) %}
+  {# By default we each contact equal chance. (The distribution is normalized in the config template)#}
+  "{{ contact.email_user }}@{{ contact.email_domain }}": 1{% if not loop.last %},{%endif%}
+  {% endfor %}
+  }
+
 # A dict of attachment files the user might send
 kyoushi_sm_horde_attachments: {}
 #The probability that an additional recipient is added to a mail
@@ -479,10 +488,23 @@ kyoushi_sm_states_owncloud_sharing_details:
     return_increase: 1.25
     # Dictionary of users to share to
     #   <username>:<probability>
-    share_users: {}
+    share_users: "{{ kyoushi_sm_states_owncloud_sharing_details_share_users | normalize_distribution }}"
     # The maximum number of users to share a single file/dir to
     # (optional)
-    #max_shares: 3
+    # note random range is defined as (min, max]
+    max_shares: "{{ (employees|length + 1) | random(2, seed=inventory_hostname)}}"
+
+kyoushi_sm_states_owncloud_sharing_details_share_users: |
+  {
+  {# 
+    By default every employee can share to every other employee with equal chance.
+    (Distribution normalization is done in the config template.)
+  #}
+  {% for share_user in (employees.values() | rejectattr('username', 'equalto', employee.username)) %}
+  "{{ share_user.username }}": 1{% if not loop.last %},{% endif %}
+  {% endfor %}
+  }
+  
 
 kyoushi_sm_states_owncloud_upload_menu:
   keep_new: 0.6

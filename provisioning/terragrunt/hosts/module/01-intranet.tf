@@ -20,7 +20,7 @@ module "internal_employees" {
 
 module "intranet" {
   count              = var.intranet_active ? 1 : 0
-  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4"
   hostname           = "intranet_server"
   tag                = "intranet, servers"
   host_address_index = var.intranet_ip_index
@@ -37,7 +37,7 @@ module "intranet" {
 
 module "shares" {
   count              = length(var.shares)
-  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4"
   hostname           = "${var.shares[count.index].name}_share"
   host_address_index = var.shares[count.index].ip_index
   tag                = "intranet, share, servers"
@@ -54,7 +54,7 @@ module "shares" {
 
 module "monitoring" {
   count              = var.monitoring_active ? 1 : 0
-  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4"
   hostname           = "monitoring"
   tag                = "intranet, servers"
   host_address_index = var.monitoring_ip_index

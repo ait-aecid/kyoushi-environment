@@ -29,7 +29,7 @@ module "vmnets" {
 
 module "internet_dns" {
   count         = var.extnet_create  ? 1 : 0
-  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.2"
+  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4"
   hostname      = var.ext_dns_name
   tag           = var.ext_dns_tag
   host_address_index = var.ext_dns_address_index

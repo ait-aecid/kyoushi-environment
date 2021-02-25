@@ -8,10 +8,11 @@ locals {
 }
 
 module "vmnets" {
-  source                 = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-vmnets.git?ref=v1.4"
+  source                 = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-vmnets.git?ref=v1.5.1"
   host_name              = var.host_name
   host_image             = var.host_image
   host_size              = var.host_size
+  host_use_volume        = var.host_use_volume
   host_flavor            = var.host_flavor
   host_tag               = var.host_tag
   host_ext_address_index = var.host_ext_address_index

@@ -7,6 +7,12 @@ variable "networks" {
       dns                = list(string)
       host_address_index = number
       host_as_dns        = bool
+      routes = list(object(
+        {
+          cidr = string
+          gw   = string
+        }
+      ))
     })
   )
   description = "map of internal networks to be created. (Note that if host_as_dns is true host_address_index must not be null)"
@@ -50,6 +56,12 @@ variable "host_size" {
   type        = number
   description = "Disksize in gb of the virtual machine"
   default     = 5
+}
+
+variable "host_use_volume" {
+  type        = bool
+  description = "If the host compute node use a volume or a root file"
+  default     = false
 }
 
 variable "host_delete_on_termination" {

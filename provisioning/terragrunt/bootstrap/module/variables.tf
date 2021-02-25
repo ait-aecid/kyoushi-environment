@@ -142,8 +142,14 @@ variable "ext_dns_flavor" {
 
 variable "ext_dns_size" {
   type        = number
-  description = "Disksize in gb of the virtual machine"
+  description = "Disksize in gb of the virtual machine (only when volumes are used)"
   default     = 5
+}
+
+variable "ext_dns_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
+  default     = false
 }
 
 variable "ext_dns_userdata_vars" {

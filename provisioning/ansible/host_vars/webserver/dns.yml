@@ -4,7 +4,7 @@ proxy_aliases: |
     {% for host in groups['proxied'] %}
     {
       "proxy_host": "{{ host }}",
-      "certificate": true
+      "certificate": True
     }{% if not loop.last %},{% endif %}
     {% endfor %}
   ]

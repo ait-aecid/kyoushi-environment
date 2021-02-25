@@ -1,7 +1,7 @@
 owncloud_deploy_path: /var/www/owncloud
 
 # allow configuring multiple owncloud instances 
-owncloud_setup_run_once: false
+owncloud_setup_run_once: False
 
 # db config
 mariadb_root_password: "{{ service_users.owncloud.password }}"

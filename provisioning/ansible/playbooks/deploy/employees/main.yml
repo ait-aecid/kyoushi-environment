@@ -6,14 +6,26 @@
       become: yes
       vars:
         user_list: "{{ [ employee_user ] }}"
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        user_list_host: []
+        user_list_group: []
     - role: grog.authorized-key
       become: yes
       vars:
         authorized_key_list: "{{ [ employee_user ] }}"
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        authorized_key_host: []
+        authorized_key_group: []
     - role: grog.sudo
       become: yes
       vars:
         sudo_list: "{{ [ employee_user ] }}"
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        sudo_host: []
+        sudo_group: []
     - cifs-mounts
   tasks:
     - name: Install employee packages
@@ -51,3 +63,33 @@
         owner: "{{ employee_user.name }}"
         group: "{{ employee_user.name }}"
       when: employee.ssh_key is defined and employee.ssh_key|bool
+
+
+- name: Setup SSH users
+  hosts: servers
+  roles:
+    - role: grog.user
+      become: yes
+      vars:
+        user_list: "{{ server_ssh_users }}"
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        user_list_host: []
+        user_list_group: []
+    - role: grog.authorized-key
+      become: yes
+      vars:
+        authorized_key_list: "{{ server_ssh_users }}"
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        authorized_key_host: []
+        authorized_key_group: []
+    - role: grog.sudo
+      become: yes
+      vars:
+        sudo_list: "{{ server_ssh_users }}"
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        sudo_host: []
+        sudo_group: []
+        

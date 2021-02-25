@@ -2,13 +2,14 @@
 
 ## Remote Employees 
 module "remote_employees" {
-  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.3.1"
+  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.4"
   host_capacity = var.remote_employee_capacity
   hostname      = "remote_employee"
   tag           = "internet, employee"
   image         = local.employee_image
   flavor        = local.employee_flavor
   volume_size   = local.employee_volume_size
+  use_volume    = local.employee_use_volume
   sshkey        = var.sshkey
   network       = var.internet
   subnet        = var.internet_subnet
@@ -18,13 +19,14 @@ module "remote_employees" {
 
 ## Attacker
 module "attackers" {
-  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.3.1"
+  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.4"
   host_capacity = var.attacker_capacity
   hostname      = "attacker"
   tag           = "internet"
   image         = local.attacker_image
   flavor        = local.attacker_flavor
   volume_size   = local.attacker_volume_size
+  use_volume    = local.attacker_use_volume
   sshkey        = var.sshkey
   network       = var.internet
   subnet        = var.internet_subnet
@@ -42,6 +44,7 @@ module "ext_mail" {
   image              = local.ext_mail_image
   flavor             = local.ext_mail_flavor
   volume_size        = local.ext_mail_volume_size
+  use_volume         = local.ext_mail_use_volume
   config_drive       = true
   sshkey             = var.sshkey
   network            = var.internet
@@ -52,13 +55,14 @@ module "ext_mail" {
 
 ## External Users 
 module "ext_users" {
-  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.3.1"
+  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.4"
   host_capacity = var.ext_user_capacity
   hostname      = "ext_user"
   tag           = "internet"
   image         = local.ext_user_image
   flavor        = local.ext_user_flavor
   volume_size   = local.ext_user_volume_size
+  use_volume    = local.ext_user_use_volume
   sshkey        = var.sshkey
   network       = var.internet
   subnet        = var.internet_subnet

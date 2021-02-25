@@ -7,6 +7,7 @@ module "mgmthost" {
   image              = local.mgmthost_image
   flavor             = local.mgmthost_flavor
   volume_size        = local.mgmthost_volume_size
+  use_volume         = local.mgmthost_use_volume
   sshkey             = var.sshkey
   network            = var.internet
   subnet             = var.internet_subnet

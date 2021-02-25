@@ -9,6 +9,7 @@ module "vpn" {
   image              = local.vpn_image
   flavor             = local.vpn_flavor
   volume_size        = local.vpn_volume_size
+  use_volume         = local.vpn_use_volume
   config_drive       = true
   sshkey             = var.sshkey
   network            = var.dmz
@@ -26,6 +27,7 @@ module "mail" {
   image              = local.mail_image
   flavor             = local.mail_flavor
   volume_size        = local.mail_volume_size
+  use_volume         = local.mail_use_volume
   config_drive       = true
   sshkey             = var.sshkey
   network            = var.dmz
@@ -43,6 +45,7 @@ module "cloud_share" {
   image              = local.cloud_image
   flavor             = local.cloud_flavor
   volume_size        = local.cloud_volume_size
+  use_volume         = local.cloud_use_volume
   config_drive       = true
   sshkey             = var.sshkey
   network            = var.dmz
@@ -60,6 +63,7 @@ module "webserver" {
   image              = local.webserver_image
   flavor             = local.webserver_flavor
   volume_size        = local.webserver_volume_size
+  use_volume         = local.webserver_use_volume
   config_drive       = true
   sshkey             = var.sshkey
   network            = var.dmz

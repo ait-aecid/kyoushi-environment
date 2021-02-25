@@ -2,7 +2,7 @@
 
 ## Internal Employees 
 module "internal_employees" {
-  source                   = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.3.1"
+  source                   = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.4"
   host_capacity            = var.employee_capacity
   hostname                 = "internal_employee"
   tag                      = "intranet, employee"
@@ -10,6 +10,7 @@ module "internal_employees" {
   image                    = local.employee_image
   flavor                   = local.employee_flavor
   volume_size              = local.employee_volume_size
+  use_volume               = local.employee_use_volume
   config_drive             = true
   sshkey                   = var.sshkey
   network                  = var.intranet
@@ -27,6 +28,7 @@ module "intranet" {
   image              = local.intranet_image
   flavor             = local.intranet_flavor
   volume_size        = local.intranet_volume_size
+  use_volume         = local.intranet_use_volume
   config_drive       = true
   sshkey             = var.sshkey
   network            = var.intranet
@@ -44,6 +46,7 @@ module "shares" {
   image              = local.share_image
   flavor             = local.share_flavor
   volume_size        = local.share_volume_size
+  use_volume         = local.share_use_volume
   config_drive       = true
   sshkey             = var.sshkey
   network            = var.intranet
@@ -61,6 +64,7 @@ module "monitoring" {
   image              = local.monitoring_image
   flavor             = local.monitoring_flavor
   volume_size        = local.monitoring_volume_size
+  use_volume         = local.monitoring_use_volume
   config_drive       = true
   sshkey             = var.sshkey
   network            = var.intranet

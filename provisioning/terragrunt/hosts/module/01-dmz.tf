@@ -3,8 +3,8 @@
 module "vpn" {
   count              = var.vpn_active ? 1 : 0
   source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4"
-  hostname           = "vpn, servers"
-  tag                = "dmz"
+  hostname           = "vpn"
+  tag                = "dmz, servers"
   host_address_index = var.vpn_ip_index
   image              = local.vpn_image
   flavor             = local.vpn_flavor

@@ -35,7 +35,7 @@ samba_users: |
       {# set username as 'name' attribute #}
       {% do user.update({'name' : user.username}) %}
 
-      {{ user | to_json }}{% if not loop.last %},{% endif %}
+      {{ user }}{% if not loop.last %},{% endif %}
     {% endfor %} 
     ]
 
@@ -45,7 +45,7 @@ user_list_host: |
   [
   {% for samba_user in samba_users %}
     {% do samba_user.update({'password' : (samba_user.password | password_hash('sha512', samba_user.password_salt)) }) %}
-    {{ samba_user | to_json }}{% if not loop.last%},{% endif %}
+    {{ samba_user }}{% if not loop.last%},{% endif %}
   {% endfor %}
   ]
 

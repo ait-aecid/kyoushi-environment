@@ -93,7 +93,7 @@ owncloud_users_group: |
     "user": "{{ user.username }}",
     "password": "{{ user.password }}",
     "display_name": "{{ user.first_name }} {{ user.last_name }}",
-    "groups": {{ user.owncloud_groups | to_json }},
+    "groups": {{ user.owncloud_groups }},
     "email": "{{ user.email_user }}@{{ user.email_domain }}"
   }{% if not loop.last %},{% endif %}
   {% endfor %}

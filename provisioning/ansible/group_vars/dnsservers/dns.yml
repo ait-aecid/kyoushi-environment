@@ -50,7 +50,7 @@ maradns_zones: |
       "fqdn4": [
         {%- for dns_entry in (hostvars.values() | selectattr('dns','defined') | map(attribute='dns') | selectattr(entry.id,'defined') | map(attribute=entry.id)) %}
         {
-          {%- if dns_entry.hostname is defined and dns_entry.hostname|length %}"domain": "{{ dns_entry.hostname }}",{% endif %}
+          {%- if dns_entry.hostname is defined and dns_entry.hostname %}"domain": "{{ dns_entry.hostname }}",{% endif %}
           "ip": "{{ dns_entry.ip }}"
         }{%- if not loop.last %},{% endif %}
         {% endfor %}
@@ -75,10 +75,10 @@ maradns_zones: |
         {% for dnat_alias in hostvars[alias.dnat_host].dnat.dns.aliases %}
         {
           {# when the current dnat_alias has a hostname we can simply set it #}
-          {%- if dnat_alias.hostname is defined and dnat_alias.hostname|length %}
+          {%- if dnat_alias.hostname is defined and dnat_alias.hostname %}
           "domain": "{{ dnat_alias.hostname }}",
           {# but if it is a proxy_host we again have to load the information from another hosts hostvars #}
-          {% elif dnat_alias.proxy_host is defined and hostvars[dnat_alias.proxy_host].proxied_name|length %}
+          {% elif dnat_alias.proxy_host is defined and hostvars[dnat_alias.proxy_host].proxied_name %}
           "domain": "{{ hostvars[dnat_alias.proxy_host].proxied_name }}",
           {% endif %}
           "ip": "{{ dnat_alias.ip if dnat_alias.ip is defined else dns_entry.ip }}"
@@ -88,9 +88,9 @@ maradns_zones: |
         {% else %}
         {
           {# for non dnat hosts we also have to differentiate between normal entries and proxy_host entries #}
-          {%- if alias.hostname is defined and alias.hostname|length %}
+          {%- if alias.hostname is defined and alias.hostname %}
           "domain": "{{ alias.hostname }}",
-          {% elif alias.proxy_host is defined and hostvars[alias.proxy_host].proxied_name|length %}
+          {% elif alias.proxy_host is defined and hostvars[alias.proxy_host].proxied_name %}
           "domain": "{{ hostvars[alias.proxy_host].proxied_name }}",
           {% endif %}
           "ip": "{{ alias.ip if alias.ip is defined else dns_entry.ip }}"

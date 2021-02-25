@@ -88,7 +88,7 @@ kyoushi_sm_browser_height: 1200
 
 # Download config
 
-kyoushi_sm_download_dir: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}"
+kyoushi_sm_download_dir: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}/downloads/"
 kyoushi_sm_download_mimes:
   - application/octet-stream
   - application/zip

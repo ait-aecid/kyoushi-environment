@@ -1,0 +1,61 @@
+# activities entry probabilities
+kyoushi_sm_states_activities:
+  horde: 0.25
+  owncloud: 0.15
+  ssh_user: 0.1
+  web_browser: 0.2
+  wp_editor: 0
+  wpdiscuz: 0.1
+  idle: 0.2
+
+
+# SSH User config
+
+# The maximum amount of times the ssh user activity will be entered per day
+kyoushi_sm_ssh_max_daily: 5
+
+# the default ssh key
+#kyoushi_sm_ssh_key: /some/path
+
+# If the user should verify the SSH servers host key by default
+kyoushi_sm_ssh_verify: False
+
+# Optional SSH Proxy Config
+# The host or IP of the default SSH proxy server
+#kyoushi_sm_ssh_proxy_host: some.host
+#kyoushi_sm_ssh_proxy_port: 22
+#kyoushi_sm_ssh_proxy_username: defaults to ssh user
+#kyoushi_sm_ssh_proxy_key: defaults to ssh key
+# If the SSH host key should be verified or not
+# kyoushi_sm_ssh_proxy_verify: True
+
+# Default list of command chains the user can execute on the hosts.
+kyoushi_sm_ssh_commands:
+  - date
+  - ip addr
+  - ps aux
+  - - cmd: tail -F /var/log/syslog
+      sudo: yes
+      expect: '.*' # we just wait for something to show
+      idle_after: medium
+  - - cmd: top 
+      expect: "avail Mem"
+      idle_after: medium
+    - "\x03" # sigint
+
+
+# Mapping of host identifiers to the probabilities of them being selected.
+#   <host id>:<probability>
+kyoushi_sm_ssh_hosts:
+  webserver: 0.5
+  cloud_share: 0.5
+
+# Mapping of host identifiers to their configurations.
+# <host id>:<HostConfig>
+kyoushi_sm_ssh_host_configs:
+  webserver:
+    host: "{{ hostvars['webserver'].openstack.addresses.dmz[0].addr }}"
+    include_default_commands: True
+  cloud_share:
+    host: "{{ hostvars['cloud_share'].openstack.addresses.dmz[0].addr }}"
+    include_default_commands: True

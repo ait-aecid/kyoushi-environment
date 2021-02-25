@@ -355,6 +355,12 @@ ssh_user:
 {% else %}
   hosts: {}
 {% endif %}
+{% if kyoushi_sm_ssh_host_configs | default({}) | length > 0 %}
+  host_configs:
+{{ kyoushi_sm_ssh_host_configs  | to_nice_yaml(indent=2) | indent(4, True) }}
+{% else %}
+  host_configs: {}
+{% endif %}
 
 {% else %}
 #ssh_user:

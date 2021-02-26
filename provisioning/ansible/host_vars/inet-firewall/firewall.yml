@@ -1,3 +1,24 @@
+# list of interface names (excluding lo)
+firewall_interfaces_names: "{{ ansible_interfaces | map('extract', ansible_facts) | selectattr('macaddress', 'defined') }}"
+firewall_interfaces:
+  inet: "{{ (devices | selectattr('macaddress', 'equalto', openstack.addresses.internet[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
+  lan:  "{{ (devices | selectattr('macaddress', 'equalto', openstack.addresses.local[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
+  dmz: "{{ (devices | selectattr('macaddress', 'equalto', openstack.addresses.dmz[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
+
+firewall_internet_netmask: "{{ firewall_interfaces.inet.ipv4.network }}/{{ firewall_interfaces.inet.ipv4.netmask }}"
+firewall_internet_cidr: "{{ firewall_internet_netmask | ansible.netcommon.ipaddr('net') }}"
+
+firewall_cidrs: |
+  {
+    {% for name,inf in firewall_interfaces.items() %}
+    {#
+      use ipaddr filter to get cidr notation e.g.,
+      192.168.1.0/255.255.255.0 -> 192.168.1.0/24
+    #}
+    "{{ name }}": "{{ (inf.ipv4.network+'/'+inf.ipv4.netmask) | ansible.netcommon.ipaddr('net') }}"{% if not loop.last %},{% endif %}
+    {% endfor %}
+  }
+
 shorewall_startup: 1
 shorewall_ipforward: "On"
 shorewall_configs_dir: /etc/shorewall
@@ -39,13 +60,14 @@ shorewall_configs:
     - DMZ Rules
     - { action: ACCEPT, source: "dmz:$vpn", dest: lan, proto: all }
   snat:
-    - { dest: $INETIF, source: 172.16.0.0/16 }
+    - { dest: $INETIF, source:  "{{ firewall_cidrs.lan }}" }
+    - { dest: $INETIF, source:  "{{ firewall_cidrs.dmz }}" }
   params:
 
     - Interfaces
-    - { name: INETIF, value: ens3 }
-    - { name: LANIF, value: ens5 }
-    - { name: DMZIF, value: ens4 }
+    - { name: INETIF, value: "{{ firewall_interfaces.inet.device }}" }
+    - { name: LANIF, value: "{{ firewall_interfaces.lan.device }}" }
+    - { name: DMZIF, value: "{{ firewall_interfaces.dmz.device }}" }
     - { name: mailserver, value: 172.16.100.41 }
     - { name: webserver, value: 172.16.100.138 }
     - { name: vpn, value: 172.16.100.210 }

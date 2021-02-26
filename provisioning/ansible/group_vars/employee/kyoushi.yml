@@ -10,7 +10,7 @@ kyoushi_config_files:
     dst: "{{ kyoushi_sim_config_path }}/sm.yml"
     deploy: yes
 
-# sm base config
+# cr cli config
 
 # use a consistent random value for seed
 kyoushi_seed: "{{ 4294967295 | random(seed=inventory_hostname) }}"
@@ -23,6 +23,11 @@ kyoushi_statemachines_version: 0.3.1
 kyoushi_venv_python_version: 3.7
 kyoushi_user_name: "{{ employee.username }}"
 kyoushi_user_group: "{{ employee.username }}"
+
+# sm base config
+kyoushi_sm_errors: 1000
+#kyoushi_sm_start: 2021-01-20T9:00
+#kyoushi_sm_end: 2021-01-20T9:00
 
 # sm logging config
 

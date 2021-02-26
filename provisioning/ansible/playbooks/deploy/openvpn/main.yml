@@ -31,5 +31,13 @@
   become: yes
   roles:
     - openvpn-client
+  tasks:
+    - name: Copy resolve update script
+      copy:
+        src: ./update-systemd-resolved
+        dest: /home/{{ openvpn_client_user }}/.openvpn/update-systemd-resolved
+        mode: a+x
+        owner: "{{ openvpn_client_user }}"
+        group: "{{ openvpn_client_group }}"
   tags: [openvpn, client]
       

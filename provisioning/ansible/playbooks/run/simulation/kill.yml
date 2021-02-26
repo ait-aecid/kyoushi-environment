@@ -2,6 +2,15 @@
   hosts: employee
   gather_facts: no
   tasks:
-    - name: Kill SM
-      shell: sudo kill $(ps aux | grep {{ kyoushi_user_name }} | cut -d" " -f5)
+    - name: Show ps
+      shell: ps aux | grep -E "^{{ kyoushi_user_name[:7] }}"
+      register: out
       become: yes
+    - debug:
+        var: out
+    - name: Kill SM
+      shell: kill $(ps aux | grep -E "^{{ kyoushi_user_name[:7] }}" | tr -s ' ' | cut -d" " -f2)
+      args:
+        executable: /bin/bash
+      become: yes
+    

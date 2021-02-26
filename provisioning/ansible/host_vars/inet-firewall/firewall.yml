@@ -68,6 +68,6 @@ shorewall_configs:
     - { name: INETIF, value: "{{ firewall_interfaces.inet.device }}" }
     - { name: LANIF, value: "{{ firewall_interfaces.lan.device }}" }
     - { name: DMZIF, value: "{{ firewall_interfaces.dmz.device }}" }
-    - { name: mailserver, value: 172.16.100.41 }
-    - { name: webserver, value: 172.16.100.138 }
-    - { name: vpn, value: 172.16.100.210 }
+    - { name: mailserver, value: "{{ hostvars['mail'].openstack.addresses.dmz[0].addr }}" }
+    - { name: webserver, value: "{{ hostvars['webserver'].openstack.addresses.dmz[0].addr }}" }
+    - { name: vpn, value: "{{ hostvars['vpn'].openstack.addresses.dmz[0].addr }}" }

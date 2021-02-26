@@ -1,0 +1,7 @@
+- name: Kill all user processes
+  hosts: employee
+  gather_facts: no
+  tasks:
+    - name: Kill SM
+      shell: sudo kill $(ps aux | grep {{ kyoushi_user_name }} | cut -d" " -f5)
+      become: yes

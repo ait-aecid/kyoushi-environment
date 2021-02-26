@@ -1,0 +1,8 @@
+- name: Start employee simulations
+  hosts: employee
+  gather_facts: no
+  tasks:
+    - name: Start ait.beta_user SM
+      shell: nohup ait.beta_user > /dev/null &
+      become: yes
+      become_user: "{{ kyoushi_user_name }}"

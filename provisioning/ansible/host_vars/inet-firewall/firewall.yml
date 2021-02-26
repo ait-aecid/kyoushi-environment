@@ -39,8 +39,8 @@ shorewall_configs:
   params:
     - Interfaces
     - { name: INETIF, value: ens3 }
-    - { name: LANIF, value: ens6 }
-    - { name: DMZIF, value: ens7 }
+    - { name: LANIF, value: ens7 }
+    - { name: DMZIF, value: ens6 }
     - { name: mailserver, value: 172.16.100.41 }
     - { name: webserver, value: 172.16.100.138 }
     - { name: vpn, value: 172.16.100.210 }

@@ -66,7 +66,6 @@ roles:
     version: master
     name: maradns
 
-<<<<<<< HEAD
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/python.git
     scm: git
     version: v1.0
@@ -141,10 +140,8 @@ roles:
     scm: git
     version: master
     name: ca-certs
-=======
   - src: https://github.com/whotwagner/ansible-role-shorewall.git
     scm: git
     version: v2.0
     name: whotwagner.shorewall
 
->>>>>>> added initial configuration for shorewall

@@ -32,6 +32,8 @@ shorewall_configs:
     - { action: DNS/ACCEPT,  source: dmz, dest: fw }
     - PING Rules
     - { action: Ping/ACCEPT, source: all, dest: all }
+    - DMZ Rules
+    - { action: ACCEPT, source: "dmz:$vpn", dest: lan, proto: all }
   snat:
     - { dest: $INETIF, source: 172.16.0.0/16 }
   params:

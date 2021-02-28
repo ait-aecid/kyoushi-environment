@@ -160,8 +160,8 @@ kyoushi_sm_horde_password: "{{ ext_user.password }}"
 #  <email>:<probability>
 kyoushi_sm_horde_contacts: |
   {
-  {# By default a employee has all employees (other than themselves) and mail users as contacts #}
-  {% for contact in employees.values() | list + ( ext_mail_users | rejectattr('email_user', 'equalto', ext_user.email_user) | list) %}
+  {# By default a ext user has all employees as contacts #}
+  {% for contact in (employees.values() | list) %}
   {# By default we each contact equal chance. (The distribution is normalized in the config template)#}
   "{{ contact.email_user }}@{{ contact.email_domain }}": 1{% if not loop.last %},{%endif%}
   {% endfor %}

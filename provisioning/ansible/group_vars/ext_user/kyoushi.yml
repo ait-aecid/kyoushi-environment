@@ -1,0 +1,232 @@
+
+mail_users: "{{ ext_mail_users | selectattr('email_domain', 'eq', domains[dns_domain].domain) | list }}"
+mail_server_info: |
+  {% for _ext_mail in (groups['ext_mail'] | map('extract', hostvars)) %}
+  {% if domains[_ext_mail.dns_domain].domain == ext_user.email_domain %}
+  {
+    "domain": "{{ domains[_ext_mail.dns_domain].domain }}",
+    "hostname": "{{ _ext_mail.dns_hostname }}",
+    "fqdn": "{{ _ext_mail.dns_hostname }}.{{ domains[_ext_mail.dns_domain].domain }}"
+  }
+  {% break %}
+  {% endif %}
+  {% endfor %}
+
+
+# sm config templates
+
+kyoushi_config_files:
+  config:
+    src: config.yml.j2
+    dst: "{{ kyoushi_sim_config_path }}/config.yml"
+    deploy: yes
+  sm:
+    src: user_beta.yml.j2
+    dst: "{{ kyoushi_sim_config_path }}/sm.yml"
+    deploy: yes
+
+# cr cli config
+
+# use a consistent random value for seed
+kyoushi_seed: "{{ 4294967295 | random(seed=inventory_hostname) }}"
+
+kyoushi_sm_name: ait.beta_user
+kyoushi_simulation_version: 0.3.6
+kyoushi_statemachines_version: 0.3.1
+#kyoushi_packages_reinstall: yes
+
+kyoushi_venv_python_version: 3.7
+kyoushi_user_name: "{{ ext_user.username }}"
+kyoushi_user_group: "{{ ext_user.username }}"
+
+# sm base config
+kyoushi_sm_errors: 1000
+#kyoushi_sm_start: 2021-01-20T9:00
+#kyoushi_sm_end: 2021-01-20T9:00
+
+# sm logging config
+
+kyoushi_log_level: INFO
+# kyoushi_log_timestamp:
+#   format: 'e.g. %m/%d/%Y, %H:%M:%S'
+#   utc: 'True'
+#   key: 'timestamp'
+kyoushi_log_console:
+  enabled: yes
+  format: plain
+kyoushi_log_file:
+  enabled: yes
+  format: json
+  path: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}/sm.log"
+
+
+# idle config
+kyoushi_sm_idle_big_min: 600 # 10*60 = 10m
+kyoushi_sm_idle_big_max: 3000  # 50*60 = 50m
+kyoushi_sm_idle_medium_min: 60 # 1m
+kyoushi_sm_idle_medium_max: 300  # 5*60 = 5m
+kyoushi_sm_idle_small_min: 5 # 5s
+kyoushi_sm_idle_small_max: 30  # 30s
+kyoushi_sm_idle_tiny_min: 0.5 # 500ms
+kyoushi_sm_idle_tiny_max: 1.5  # 1s500ms
+
+# sm selenium config
+
+# browser type to use
+kyoushi_sm_browser: firefox
+kyoushi_sm_browser_insecure_ssl: yes
+kyoushi_sm_browser_headless: yes
+kyoushi_sm_browser_width: 1650
+kyoushi_sm_browser_height: 1200
+
+# Selenium Driver Manager config
+
+#kyoushi_sm_browser_driver_manager
+  # The webdriver cache path
+  #path: /some/path
+  # The base URL to download the webdriver from.
+  #url: https://chromedriver.storage.googleapis.com
+  # The URL for the latest version of the webdriver
+  #latest_release_url: <the url>
+  #log_level: INFO
+  # The validity of the driver cache in days.
+  #cache_valid_range: 1
+    
+
+# HTTP Proxy Config
+
+#kyoushi_sm_browser_proxy_enabled: False
+#kyoushi_sm_browser_proxy_host: localhost
+#kyoushi_sm_browser_proxy_port: 8080
+# If a socks proxy should be used instead of a HTTP proxy
+#kyoushi_sm_browser_proxy_socks: False
+# The SOCKS protocol version to use
+#kyoushi_sm_browser_proxy_socks_version: 5
+# The socks username and password to use for authentication
+#kyoushi_sm_browser_proxy_username: fancy_user
+#kyoushi_sm_browser_proxy_password: secret
+
+# Download config
+
+kyoushi_sm_download_dir: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}/downloads/"
+kyoushi_sm_download_mimes:
+  - application/octet-stream
+  - application/zip
+  - application/msword
+  - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+  - application/vnd.oasis.opendocument.text
+  - application/vnd.oasis.opendocument.spreadsheet
+  - application/vnd.oasis.opendocument.presentation
+  - text/plain
+  - application/pdf
+  - image/jpeg
+  - image/bmp
+  - image/gif
+  - image/png
+  - image/svg+xml
+  - image/tiff
+  
+# Additional commandline arguments for the webdriver
+#kyoushi_sm_browser_arguments: []
+# Extra list of desired browser capabilities
+#kyoushi_sm_browser_capabilities: []
+
+# VPN config
+
+kyoushi_sm_vpn_enabled: False
+
+# horde user config
+
+# The maximum amount of times the horde activity will be entered per day
+kyoushi_sm_horde_max_daily: 10
+# The horde servers base URL
+kyoushi_sm_horde_url: "https://{{ mail_server_info.fqdn }}"
+# The firstname of the horde user
+kyoushi_sm_horde_first_name: "{{ ext_user.first_name }}"
+#The lastname of the horde user
+kyoushi_sm_horde_last_name: "{{ ext_user.last_name }}"
+# The horde user
+kyoushi_sm_horde_username: "{{ ext_user.email_user }}"
+# The horde users password
+kyoushi_sm_horde_password: "{{ ext_user.password }}"
+# The email contacts for the horde user
+#  <email>:<probability>
+kyoushi_sm_horde_contacts: |
+  {
+  {# By default a employee has all employees (other than themselves) and mail users as contacts #}
+  {% for contact in employees.values() | list + ( ext_mail_users | rejectattr('email_user', 'equalto', ext_user.email_user) | list) %}
+  {# By default we each contact equal chance. (The distribution is normalized in the config template)#}
+  "{{ contact.email_user }}@{{ contact.email_domain }}": 1{% if not loop.last %},{%endif%}
+  {% endfor %}
+  }
+
+# A dict of attachment files the user might send
+kyoushi_sm_horde_attachments: {}
+#The probability that an additional recipient is added to a mail
+kyoushi_sm_horde_extra_recipient: 0.1
+# The maximum amount of recipients
+kyoushi_sm_horde_max_recipients: 10
+# The probability that an attachment is added to a new email
+kyoushi_sm_horde_attachment: 0.2
+# The probability that an attachment is added to a reply
+kyoushi_sm_horde_attachment_reply: 0.1
+
+# activities entry probabilities
+# we set idle high since ext users only do emails
+kyoushi_sm_states_activities:
+  horde: 0.4
+  owncloud: 0
+  ssh_user: 0
+  web_browser: 0
+  wp_editor: 0
+  wpdiscuz: 0
+  idle: 0.6
+
+# horde activity states configs
+kyoushi_sm_states_horde:
+  login_page: "{{ kyoushi_sm_states_horde_login_page }}"
+  logout_choice: "{{ kyoushi_sm_states_horde_login_choice }}"
+  selecting_menu: "{{ kyoushi_sm_states_horde_selecting_menu }}"
+  mails_page: "{{ kyoushi_sm_states_horde_mails_page }}"
+  mail_view: "{{ kyoushi_sm_states_horde_mail_view }}"
+  mail_info: "{{ kyoushi_sm_states_horde_mail_info }}"
+
+
+kyoushi_sm_states_horde_login_page:
+  # The chance the user will use an incorrect password
+  fail_chance: 0
+  # Fail chance decrease factor
+  fail_decrease: 0.9
+
+kyoushi_sm_states_horde_login_choice:
+  # The chance the user will logout when stopping the horde activity
+  logout_chance: 1
+
+kyoushi_sm_states_horde_selecting_menu:
+  nav_mail: 0.9
+  nav_preferences: 0
+  nav_admin: 0
+  nav_notes: 0
+  nav_tasks: 0
+  nav_address_book: 0
+  nav_calendar: 0
+  return: 0.1
+  extra: 
+    return_increase: 1.75
+
+kyoushi_sm_states_horde_mails_page:
+  view_mail: 0.45
+  new_mail: 0.35
+  refresh_mail: 0.1
+  return: 0.1
+  extra: 
+    return_increase: 1.2
+
+kyoushi_sm_states_horde_mail_view:
+  delete_mail: 0.3
+  open_mail: 0.4
+  do_nothing: 0.3
+
+kyoushi_sm_states_horde_mail_info:
+  delete_mail: 0.3
+  reply_mail: 0.7

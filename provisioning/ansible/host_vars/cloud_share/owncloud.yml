@@ -123,7 +123,7 @@ owncloud_mounts_host:
     authentication_password: "{{ service_users.owncloud_samba.password }}"
     options:
       read_only: False
-      enable_sharing: True
+      enable_sharing: False
 
   - mount_point: /Reports
     groups:
@@ -137,7 +137,7 @@ owncloud_mounts_host:
     authentication_password: "{{ service_users.owncloud_samba.password }}"
     options:
       read_only: False
-      enable_sharing: True
+      enable_sharing: False
   
   - mount_point: /Marketing
     groups:
@@ -148,6 +148,6 @@ owncloud_mounts_host:
       datadir: "{{ owncloud_prepared_files_dest }}/Marketing"
     options:
       read_only: False
-      enable_sharing: True
+      enable_sharing: False
 
   

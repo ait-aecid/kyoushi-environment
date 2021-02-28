@@ -1,5 +1,7 @@
 ext_user: "{{ ext_mail_users[ext_user_index] }}"
 
+management_user_key: "{{ lookup('file', ait_ssh_key_pub) }}"
+
 ext_user_account:
   name: "{{ ext_user.username }}"
   comment: "{{ ext_user.first_name }} {{ ext_user.last_name }}"
@@ -9,3 +11,7 @@ ext_user_account:
     - key: "{{ management_user_key }}"
       exclusive: no
   sudo: "{{ ext_user.sudo | default({'hosts': 'ALL', 'as': 'ALL', 'commands': 'ALL', 'nopasswd': True}, True) }}"
+
+user_extra_packages:
+  - firefox
+  - chromium-browser

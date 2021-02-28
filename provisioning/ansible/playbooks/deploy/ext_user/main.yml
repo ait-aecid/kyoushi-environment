@@ -1,0 +1,38 @@
+- name: Setup employee users and packages
+  hosts: ext_user
+  roles:
+    - python
+    - role: grog.user
+      become: yes
+      vars:
+        user_list: "{{ [ ext_user_account ] }}"
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        user_list_host: []
+        user_list_group: []
+    - role: grog.authorized-key
+      become: yes
+      vars:
+        authorized_key_list: "{{ [ ext_user_account ] }}"
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        authorized_key_host: []
+        authorized_key_group: []
+    - role: grog.sudo
+      become: yes
+      vars:
+        sudo_list: "{{ [ ext_user_account ] }}"
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        sudo_host: []
+        sudo_group: []
+  tasks:
+    - name: Install extra packages
+      become: yes
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600
+      loop: "{{ user_extra_packages }}"
+

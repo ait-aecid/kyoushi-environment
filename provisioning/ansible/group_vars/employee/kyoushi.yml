@@ -110,6 +110,7 @@ kyoushi_sm_download_mimes:
   - application/vnd.oasis.opendocument.presentation
   - text/plain
   - application/pdf
+  - application/postscript
   - image/jpeg
   - image/bmp
   - image/gif

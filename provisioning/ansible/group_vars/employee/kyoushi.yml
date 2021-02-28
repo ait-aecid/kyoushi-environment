@@ -305,7 +305,7 @@ kyoushi_sm_states_horde_selecting_menu:
   nav_calendar: 0.15
   return: 0.075
   extra: 
-    return_increase: 1.25
+    return_increase: 1.5
 
 kyoushi_sm_states_horde_mails_page:
   view_mail: 0.45

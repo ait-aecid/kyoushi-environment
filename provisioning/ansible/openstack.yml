@@ -15,3 +15,7 @@ compose:
           (openstack.name | regex_replace('(.*_employee_)(\d*)', '\2')) | int
           if openstack.name.startswith('internal_employee_') or openstack.name.startswith('remote_employee_')
           else __this_does_not_exists__
+  ext_user_index:
+          (openstack.name | regex_replace('(ext_user_)(\d*)', '\2')) | int
+          if openstack.name.startswith('ext_user_') else __this_does_not_exists__
+  

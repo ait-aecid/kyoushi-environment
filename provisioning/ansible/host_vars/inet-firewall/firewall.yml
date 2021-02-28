@@ -1,9 +1,9 @@
 # list of interface names (excluding lo)
 firewall_interfaces_names: "{{ ansible_interfaces | map('extract', ansible_facts) | selectattr('macaddress', 'defined') }}"
 firewall_interfaces:
-  inet: "{{ (devices | selectattr('macaddress', 'equalto', openstack.addresses.internet[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
-  lan:  "{{ (devices | selectattr('macaddress', 'equalto', openstack.addresses.local[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
-  dmz: "{{ (devices | selectattr('macaddress', 'equalto', openstack.addresses.dmz[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
+  inet: "{{ (firewall_interfaces_names | selectattr('macaddress', 'equalto', openstack.addresses.internet[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
+  lan:  "{{ (firewall_interfaces_names | selectattr('macaddress', 'equalto', openstack.addresses.local[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
+  dmz: "{{ (firewall_interfaces_names | selectattr('macaddress', 'equalto', openstack.addresses.dmz[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
 
 firewall_internet_netmask: "{{ firewall_interfaces.inet.ipv4.network }}/{{ firewall_interfaces.inet.ipv4.netmask }}"
 firewall_internet_cidr: "{{ firewall_internet_netmask | ansible.netcommon.ipaddr('net') }}"
@@ -59,6 +59,13 @@ shorewall_configs:
     - { action: Ping/ACCEPT, source: all, dest: all }
     - DMZ Rules
     - { action: ACCEPT, source: "dmz:$vpn", dest: lan, proto: all }
+    - Cloud SAMBA Access Rules
+    - { action: ACCEPT, source: "dmz:$cloud", dest: "lan:$share", proto: udp, dest_port: 137}
+    - { action: ACCEPT, source: "dmz:$cloud", dest: "lan:$share", proto: udp, dest_port: 138}
+    - { action: ACCEPT, source: "dmz:$cloud", dest: "lan:$share", proto: udp, dest_port: 139}
+    - { action: ACCEPT, source: "dmz:$cloud", dest: "lan:$share", proto: udp, dest_port: 445}
+    - { action: ACCEPT, source: "dmz:$cloud", dest: "lan:$share", proto: tcp, dest_port: 139}
+    - { action: ACCEPT, source: "dmz:$cloud", dest: "lan:$share", proto: tcp, dest_port: 445}
   snat:
     - { dest: $INETIF, source:  "{{ firewall_cidrs.lan }}" }
     - { dest: $INETIF, source:  "{{ firewall_cidrs.dmz }}" }
@@ -71,3 +78,5 @@ shorewall_configs:
     - { name: mailserver, value: "{{ hostvars['mail'].openstack.addresses.dmz[0].addr }}" }
     - { name: webserver, value: "{{ hostvars['webserver'].openstack.addresses.dmz[0].addr }}" }
     - { name: vpn, value: "{{ hostvars['vpn'].openstack.addresses.dmz[0].addr }}" }
+    - { name: cloud, value: "{{ hostvars['cloud_share'].openstack.addresses.dmz[0].addr }}" }
+    - { name: share, value: "{{ hostvars['internal_share'].openstack.addresses.local[0].addr }}" }

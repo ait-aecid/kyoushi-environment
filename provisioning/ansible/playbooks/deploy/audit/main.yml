@@ -1,0 +1,15 @@
+- name: Disable suricata PPA repo use for debian
+  hosts: servers
+  tasks:
+    - set_fact:
+        suricata_use_ppa: False
+      when: ansible_distribution == 'Debian'
+
+- name: Configure extended monitoring on servers
+  hosts: servers
+  tags: [suricata,audit]
+  become: yes
+  roles:
+    # suricata nids
+    - suricata
+    - auditd

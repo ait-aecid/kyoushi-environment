@@ -150,3 +150,15 @@ roles:
     scm: git
     version: v1.0.1
     name: kyoushi-simulation
+  
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/auditd.git
+    scm: git
+    version: v1.0
+    name: auditd
+  
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/suricata.git
+    scm: git
+    version: v1.1.3
+    name: suricata
+
+  

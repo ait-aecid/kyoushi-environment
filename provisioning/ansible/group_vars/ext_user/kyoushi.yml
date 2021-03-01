@@ -25,6 +25,15 @@ kyoushi_config_files:
     dst: "{{ kyoushi_sim_config_path }}/sm.yml"
     deploy: yes
 
+# kyoushi simulation files config
+
+kyoushi_files_owner: "{{ ext_user.username }}"
+kyoushi_files_group: "{{ ext_user.username }}"
+
+kyoushi_files_dir: "/home/{{ kyoushi_files_owner }}/files"
+kyoushi_files_glob: "files/**"
+kyoushi_files: "{{ query('fileglob', kyoushi_files_glob) }}"
+
 # cr cli config
 
 # use a consistent random value for seed
@@ -168,7 +177,13 @@ kyoushi_sm_horde_contacts: |
   }
 
 # A dict of attachment files the user might send
-kyoushi_sm_horde_attachments: {}
+kyoushi_sm_horde_attachments: |
+  {
+    {# By default each file has equal chance to be chosen #}
+    {% for _file in kyoushi_files %}
+    "{{ kyoushi_files_dir }}/{{ _file | basename }}": 1{% if not loop.last %},{% endif %}
+    {% endfor %}
+  }
 #The probability that an additional recipient is added to a mail
 kyoushi_sm_horde_extra_recipient: 0.1
 # The maximum amount of recipients

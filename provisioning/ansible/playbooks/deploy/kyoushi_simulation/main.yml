@@ -5,6 +5,26 @@
   gather_facts: yes
 
 - name: Install and configure simulation state machines
-  hosts: employee
+  hosts: employee,ext_user
   roles:
-    - kyoushi-simulation
+    - role: kyoushi-simulation
+      tags: [install]
+  tasks:
+    - name: Ensure simulation files dir exists
+      file:
+        path: "{{ kyoushi_files_dir }}"
+        owner: "{{ kyoushi_files_owner | default(omit) }}"
+        group: "{{ kyoushi_files_group | default(omit) }}"
+        state: directory
+        recurse: yes
+      become: yes
+      tags: [files]
+    - name: Deploy simulation files
+      copy:
+        src: "{{ item }}"
+        dest: "{{ kyoushi_files_dir }}/{{ item | basename }}"
+        owner: "{{ kyoushi_files_owner | default(omit) }}"
+        group: "{{ kyoushi_files_group | default(omit) }}"
+      loop: "{{ kyoushi_files }}"
+      become: yes
+      tags: [files]

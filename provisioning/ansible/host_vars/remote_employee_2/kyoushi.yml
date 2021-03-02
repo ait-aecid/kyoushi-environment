@@ -38,6 +38,7 @@ kyoushi_sm_ssh_commands:
       sudo: yes
       expect: '.*' # we just wait for something to show
       idle_after: medium
+    - "\x03" # sigint
   - - cmd: top 
       expect: "avail Mem"
       idle_after: medium

@@ -1,7 +1,15 @@
+dnsmasq_log_file: /var/log/dnsmasq.log
 dnsmasq_config:
     - name: custom
-      content: except-interface=lo
+      content: |
+        except-interface=lo
+        # don't read DNS settings from normal resolv.conf
+        resolv-file=/etc/dnsmasq.d/dnsmasq-resolv.conf
       prio: 0
+    - name: logging
+      content: |
+        log-queries
+        log-facility={{ dnsmasq_log_file }}
     - name: "{{ dns_server_name }}"
       content: |
         {%- for entry in domains.values() %}

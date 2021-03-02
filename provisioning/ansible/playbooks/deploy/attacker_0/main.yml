@@ -1,0 +1,43 @@
+- name: Configure and deploy attacker
+  hosts: attacker_0
+  become: yes
+  roles:
+    - role: grog.user
+      become: yes
+      vars:
+        user_list: ["{{ attacker_user }}"]
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        user_list_host: []
+        user_list_group: []
+    - role: grog.authorized-key
+      become: yes
+      vars:
+        authorized_key_list: ["{{ attacker_user }}"]
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        authorized_key_host: []
+        authorized_key_group: []
+    - role: grog.sudo
+      become: yes
+      vars:
+        sudo_list: ["{{ attacker_user }}"]
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        sudo_host: []
+        sudo_group: []
+  tasks:
+    - name: Install required software
+      become: yes
+      apt:
+        name: "{{ attacker_packages }}"
+        state: present
+      tags: [install]
+
+    - name: Install wpscan
+      become: yes
+      community.general.gem:
+        name: wpscan
+        user_install: no
+        state: present
+      tags: [install, wpscan]

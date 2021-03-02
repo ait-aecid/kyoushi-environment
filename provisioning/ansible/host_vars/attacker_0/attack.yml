@@ -1,0 +1,58 @@
+attacker:
+  username: attacker
+  password: gFR5B7x7GN
+  password_salt: 1e237c4f6e984878
+  sudo:
+    hosts: ALL
+    as: ALL
+    commands: ALL
+    nopasswd: yes
+
+attacker_user:
+  name: "{{ attacker.username }}"
+  shell: '/bin/bash'
+  password: "{{ attacker.password | password_hash('sha512', attacker.password_salt) }}"
+  authorized_keys:
+    - key: "{{ management_user_key }}"
+      exclusive: no
+  sudo: "{{ attacker.sudo | default({}, True) }}"
+
+attacker_packages:
+  - nmap
+  - proxychains4
+  - python3 
+  - python3-pip 
+  - python3-dev 
+  - git 
+  - libssl-dev 
+  - libffi-dev 
+  - build-essential
+  - python-virtualenv
+  - python3-virtualenv
+  - expect
+  - nikto
+  - gnupg2
+  - curl  
+  - traceroute
+  - libcurl4-openssl-dev 
+  - make 
+  - zlib1g-dev
+  - gawk 
+  - g++ 
+  - gcc 
+  - libreadline6-dev 
+  - libssl-dev 
+  - libyaml-dev
+  - liblzma-dev 
+  - autoconf 
+  - libgdbm-dev 
+  - libncurses5-dev 
+  - automake
+  - libtool 
+  - bison 
+  - pkg-config 
+  - ruby 
+  - ruby-bundler 
+  - ruby-dev 
+  - libsqlite3-dev 
+  - sqlite3

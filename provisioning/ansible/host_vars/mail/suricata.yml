@@ -1,0 +1,3 @@
+# disable extra rules for this server
+# since it is running an old suricata version
+suricata_extra_rule_files_all: []

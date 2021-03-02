@@ -1,0 +1,46 @@
+suricata_use_ppa: yes
+suricata_interface: "{{ ansible_default_ipv4.interface }}"
+suricata_listenmode: af-packet
+suricata_pcap_log: no
+
+# List of networks considered as the local network zones
+#suricata_home_nets: [192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]
+
+# extra rule files (to be copied to the host)
+# note that these files are not automatically activated to actually use them
+# they also must be added to the respective suricata_rule_files_<*> list.
+
+suricata_extra_rule_files_all: "{{ lookup('filetree', 'suricata/rules') | map(attribute='src') | list }}"
+suricata_extra_rule_files_group: []
+suricata_extra_rule_files_host: []
+
+suricata_extra_rule_files: "{{ suricata_extra_rule_files_all + suricata_extra_rule_files_group + suricata_extra_rule_files_host }}"
+
+# rules to be configured
+suricata_rule_files_default:
+    - http-events.rules    # available in suricata sources under rules dir
+    - smtp-events.rules    # available in suricata sources under rules dir
+    - dns-events.rules     # available in suricata sources under rules dir
+    - tls-events.rules     # available in suricata sources under rules dir
+suricata_rule_files_all: "{{ suricata_extra_rule_files_all | map('basename') | list + suricata_rule_files_default }}"
+suricata_rule_files_group: []
+suricata_rule_files_host: []
+
+# uncomment to use custom rule files list instead of default
+suricata_rule_files: "{{ suricata_rule_files_all + suricata_rule_files_group + suricata_rule_files_host }}"
+
+suricata_httpservers:
+  - "{{ hostvars['webserver'].openstack.addresses.dmz[0].addr }}"
+  - "{{ hostvars['mail'].openstack.addresses.dmz[0].addr }}"
+  - "{{ hostvars['cloud_share'].openstack.addresses.dmz[0].addr }}"
+  - "{{ hostvars['intranet_server'].openstack.addresses.local[0].addr }}"
+
+
+suricata_address_groups:
+  # set both interfaces of inet firewall as mail servers
+  DNS_SERVERS: "[{{ hostvars['inet-firewall'].openstack.addresses.dmz[0].addr }},{{ hostvars['inet-firewall'].openstack.addresses.local[0].addr }}]"
+  HTTP_SERVERS: "[{{ suricata_httpservers | join(',') }}]"
+  SMTP_SERVERS: "[{{ hostvars['mail'].openstack.addresses.dmz[0].addr }}]"
+
+suricata_port_groups:
+  HTTP_PORTS: "[80,443,8080,5601,8200]"

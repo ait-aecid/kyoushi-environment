@@ -25,7 +25,7 @@ apache2_proxy_vhosts: |
       "redirect_ssl": {{ hostvars[host].proxied_redirect_ssl | default(True) }},
       "cert": "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ hostvars[host].proxied_name }}.{{ dns.company.domain }}/{{ hostvars[host].proxied_name }}.{{ dns.company.domain }}.crt",
       "key": "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ hostvars[host].proxied_name }}.{{ dns.company.domain }}/{{ hostvars[host].proxied_name }}.{{ dns.company.domain }}.key",
-      "copycerts": true
+      "copycerts": True
     }{% if not loop.last %},{% endif %}
     {% endfor %}
   ]
@@ -34,11 +34,11 @@ apache2_webserver_vhosts:
   # catch all vhost
   - name: 000-catch-all
     server_name: "{{ dns.company.fqdn }}"
-    vhost_dir: false
+    vhost_dir: False
     vhost_template: "templates/catch_all_vhost.conf.j2"
     "cert": "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ dns.company.hostname }}.{{ dns.company.domain }}/{{ dns.company.hostname }}.{{ dns.company.domain }}.crt"
     "key": "{{ ca_servers_path }}/{{ inventory_hostname }}/{{ dns.company.hostname }}.{{ dns.company.domain }}/{{ dns.company.hostname }}.{{ dns.company.domain }}.key"
-    "copycerts": true
+    "copycerts": True
   
 
 apache2_vhosts: "{{ apache2_proxy_vhosts + apache2_webserver_vhosts }}"

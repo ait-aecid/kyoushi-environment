@@ -26,10 +26,10 @@ inputs = {
 
     sshkey = "testbed-key"
 
-    employee_capacity        = 1
-    remote_employee_capacity = 1
+    employee_capacity        = 7
+    remote_employee_capacity = 3
     attacker_capacity = 1
-    ext_user_capacity = 1
+    ext_user_capacity = 10
     
     shares = [
         {

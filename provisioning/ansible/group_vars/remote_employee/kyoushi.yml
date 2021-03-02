@@ -1,0 +1,2 @@
+kyoushi_sm_vpn_enabled: True
+kyoushi_sm_vpn_config: "/home/{{ kyoushi_user_name }}/.openvpn/work.ovpn"

@@ -1,0 +1,10 @@
+
+# this is needed for some of the SM configs
+- name: Gather facts about other hosts
+  hosts: all
+  gather_facts: yes
+
+- name: Install and configure simulation state machines
+  hosts: employee
+  roles:
+    - kyoushi-simulation

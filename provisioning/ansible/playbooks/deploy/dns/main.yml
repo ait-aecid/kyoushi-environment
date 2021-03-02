@@ -3,6 +3,16 @@
   hosts: all
   gather_facts: yes
 
+- name: Update apt
+  hosts: dnsservers
+  become: true
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      tags: [install]
+
 - name: Configure the dns servers
   hosts: dnsservers
   become: true

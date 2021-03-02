@@ -23,5 +23,5 @@ dns_domains:
     hostname: gateway
     ip: "{{ openstack.addresses.local[0].addr }}"
   - domain: company_external
-    hostname: null
+    hostname:
     aliases: "{{ dnat_aliases_list }}"

@@ -1,0 +1,634 @@
+# sm config templates
+
+kyoushi_config_files:
+  config:
+    src: config.yml.j2
+    dst: "{{ kyoushi_sim_config_path }}/config.yml"
+    deploy: yes
+  sm:
+    src: user_beta.yml.j2
+    dst: "{{ kyoushi_sim_config_path }}/sm.yml"
+    deploy: yes
+
+# cr cli config
+
+# use a consistent random value for seed
+kyoushi_seed: "{{ 4294967295 | random(seed=inventory_hostname) }}"
+
+kyoushi_sm_name: ait.beta_user
+kyoushi_simulation_version: 0.3.6
+kyoushi_statemachines_version: 0.3.1
+#kyoushi_packages_reinstall: yes
+
+kyoushi_venv_python_version: 3.7
+kyoushi_user_name: "{{ employee.username }}"
+kyoushi_user_group: "{{ employee.username }}"
+
+# sm base config
+kyoushi_sm_errors: 1000
+#kyoushi_sm_start: 2021-01-20T9:00
+#kyoushi_sm_end: 2021-01-20T9:00
+
+# sm logging config
+
+kyoushi_log_level: INFO
+# kyoushi_log_timestamp:
+#   format: 'e.g. %m/%d/%Y, %H:%M:%S'
+#   utc: 'True'
+#   key: 'timestamp'
+kyoushi_log_console:
+  enabled: yes
+  format: plain
+kyoushi_log_file:
+  enabled: yes
+  format: json
+  path: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}/sm.log"
+
+
+# idle config
+kyoushi_sm_idle_big_min: 600 # 10*60 = 10m
+kyoushi_sm_idle_big_max: 3000  # 50*60 = 50m
+kyoushi_sm_idle_medium_min: 60 # 1m
+kyoushi_sm_idle_medium_max: 300  # 5*60 = 5m
+kyoushi_sm_idle_small_min: 5 # 5s
+kyoushi_sm_idle_small_max: 30  # 30s
+kyoushi_sm_idle_tiny_min: 0.5 # 500ms
+kyoushi_sm_idle_tiny_max: 1.5  # 1s500ms
+
+# sm selenium config
+
+# browser type to use
+kyoushi_sm_browser: firefox
+kyoushi_sm_browser_insecure_ssl: yes
+kyoushi_sm_browser_headless: yes
+kyoushi_sm_browser_width: 1650
+kyoushi_sm_browser_height: 1200
+
+# Selenium Driver Manager config
+
+#kyoushi_sm_browser_driver_manager
+  # The webdriver cache path
+  #path: /some/path
+  # The base URL to download the webdriver from.
+  #url: https://chromedriver.storage.googleapis.com
+  # The URL for the latest version of the webdriver
+  #latest_release_url: <the url>
+  #log_level: INFO
+  # The validity of the driver cache in days.
+  #cache_valid_range: 1
+    
+
+# HTTP Proxy Config
+
+#kyoushi_sm_browser_proxy_enabled: False
+#kyoushi_sm_browser_proxy_host: localhost
+#kyoushi_sm_browser_proxy_port: 8080
+# If a socks proxy should be used instead of a HTTP proxy
+#kyoushi_sm_browser_proxy_socks: False
+# The SOCKS protocol version to use
+#kyoushi_sm_browser_proxy_socks_version: 5
+# The socks username and password to use for authentication
+#kyoushi_sm_browser_proxy_username: fancy_user
+#kyoushi_sm_browser_proxy_password: secret
+
+# Download config
+
+kyoushi_sm_download_dir: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}/downloads/"
+kyoushi_sm_download_mimes:
+  - application/octet-stream
+  - application/zip
+  - application/msword
+  - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+  - application/vnd.oasis.opendocument.text
+  - application/vnd.oasis.opendocument.spreadsheet
+  - application/vnd.oasis.opendocument.presentation
+  - text/plain
+  - application/pdf
+  - image/jpeg
+  - image/bmp
+  - image/gif
+  - image/png
+  - image/svg+xml
+  - image/tiff
+  
+# Additional commandline arguments for the webdriver
+#kyoushi_sm_browser_arguments: []
+# Extra list of desired browser capabilities
+#kyoushi_sm_browser_capabilities: []
+
+# VPN config
+
+kyoushi_sm_vpn_enabled: False
+#kyoushi_sm_vpn_config: "/home/{{ kyoushi_user_name }}/.openvpn/work.ovpn"
+# eager means the user will connect as soon as they start working
+# otherwise they only connect once they want to execute a VPN activity
+# by default we use a coin flip to decide if a user is eager or not
+kyoushi_sm_vpn_eager: "{{ True if (2 | random(seed=inventory_hostname)) == 1 else False}}"
+# VPN activities config
+kyoushi_sm_vpn_horde: False
+kyoushi_sm_vpn_owncloud: False
+kyoushi_sm_vpn_ssh: True
+kyoushi_sm_vpn_web_browser: False
+kyoushi_sm_vpn_wp_editor: True
+kyoushi_sm_vpn_wpdiscuz: True
+
+# horde user config
+
+# The maximum amount of times the horde activity will be entered per day
+kyoushi_sm_horde_max_daily: 10
+# The horde servers base URL
+kyoushi_sm_horde_url: "http://{{ hostvars['mail'].proxied_name }}.{{ domains.company_external.domain }}"
+# The firstname of the horde user
+kyoushi_sm_horde_first_name: "{{ employee.first_name }}"
+#The lastname of the horde user
+kyoushi_sm_horde_last_name: "{{ employee.last_name }}"
+# The horde user
+kyoushi_sm_horde_username: "{{ employee.email_user }}"
+# The horde users password
+kyoushi_sm_horde_password: "{{ employee.password }}"
+# The email contacts for the horde user
+#  <email>:<probability>
+kyoushi_sm_horde_contacts: |
+  {
+  {# By default a employee has all employees (other than themself) and mail users as contacts #}
+  {% for contact in (employees.values() | rejectattr('email_user', 'equalto', employee.email_user) | list + ext_mail_users) %}
+  {# By default we each contact equal chance. (The distribution is normalized in the config template)#}
+  "{{ contact.email_user }}@{{ contact.email_domain }}": 1{% if not loop.last %},{%endif%}
+  {% endfor %}
+  }
+
+# A dict of attachment files the user might send
+kyoushi_sm_horde_attachments: {}
+#The probability that an additional recipient is added to a mail
+kyoushi_sm_horde_extra_recipient: 0.1
+# The maximum amount of recipients
+kyoushi_sm_horde_max_recipients: 10
+# The probability that an attachment is added to a new email
+kyoushi_sm_horde_attachment: 0.2
+# The probability that an attachment is added to a reply
+kyoushi_sm_horde_attachment_reply: 0.1
+
+# owncloud user config
+
+# The maximum amount of times the owncloud user activity will be entered per day
+kyoushi_sm_owncloud_max_daily: 10
+# The owncloud servers url
+kyoushi_sm_owncloud_url: "http://{{ hostvars['cloud_share'].proxied_name }}.{{ domains.company_external.domain }}"
+kyoushi_sm_owncloud_username: "{{ employee.username }}"
+kyoushi_sm_owncloud_password: "{{ employee.password }}"
+# Files the user might upload mapped to their propabilities
+#  <path>:<probability>
+kyoushi_sm_owncloud_upload_files: {}
+# List of regular expresions used to control which 
+# directories can be modified. i.e., dir create, file upload, delete
+# (default means any directory other than root)
+kyoushi_sm_owncloud_modify_directories: ['\/.+']
+# The maximum directory level to create sub directories in.
+#kyoushi_sm_owncloud_max_directory_create_depth: 3
+# The maximum sub directories to create.
+#kyoushi_sm_owncloud_max_directory_count: 3
+# Factor used to decrease favorite and remove_favorite chance.
+kyoushi_sm_owncloud_favor_factor: 1.0
+
+# SSH User config
+
+# The maximum amount of times the ssh user activity will be entered per day
+kyoushi_sm_ssh_max_daily: 10
+kyoushi_sm_ssh_username: "{{ employee.username }}"
+kyoushi_sm_ssh_password: "{{ employee.password }}"
+
+# the default ssh key
+#kyoushi_sm_ssh_key: /some/path
+
+# If the user should verify the SSH servers host key by default
+kyoushi_sm_ssh_verify: True
+
+# Optional SSH Proxy Config
+# The host or IP of the default SSH proxy server
+#kyoushi_sm_ssh_proxy_host: some.host
+#kyoushi_sm_ssh_proxy_port: 22
+#kyoushi_sm_ssh_proxy_username: defaults to ssh user
+#kyoushi_sm_ssh_proxy_key: defaults to ssh key
+# If the SSH host key should be verified or not
+# kyoushi_sm_ssh_proxy_verify: True
+
+# Default list of command chains the user can execute on the hosts.
+kyoushi_sm_ssh_commands: []
+
+# Mapping of host identifiers to the probabilities of them being selected.
+#   <host id>:<probability>
+kyoushi_sm_ssh_hosts: {}
+
+# Mapping of host identifiers to their configurations.
+# <host id>:<HostConfig>
+kyoushi_sm_ssh_host_configs: {}
+
+# web browser config
+
+# The maximum websites to visit per day
+kyoushi_sm_web_browser_max_daily: 10
+# The maximum link depth the user will browse to on a website
+kyoushi_sm_web_browser_max_depth: 3
+# The web site URLs the user can visit
+kyoushi_sm_web_browser_websites: "{{ moz_top500 }}"
+
+
+# WP Editor Config
+
+# The maximum amount of times the wp editor activity will be entered per day
+kyoushi_sm_wp_editor_max_daily: 10
+# The wp-admin url
+kyoushi_sm_wp_editor_url: "http://{{ domains.intranet.domain }}/wp-admin/"
+kyoushi_sm_wp_editor_username: "{{ employee.username }}"
+kyoushi_sm_wp_editor_password: "{{ employee.password }}"
+
+# WP Reader Config
+
+# The maximum amount of times the wpdiscuz activity will be entered per day
+kyoushi_sm_wpdiscuz_max_daily: 10
+# The wordpress servers base URL
+kyoushi_sm_wpdiscuz_url: "http://{{ domains.intranet.domain }}"
+# The comment authors name and email
+kyoushi_sm_wpdiscuz_author: "{{ employee.first_name }} {{ employee.last_name }}"
+kyoushi_sm_wpdiscuz_email: "{{ employee.email_user }}@{{ employee.email_domain }}"
+# The wordpress instances expected page title  
+kyoushi_sm_wpdiscuz_page_title: "{{ hostvars['intranet_server'].wp_title }}"
+
+
+# activities entry probabilities
+kyoushi_sm_states_activities:
+  horde: 0.3
+  owncloud: 0.15
+  ssh_user: 0
+  web_browser: 0.2
+  wp_editor: 0
+  wpdiscuz: 0.15
+  idle: 0.2
+
+# horde activity states configs
+kyoushi_sm_states_horde:
+  login_page: "{{ kyoushi_sm_states_horde_login_page }}"
+  logout_choice: "{{ kyoushi_sm_states_horde_login_choice }}"
+  selecting_menu: "{{ kyoushi_sm_states_horde_selecting_menu }}"
+  mails_page: "{{ kyoushi_sm_states_horde_mails_page }}"
+  mail_view: "{{ kyoushi_sm_states_horde_mail_view }}"
+  mail_info: "{{ kyoushi_sm_states_horde_mail_info }}"
+  admin_page: "{{ kyoushi_sm_states_horde_admin_page }}"
+  admin_groups_page: "{{ kyoushi_sm_states_horde_admin_groups_page }}"
+  notes_page: "{{ kyoushi_sm_states_horde_notes_page }}"
+  note_editor: "{{ kyoushi_sm_states_horde_note_editor }}"
+  tasks_page: "{{ kyoushi_sm_states_horde_tasks_page }}"
+  address_book_page: "{{ kyoushi_sm_states_horde_address_book_page }}"
+  contacts_browser: "{{ kyoushi_sm_states_horde_contacts_browser }}"
+  contact_info: "{{ kyoushi_sm_states_horde_contact_info }}"
+  calendar_page: "{{ kyoushi_sm_states_horde_calendar_page }}"
+  event_edit: "{{ kyoushi_sm_states_horde_event_edit }}"
+
+
+kyoushi_sm_states_horde_login_page:
+  # The chance the user will use an incorrect password
+  fail_chance: 0.05
+  # Fail chance decrease factor
+  fail_decrease: 0.9
+
+kyoushi_sm_states_horde_login_choice:
+  # The chance the user will logout when stopping the horde activity
+  logout_chance: 0.05
+
+kyoushi_sm_states_horde_selecting_menu:
+  nav_mail: 0.3
+  nav_preferences: 0.1
+  nav_admin: 0
+  nav_notes: 0.15
+  nav_tasks: 0.1
+  nav_address_book: 0.125
+  nav_calendar: 0.15
+  return: 0.075
+  extra: 
+    return_increase: 1.25
+
+kyoushi_sm_states_horde_mails_page:
+  view_mail: 0.45
+  new_mail: 0.35
+  refresh_mail: 0.1
+  return: 0.1
+  extra: 
+    return_increase: 1.2
+
+kyoushi_sm_states_horde_mail_view:
+  delete_mail: 0.3
+  open_mail: 0.4
+  do_nothing: 0.3
+
+kyoushi_sm_states_horde_mail_info:
+  delete_mail: 0.3
+  reply_mail: 0.7
+
+kyoushi_sm_states_horde_admin_page:
+  nav_config: 0.15
+  nav_groups: 0.15
+  nav_users: 0.09
+  nav_sessions: 0.09
+  nav_alarms: 0.09
+  nav_locks: 0.09
+  nav_permissions: 0.09
+  nav_php_shell: 0.05
+  nav_sql_shell: 0.05
+  nav_cli_shell: 0.05
+  return: 0.1
+  extra: 
+    return_increase: 2
+
+kyoushi_sm_states_horde_admin_groups_page:
+  group_add: 0.45
+  group_delete: 0.25
+  return: 0.3
+  extra: 
+    return_increase: 2
+
+kyoushi_sm_states_horde_notes_page:
+  new_note: 0.5
+  edit_note: 0.4
+  return: 0.1
+  extra: 
+    return_increase: 2
+
+kyoushi_sm_states_horde_note_editor:
+  write_note: 0.6
+  delete_note: 0.4
+
+kyoushi_sm_states_horde_tasks_page:
+  new_task: 0.5
+  edit_task: 0.4
+  return: 0.1
+  extra: 
+    return_increase: 1.4
+
+kyoushi_sm_states_horde_address_book_page:
+  new_contact: 0.2
+  browse_contacts: 0.675
+  return: 0.125
+  extra: 
+    return_increase: 1.4
+
+kyoushi_sm_states_horde_contacts_browser:
+  new_contact: 0.35
+  view_contact: 0.65
+
+kyoushi_sm_states_horde_contact_info:
+  delete_contact: 0.4
+  do_nothing: 0.6
+
+kyoushi_sm_states_horde_calendar_page:
+  new_event: 0.4
+  edit_event: 0.35
+  return: 0.25
+  extra: 
+    return_increase: 2
+
+kyoushi_sm_states_horde_event_edit:
+  write_event: 0.6
+  delete_event: 0.4
+
+
+# owncloud activity states configs
+kyoushi_sm_states_owncloud:
+  login_page: "{{ kyoushi_sm_states_owncloud_login_page }}"
+  logout_choice: "{{ kyoushi_sm_states_owncloud_logout_choice }}"
+  selecting_menu: "{{ kyoushi_sm_states_owncloud_selecting_menu }}"
+  all_files: "{{ kyoushi_sm_states_owncloud_all_files }}"
+  favorites: "{{ kyoushi_sm_states_owncloud_favorites }}"
+  sharing_in: "{{ kyoushi_sm_states_owncloud_sharing_in }}"
+  sharing_out: "{{ kyoushi_sm_states_owncloud_sharing_out }}"
+  file_details: "{{ kyoushi_sm_states_owncloud_file_details }}"
+  sharing_details: "{{ kyoushi_sm_states_owncloud_sharing_details}}"
+  upload_menu: "{{ kyoushi_sm_states_owncloud_upload_menu }}"
+
+kyoushi_sm_states_owncloud_login_page:
+  # The chance the user will use an incorrect password
+  fail_chance: 0.05
+  # Fail chance decrease factor
+  fail_decrease: 0.9
+
+kyoushi_sm_states_owncloud_logout_choice:
+  # The chance the user will logout when stopping the owncloud activity
+  logout_chance: 0.05
+
+kyoushi_sm_states_owncloud_selecting_menu:
+  nav_all: 0.25
+  nav_favorites: 0.2
+  nav_sharing_in: 0.25
+  nav_sharing_out: 0.2
+  return: 0.1
+  extra:
+    return_increase: 1.25
+
+kyoushi_sm_states_owncloud_all_files:
+  scroll_down: 0.1
+  favorite: 0.05
+  remove_favorite: 0.05
+  open_directory: 0.1
+  nav_root: 0.075
+  download_file: 0.1
+  delete_file: 0.075
+  upload_file: 0.075
+  download_directory: 0.05
+  delete_directory: 0.05
+  create_directory: 0.075
+  view_details: 0.125
+  return: 0.075
+  extra:
+    return_increase: 1.25
+
+kyoushi_sm_states_owncloud_favorites:
+  scroll_down: 0.15
+  favorite: 0.05
+  remove_favorite: 0.05
+  open_directory: 0.2
+  download_file: 0.1
+  delete_file: 0.1
+  download_directory: 0.05
+  delete_directory: 0.05
+  view_details: 0.15
+  return: 0.1
+  extra:
+    return_increase: 1.25
+  
+
+kyoushi_sm_states_owncloud_sharing_in:
+  scroll_down: 0.15
+  accept: 0.4
+  decline: 0.35
+  return: 0.1
+  extra:
+    return_increase: 1.25
+
+kyoushi_sm_states_owncloud_sharing_out:
+  scroll_down: 0.15
+  favorite: 0.05
+  remove_favorite: 0.05
+  open_directory: 0.2
+  download_file: 0.1
+  delete_file: 0.1
+  download_directory: 0.05
+  delete_directory: 0.05
+  view_details: 0.15
+  return: 0.1
+  extra:
+    return_increase: 1.25
+
+kyoushi_sm_states_owncloud_file_details:
+  view_comments: 0.25
+  view_sharing: 0.4
+  view_versions: 0.25
+  return: 0.1
+  extra:
+    return_increase: 1.25
+
+kyoushi_sm_states_owncloud_sharing_details:
+  share: 0.4
+  unshare: 0.35
+  return: 0.25
+  extra:
+    return_increase: 1.25
+    # Dictionary of users to share to
+    #   <username>:<probability>
+    share_users: "{{ kyoushi_sm_states_owncloud_sharing_details_share_users | normalize_distribution }}"
+    # The maximum number of users to share a single file/dir to
+    # (optional)
+    # note random range is defined as (min, max]
+    max_shares: "{{ (employees|length + 1) | random(2, seed=inventory_hostname)}}"
+
+kyoushi_sm_states_owncloud_sharing_details_share_users: |
+  {
+  {# 
+    By default every employee can share to every other employee with equal chance.
+    (Distribution normalization is done in the config template.)
+  #}
+  {% for share_user in (employees.values() | rejectattr('username', 'equalto', employee.username)) %}
+  "{{ share_user.username }}": 1{% if not loop.last %},{% endif %}
+  {% endfor %}
+  }
+  
+
+kyoushi_sm_states_owncloud_upload_menu:
+  keep_new: 0.6
+  keep_both: 0.3
+  keep_old: 0.1
+
+
+# ssh user activity states configs
+kyoushi_sm_states_ssh_user:
+  connected: "{{ kyoushi_sm_states_ssh_user_connected }}"
+  sudo_dialog: "{{ kyoushi_sm_states_ssh_user_sudo_dialog }}"
+
+kyoushi_sm_states_ssh_user_connected:
+  select_chain: 0.9
+  disconnect: 0.1
+  extra:
+    disconnect_increase: 3
+
+kyoushi_sm_states_ssh_user_sudo_dialog:
+  enter_password: 0.95
+  fail: 0.05
+  extra:
+    # factor to increase fail chance by with each consecutive fail
+    fail_increase: 4
+
+
+# web browser activity states configs
+kyoushi_sm_states_web_browser:
+  on_website: "{{ kyoushi_sm_states_web_browser_on_website }}"
+  leaving_website: "{{ kyoushi_sm_states_web_browser_leaving_website }}"
+
+kyoushi_sm_states_web_browser_on_website:
+  visit_link: 0.7
+  leave_website: 0.3
+
+kyoushi_sm_states_web_browser_leaving_website:
+  # leave the website open in the background
+  background: 0.5
+  # leave the website (i.e., replace it with an empty window)
+  close: 0.5
+
+# wp editor activity states configs
+kyoushi_sm_states_wp_editor:
+  login_page: "{{ kyoushi_sm_states_wp_editor_login_page }}"
+  logout_choice: "{{ kyoushi_sm_states_wp_editor_logout_choice }}"
+  selecting_menu: "{{ kyoushi_sm_states_wp_editor_selecting_menu }}"
+  comments_page: "{{ kyoushi_sm_states_wp_editor_comments_page }}"
+  posts_page: "{{ kyoushi_sm_states_wp_editor_posts_page }}"
+
+kyoushi_sm_states_wp_editor_login_page:
+  # The chance the user will use an incorrect password
+  fail_chance: 0.05
+  # Fail chance decrease factor
+  fail_decrease: 0.9
+
+kyoushi_sm_states_wp_editor_logout_choice:
+  # The chance the user will logout when stopping the wp editor activity
+  logout_chance: 0.05
+
+kyoushi_sm_states_wp_editor_selecting_menu:
+  nav_dashboard: 0.15
+  nav_comments: 0.25
+  nav_media: 0.15
+  nav_posts: 0.3
+  return: 0.15
+  extra:
+    return_increase: 1.25
+
+kyoushi_sm_states_wp_editor_comments_page:
+  new_reply: 0.45
+  return: 0.55
+  extra: 
+    return_increase: 1.25
+    # If the user should only reply to guest comments
+    reply_only_guests: True
+
+kyoushi_sm_states_wp_editor_posts_page:
+  new_post: 0.5
+  return: 0.5
+  extra:
+    return_increase: 1.25
+    # The maximum number of posts a user will post in a day
+    max_posts_daily: 1
+
+
+# wp reader activity states configs
+kyoushi_sm_states_wpdiscuz:
+  posts_page: "{{ kyoushi_sm_states_wpdiscuz_posts_page }}"
+  close_choice: "{{ kyoushi_sm_states_wpdiscuz_close_choice }}"
+  post_page: "{{ kyoushi_sm_states_wpdiscuz_post_page }}"
+
+kyoushi_sm_states_wpdiscuz_posts_page:
+  nav_older: 0.15
+  nav_newer: 0.25
+  nav_post: 0.35
+  return: 0.25
+  extra: 
+    return_increase: 1.5
+    # The maximum posts page to navigate to
+    max_page: 3
+
+kyoushi_sm_states_wpdiscuz_close_choice:
+  # leave the wordpress page open in the background
+  leave_open: 0.6
+  # close the page
+  close: 0.4
+
+kyoushi_sm_states_wpdiscuz_post_page:
+  rate_post: 0.1
+  down_vote: 0.1
+  up_vote: 0.15
+  comment: 0.25
+  reply: 0.2
+  return: 0.2
+  extra: 
+    return_increase: 1.5
+    # The maximum comment depth level to reply to.
+    max_level: 3
+    # The maximum star rating the user will give to a post.
+    max_rating: 5
+    # The minimum star rating the user will give to a post.
+    min_rating: 1

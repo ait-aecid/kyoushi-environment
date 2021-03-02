@@ -60,25 +60,25 @@ smb_extra_files_base: files/internal
 smb_extra_files:
   Billing:
     - src: Billing
-      directory: true
+      directory: True
       recursive: yes
       #owner: m03
 
   Customers:
     - src: Customers
-      directory: true
+      directory: True
       recursive: yes
       #owner: m03
 
   Management:
     - src: Management
-      directory: true
+      directory: True
       recursive: yes
       #owner: m05
 
   Reports:
     - src: Reports
-      directory: true
+      directory: True
       recursive: yes
       #owner: m05
   

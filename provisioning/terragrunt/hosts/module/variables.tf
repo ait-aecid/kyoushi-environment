@@ -19,8 +19,14 @@ variable "flavor" {
 
 variable "volume_size" {
   type        = string
-  description = "volume_size"
+  description = "volume_size (only used if use_volume=true)"
   default     = 5
+}
+
+variable "use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
+  default     = false
 }
 
 variable "userdata_file" {
@@ -87,6 +93,12 @@ variable "employee_volume_size" {
   default     = null
 }
 
+variable "employee_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
+  default     = null
+}
+
 variable "employee_userdata_file" {
   type        = string
   description = "optional override for the default userdata file for employee hosts (defaults to userdata_file')"
@@ -135,6 +147,12 @@ variable "attacker_volume_size" {
   default     = null
 }
 
+variable "attacker_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
+  default     = null
+}
+
 variable "attacker_userdata_file" {
   type        = string
   description = "optional override for the default userdata file for attacker hosts (defaults to userdata_file')"
@@ -171,6 +189,12 @@ variable "vpn_flavor" {
 variable "vpn_volume_size" {
   type        = string
   description = "volume_size for the vpn host (defaults to volume_size)"
+  default     = null
+}
+
+variable "vpn_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
   default     = null
 }
 
@@ -218,6 +242,12 @@ variable "mail_volume_size" {
   default     = null
 }
 
+variable "mail_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
+  default     = null
+}
+
 variable "mail_userdata_file" {
   type        = string
   description = "optional override for the default userdata file for the mail host (defaults to userdata_file')"
@@ -259,6 +289,12 @@ variable "cloud_flavor" {
 variable "cloud_volume_size" {
   type        = string
   description = "volume_size for the the cloud server host (defaults to volume_size)"
+  default     = null
+}
+
+variable "cloud_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
   default     = null
 }
 
@@ -306,6 +342,12 @@ variable "webserver_volume_size" {
   default     = null
 }
 
+variable "webserver_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
+  default     = null
+}
+
 variable "webserver_userdata_file" {
   type        = string
   description = "optional override for the default userdata file for the webserver host (defaults to userdata_file')"
@@ -350,6 +392,12 @@ variable "intranet_volume_size" {
   default     = null
 }
 
+variable "intranet_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
+  default     = null
+}
+
 variable "intranet_userdata_file" {
   type        = string
   description = "optional override for the default userdata file for the intranet host (defaults to userdata_file')"
@@ -391,6 +439,12 @@ variable "share_flavor" {
 variable "share_volume_size" {
   type        = string
   description = "volume_size for the share hosts (defaults to volume_size)"
+  default     = null
+}
+
+variable "share_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
   default     = null
 }
 
@@ -440,6 +494,12 @@ variable "monitoring_volume_size" {
   default     = null
 }
 
+variable "monitoring_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
+  default     = null
+}
+
 variable "monitoring_userdata_file" {
   type        = string
   description = "optional override for the default userdata file for the monitoring host (defaults to userdata_file')"
@@ -481,6 +541,12 @@ variable "mgmthost_flavor" {
 variable "mgmthost_volume_size" {
   type        = string
   description = "volume_size for the mgmthost (defaults to volume_size)"
+  default     = null
+}
+
+variable "mgmthost_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
   default     = null
 }
 
@@ -534,6 +600,12 @@ variable "ext_mail_volume_size" {
   default     = null
 }
 
+variable "ext_mail_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
+  default     = null
+}
+
 variable "ext_mail_userdata_file" {
   type        = string
   description = "optional override for the default userdata file for ext_mail hosts (defaults to userdata_file')"
@@ -572,6 +644,12 @@ variable "ext_user_flavor" {
 variable "ext_user_volume_size" {
   type        = string
   description = "volume_size for the ext_user hosts (defaults to volume_size)"
+  default     = null
+}
+
+variable "ext_user_use_volume" {
+  type        = bool
+  description = "If the compute node should use a volume or root file"
   default     = null
 }
 

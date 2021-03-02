@@ -53,7 +53,11 @@ dns: |
   {
   {% for dns_domain in dns_domains %}
     "{{ dns_domain.domain }}":  {
+        {% if dns_domain.hostname | default(ansible_nodename) is not none %}
         "hostname": "{{ dns_domain.hostname | default(ansible_nodename) }}",
+        {% else %}
+        "hostname": None,
+        {% endif %}
         "domain": "{{ dns_domain.domain }}",
         "fqdn": "{{ (dns_domain.hostname | default(ansible_nodename))+"." if (dns_domain.hostname | default(ansible_nodename)) is not none }}{{ domains[dns_domain.domain].domain }}",
         "ip": "{{ dns_domain.ip | default(ansible_default_ipv4['address'], True) }}",

@@ -1,0 +1,28 @@
+server_default_sudo:
+  hosts: ALL
+  as: ALL
+  commands: ALL
+  nopasswd: yes
+
+server_ssh_users: "{{ server_ssh_users_group + server_ssh_users_host }}"
+
+server_ssh_users_group: |
+  [
+  {% for ssh_user in (employees.values() | selectattr('ssh_admin', 'defined') | selectattr('ssh_admin', 'equalto', True) | list)%}
+    {% set ssh_user_pubkey_path = ssh_keys_base_path+'/'+ssh_user.key_+'/id_rsa.pub' %}
+    {
+      "name": "{{ ssh_user.username }}",
+      "comment": "{{ ssh_user.first_name }} {{ ssh_user.last_name }}",
+      "shell": "/bin/bash",
+      "password": "{{ ssh_user.password | password_hash('sha512', ssh_user.password_salt) }}",
+      "sudo": {{ ssh_user.sudo | default(server_default_sudo, True) }},
+      "authorized_keys": [
+        {
+          "key": "{{ lookup('file', ssh_user_pubkey_path) }}",
+          "exclusive": False
+        }
+      ]
+    }{% if not loop.last %},{% endif %}
+  {% endfor %}
+  ]
+server_ssh_users_host: []

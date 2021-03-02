@@ -15,4 +15,6 @@ employee_user:
   authorized_keys:
     - key: "{{ management_user_key }}"
       exclusive: no
-  sudo: "{{ employee.sudo | default([], True) }}"
+  sudo: "{{ employee.sudo | default({}, True) }}"
+
+      

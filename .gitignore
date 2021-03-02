@@ -1,8 +1,12 @@
 *.retry
 .idea/
+.vscode/
 
 # For Terragrunt/Terraform
 .terragrunt-cache
+.terraform
+.terraform.lock.hcl
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,12 +1,13 @@
 module "mgmthost" {
   count              = var.mgmthost_active ? 1 : 0
-  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.3.1"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4"
   hostname           = "mgmthost"
   tag                = "management"
   host_address_index = var.mgmthost_ip_index
   image              = local.mgmthost_image
   flavor             = local.mgmthost_flavor
   volume_size        = local.mgmthost_volume_size
+  use_volume         = local.mgmthost_use_volume
   sshkey             = var.sshkey
   network            = var.internet
   subnet             = var.internet_subnet

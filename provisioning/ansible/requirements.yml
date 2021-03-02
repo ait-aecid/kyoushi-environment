@@ -96,14 +96,14 @@ roles:
     version: master
     name: samba
 
-  - src: https://github.com/owncloud-ansible/owncloud.git
+  - src: https://github.com/max-frank/owncloud.git
     scm: git
-    version: master
+    version: ab7b8daed31f0613da1acb74408901976b1f02f3
     name: owncloud
 
-  - src: https://github.com/owncloud-ansible/php.git
+  - src: https://github.com/max-frank/php.git
     scm: git
-    version: master
+    version: 898d2a64608220e02b31fcf9c12ab6e5ce2fd822
     name: owncloud-php
 
   - src: https://github.com/owncloud-ansible/apache.git
@@ -123,7 +123,7 @@ roles:
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/horde.git
     scm: git
-    version: v1.1
+    version: v1.1.1
     name: horde
 
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/debiansnapshot.git
@@ -140,3 +140,13 @@ roles:
     scm: git
     version: master
     name: ca-certs
+    
+  - src: https://github.com/whotwagner/ansible-role-shorewall.git
+    scm: git
+    version: v2.0
+    name: whotwagner.shorewall
+  
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kyoushi-simulation.git
+    scm: git
+    version: v1.0.1
+    name: kyoushi-simulation

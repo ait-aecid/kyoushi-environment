@@ -1,0 +1,10 @@
+
+- name: Fact gathering pre firewall conifguration
+  hosts: all
+  gather_facts: yes
+
+- name: Configure the firewalls
+  hosts: firewall
+  become: true
+  roles:
+      - whotwagner.shorewall

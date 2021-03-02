@@ -32,7 +32,8 @@ inputs = {
 		subnet = "local-subnet", 
 		cidr = "172.16.0.0/24", 
                 dns = [],
-                host_as_dns = true
+                host_as_dns = true,
+                routes = null
 	}
         dmz = {
                 network = "dmz",
@@ -40,7 +41,8 @@ inputs = {
 		subnet = "dmz-subnet"
 		cidr = "172.16.100.0/24"
                 dns = [],
-                host_as_dns = true
+                host_as_dns = true,
+                routes = null
         }
     }
 }

@@ -1,3 +1,8 @@
+# this is needed for some of the SM configs
+- name: Gather facts about other hosts
+  hosts: all
+  gather_facts: yes
+
 - name: Configure and deploy attacker
   hosts: attacker_0
   become: yes
@@ -26,13 +31,15 @@
         # the extra lists to empty
         sudo_host: []
         sudo_group: []
+    - role: kyoushi-simulation
+      tags: [install, simulation]
   tasks:
     - name: Install required software
       become: yes
       apt:
         name: "{{ attacker_packages }}"
         state: present
-      tags: [install]
+      tags: [install, packages]
 
     - name: Install wpscan
       become: yes

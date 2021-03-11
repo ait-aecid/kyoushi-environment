@@ -17,6 +17,15 @@ attacker_user:
       exclusive: no
   sudo: "{{ attacker.sudo | default({}, True) }}"
 
+# select random remote employee index and use it for openvpn connection
+attack_openvpn_employee_index: "{{ (groups['remote_employee'] | length) | random(seed=inventory_hostname) }}"
+attack_openvpn_employee: "{{ employees[remote_employees[openvpn_employee_index]] }}"
+
+# all possible admin users
+attack_shell_admins: "{{ employees.values() | selectattr('ssh_admin', 'defined') | selectattr('ssh_admin', 'equalto', True) | list }}"
+# select one random admin user to escalate to after reverse shell connection
+attack_shell_user: "{{ attack_shell_admins[(attack_shell_admins | length) | random(seed=inventory_hostname)] }}"
+
 attacker_packages:
   - nmap
   - proxychains4
@@ -57,3 +66,22 @@ attacker_packages:
   - ruby-dev 
   - libsqlite3-dev 
   - sqlite3
+
+# network information
+
+firewall_interfaces_names: "{{ hostvars['inet-firewall'].ansible_interfaces | map('extract', hostvars['inet-firewall'].ansible_facts) | selectattr('macaddress', 'defined') }}"
+firewall_interfaces:
+  inet: "{{ (firewall_interfaces_names | selectattr('macaddress', 'equalto', hostvars['inet-firewall'].openstack.addresses.internet[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
+  lan:  "{{ (firewall_interfaces_names | selectattr('macaddress', 'equalto', hostvars['inet-firewall'].openstack.addresses.local[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
+  dmz: "{{ (firewall_interfaces_names | selectattr('macaddress', 'equalto', hostvars['inet-firewall'].openstack.addresses.dmz[0]['OS-EXT-IPS-MAC:mac_addr']))[0] }}"
+
+firewall_cidrs: |
+  {
+    {% for name,inf in firewall_interfaces.items() %}
+    {#
+      use ipaddr filter to get cidr notation e.g.,
+      192.168.1.0/255.255.255.0 -> 192.168.1.0/24
+    #}
+    "{{ name }}": "{{ (inf.ipv4.network+'/'+inf.ipv4.netmask) | ansible.netcommon.ipaddr('net') }}"{% if not loop.last %},{% endif %}
+    {% endfor %}
+  }

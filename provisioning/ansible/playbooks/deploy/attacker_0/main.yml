@@ -48,3 +48,21 @@
         user_install: no
         state: present
       tags: [install, wpscan]
+    - name: Ensure simulation files dir exists
+      file:
+        path: "{{ kyoushi_files_dir }}"
+        owner: "{{ kyoushi_files_owner | default(omit) }}"
+        group: "{{ kyoushi_files_group | default(omit) }}"
+        state: directory
+        recurse: yes
+      become: yes
+      tags: [files]
+    - name: Deploy simulation files
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "{{ kyoushi_files_owner | default(omit) }}"
+        group: "{{ kyoushi_files_group | default(omit) }}"
+      loop: "{{ kyoushi_files }}"
+      become: yes
+      tags: [files]

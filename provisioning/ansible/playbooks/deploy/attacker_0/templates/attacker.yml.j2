@@ -8,17 +8,17 @@ escalate_start_time: {{ kyoushi_attacker_escalate_start | default(0) }}
 # The idle configuration for the state machine
 idle:
   big:
-    min: {{ kyoushi_sm_idle_big_min | default(600)}} # 10*60 = 10m
-    max: {{ kyoushi_sm_idle_big_max | default(3000)}}  # 50*60 = 50m
+    min: {{ kyoushi_sm_idle_big_min | default(600)}}
+    max: {{ kyoushi_sm_idle_big_max | default(3000)}} 
   medium:
-    min: {{ kyoushi_sm_idle_medium_min | default(60)}} # 1m
-    max: {{ kyoushi_sm_idle_medium_max | default(300)}}  # 5*60 = 5m
+    min: {{ kyoushi_sm_idle_medium_min | default(60)}}
+    max: {{ kyoushi_sm_idle_medium_max | default(300)}} 
   small:
-    min: {{ kyoushi_sm_idle_small_min | default(5)}} # 5s
-    max: {{ kyoushi_sm_idle_small_max | default(30)}}  # 30s
+    min: {{ kyoushi_sm_idle_small_min | default(5)}}
+    max: {{ kyoushi_sm_idle_small_max | default(30)}} 
   tiny:
-    min: {{ kyoushi_sm_idle_tiny_min | default(0.5)}} # 500ms
-    max: {{ kyoushi_sm_idle_tiny_max | default(1.5)}}  # 1s500ms
+    min: {{ kyoushi_sm_idle_tiny_min | default(0.5)}}
+    max: {{ kyoushi_sm_idle_tiny_max | default(1.5)}} 
 
 
 # The VPN connection config to use
@@ -37,7 +37,7 @@ recon:
   domain: "{{ kyoushi_attacker_recon_domain }}"
   # The hosts to target for the service sca
   hosts:
-{{ kyoushi_attacker_recon_hosts | to_nice_yaml(indent=2) | indent(4)}}
+{{ kyoushi_attacker_recon_hosts | to_nice_yaml(indent=2) | indent(4, True)}}
 
 wordpress:
   # The base URL for the wordpress instance
@@ -48,14 +48,14 @@ wordpress:
 
   # The wordlists to use. 
   # By default `/usr/share/dirb/wordlists/common.txt` is used.
-  dirb_wordlists: "{{ kyoushi_attacker_wp_dirb | default([]) }}"
+  dirb_wordlists: {{ kyoushi_attacker_wp_dirb | default([]) }}
 
   # The JPEG image to use to for the web shell upload exploit
   rce_image: "{{ kyoushi_attacker_web_shell_image }}"
   
   # The commands to execute via the web shell
   commands:
-{{ kyoushi_attacker_web_shell_commands | to_nice_yaml(indent=2) | indent(4)}}
+{{ kyoushi_attacker_web_shell_commands | to_nice_yaml(indent=2) | indent(4, True)}}
 
 escalate:
   # The user to escalate to in the 2nd part
@@ -64,11 +64,10 @@ escalate:
   password: "{{ kyoushi_attacker_reverse_shell_password }}"
   # The command to execute via the web shell to establish a reverse shell
   reverse_cmd:
-{{ kyoushi_attacker_reverse_shell | to_nice_yaml(indent=2) | indent(4)}}
+{{ kyoushi_attacker_reverse_shell | to_nice_yaml(indent=2) | indent(4, True)}}
 
   # The port to bind the reverse shell to
   reverse_port: {{ kyoushi_attacker_reverse_shell_port  | default(9999) }}
   # The commands to execute via the reverse shell
   commands:
-{{ kyoushi_attacker_reverse_shell_commands | to_nice_yaml(indent=2) | indent(4)}}
-    
+{{ kyoushi_attacker_reverse_shell_commands | to_nice_yaml(indent=2) | indent(4, True)}}

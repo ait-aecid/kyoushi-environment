@@ -21,6 +21,7 @@ wp_apache_ssl_copycerts: yes
 wp_admin_password: 'eiY4teenae4eep9'
 wp_mysqldb_user: 'wordpress'
 wp_mysqldb_password: 'tainoox3aedeeSh'
+wp_mysqldb_dbname: 'wordpress_db'
 
 wp_title: 'Intranet'
 wp_tagline: 'Information Platform'

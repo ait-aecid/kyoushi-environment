@@ -1,0 +1,73 @@
+- name: Configure and deploy attacker
+  hosts: attacker_0
+  become: yes
+  handlers:
+    - name: reload dnsteal
+      systemd:
+        name: dnsteal
+        state: "{{ dnsteal_service_state | default('stopped') }}"
+        enabled: no
+        daemon_reload: yes
+  tasks:
+    - name: Ensure python python3-pip is installed
+      apt:
+        name: python3-pip
+        update_cache: yes
+        cache_valid_time: 3600
+      become: yes
+
+    - name: Ensure virtualenv is installed
+      pip:
+        name: virtualenv
+        executable: pip3
+      become: yes
+
+    - name: Git checkout dnsteal
+      ansible.builtin.git:
+        repo: "{{ dnsteal_repo }}"
+        dest: "{{ dnsteal_install_dir }}"
+        version: "{{ dnsteal_tag | default(omit) }}"
+      become: yes
+    
+    - name: Change git directory ownership
+      file:
+        path: "{{ dnsteal_install_dir }}"
+        owner: "{{ dnsteal_service_user | default(omit) }}"
+        group: "{{ dnsteal_service_group | default(omit) }}"
+        state: directory
+        recurse: yes
+
+    - name: Ensure venv path exists
+      ansible.builtin.file:
+        path: "{{ dnsteal_venv }}"
+        owner: "{{ dnsteal_service_user | default(omit) }}"
+        group: "{{ dnsteal_service_group | default(omit) }}"
+        state: directory
+        recurse: yes
+      become: yes
+
+    - name: Install dnsteal requirements
+      pip:
+        requirements: "{{ dnsteal_install_dir }}/requirements.txt"
+        virtualenv: "{{ dnsteal_venv }}"
+        virtualenv_python: "python3"
+      become: yes
+      become_user: "{{ dnsteal_service_user | default(omit) }}"
+
+    - name: Set group to venv
+      ansible.builtin.file:
+        path: "{{ dnsteal_venv }}"
+        owner: "{{ dnsteal_service_user | default(omit) }}"
+        group: "{{ dnsteal_service_group | default(omit) }}"
+        recurse: yes
+      become: yes
+    
+    - name: Copy systemd service file to attacker server
+      ansible.builtin.template:
+        src: dnsteal.service.j2
+        dest: /etc/systemd/system/dnsteal.service
+        owner: root
+        group: root
+      notify:
+        - reload dnsteal
+      become: yes

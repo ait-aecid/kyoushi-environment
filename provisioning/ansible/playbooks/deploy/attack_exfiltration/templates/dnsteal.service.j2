@@ -1,0 +1,12 @@
+[Unit]
+Description=dnsteal service
+
+[Service]
+User={{ dnsteal_service_user }}
+Group={{ dnsteal_service_group }}
+ExecStart={{ dnsteal_venv }}/bin/python {{ dnsteal_install_dir }}/dnsteal.py --no-color --log-file {{ dnsteal_log_file }} {% if dnsteal_endtime %} --endtime "{{ dnsteal_endtime }}" {% endif %} {% if dnsteal_compressed %} -z {% endif %} {% if dnsteal_verbose %} -v {% endif %} -s {{ dnsteal_sub_domains|default(4) }} -b {{ dnsteal_block_size|default(56) }} {{ dnsteal_bind_ip }}
+ExecStop=/bin/kill -s SIGINT $MAINPID
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

@@ -14,20 +14,17 @@
         name: python3-pip
         update_cache: yes
         cache_valid_time: 3600
-      become: yes
 
     - name: Ensure virtualenv is installed
       pip:
         name: virtualenv
         executable: pip3
-      become: yes
 
     - name: Git checkout dnsteal
       ansible.builtin.git:
         repo: "{{ dnsteal_repo }}"
         dest: "{{ dnsteal_install_dir }}"
         version: "{{ dnsteal_tag | default(omit) }}"
-      become: yes
     
     - name: Change git directory ownership
       file:
@@ -44,14 +41,12 @@
         group: "{{ dnsteal_service_group | default(omit) }}"
         state: directory
         recurse: yes
-      become: yes
 
     - name: Install dnsteal requirements
       pip:
         requirements: "{{ dnsteal_install_dir }}/requirements.txt"
         virtualenv: "{{ dnsteal_venv }}"
         virtualenv_python: "python3"
-      become: yes
       become_user: "{{ dnsteal_service_user | default(omit) }}"
 
     - name: Set group to venv
@@ -60,7 +55,14 @@
         owner: "{{ dnsteal_service_user | default(omit) }}"
         group: "{{ dnsteal_service_group | default(omit) }}"
         recurse: yes
-      become: yes
+    
+    - name: Ensure dnsteal files dir exists
+      ansible.builtin.file:
+        path: "{{ dnsteal_files_dir }}"
+        owner: "{{ dnsteal_service_user | default(omit) }}"
+        group: "{{ dnsteal_service_group | default(omit) }}"
+        state: directory
+        recurse: yes
     
     - name: Copy systemd service file to attacker server
       ansible.builtin.template:
@@ -70,4 +72,33 @@
         group: root
       notify:
         - reload dnsteal
-      become: yes
+
+- name: Configure exfiltration victim server
+  hosts: internal_share
+  become: yes
+  handlers:
+    - name: reload exfil
+      systemd:
+        name: "{{ exfiltration_service_name }}"
+        state: "{{ exfiltration_service_state | default('stopped') }}"
+        enabled: no
+        daemon_reload: yes
+  tasks:
+    - name: Copy systemd service file to victim server
+      ansible.builtin.template:
+        src: exfil.sh.j2
+        dest: "{{ exfiltration_service_script }}"
+        mode: "a+x"
+        owner: "{{ exfiltration_service_user | default(omit) }}"
+        group: "{{ exfiltration_service_group | default(omit) }}"
+      notify:
+        - reload exfil
+
+    - name: Copy systemd service file to victim server
+      ansible.builtin.template:
+        src: exfil.service.j2
+        dest: /etc/systemd/system/{{ exfiltration_service_name }}.service
+        owner: root
+        group: root
+      notify:
+        - reload exfil

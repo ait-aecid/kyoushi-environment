@@ -7,8 +7,11 @@ dnsteal_service_group: root
 dnsteal_install_dir: /opt/dnsteal
 dnsteal_venv: "{{ dnsteal_install_dir }}/venv"
 dnsteal_log_file: /var/log/dnsteal.log
+dnsteal_files_dir: /var/log/dnsteal
 
-dnsteal_compressed: no
+dnsteal_domain: exfil.cyberrange.at
+dnsteal_force_ip: no
+dnsteal_compressed: yes
 dnsteal_verbose: yes
 dnsteal_sub_domains: 3
 dnsteal_block_size: 30

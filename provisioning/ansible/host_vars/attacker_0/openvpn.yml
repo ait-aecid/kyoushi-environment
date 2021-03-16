@@ -1,0 +1,26 @@
+openvpn_user_cert_src: "{{ openvpn_ca_certs_path }}/remote_employee_{{ attack_openvpn_employee_index }}"
+
+
+openvpn_client_user: "{{ attacker.username }}"
+openvpn_client_group: "{{ attacker.username }}"
+
+openvpn_client_ca: "{{ lookup('file', openvpn_ca_base_path+'/ca.crt') }}"
+openvpn_client_configs:
+  - name: stolen
+    remote: "{{ hostvars['inet-firewall'].openstack.addresses.internet[0].addr }}"
+    instances:
+      - port: 1194
+        proto: udp
+        client_extra_options:
+          - '# prevent DNS leakage'
+          - dhcp-option DOMAIN-ROUTE .
+          - dhcp-option DNS {{ hostvars['inet-firewall'].openstack.addresses.dmz[0].addr }}
+          - '# ensure DNS is updated'
+          - script-security 2
+          - setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          - up /home/{{ openvpn_client_user }}/.openvpn/update-systemd-resolved
+          - up-restart
+          - down /home/{{ openvpn_client_user }}/.openvpn/update-systemd-resolved
+          - down-pre
+    cert: "{{ lookup('file', openvpn_user_cert_src+'/openvpn.crt') }}"
+    key: "{{ lookup('file', openvpn_user_cert_src+'/openvpn.key') }}"

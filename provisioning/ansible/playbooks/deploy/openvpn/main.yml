@@ -27,7 +27,7 @@
   tags: [openvpn, server]
 
 - name: Configure OpenVPN on remote employees
-  hosts: remote_employee
+  hosts: remote_employee,attacker_0
   become: yes
   roles:
     - openvpn-client

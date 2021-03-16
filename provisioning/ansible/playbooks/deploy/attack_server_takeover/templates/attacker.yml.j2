@@ -1,0 +1,73 @@
+# The attack start time 
+# (can also be defined as timedelta relative to the current time)
+attack_start_time: {{ kyoushi_attacker_start | default(0) }}
+# The host user escalation start time 
+# (can also be defined as timedelta relative to the attack start time)
+escalate_start_time: {{ kyoushi_attacker_escalate_start | default(0) }}
+
+# The idle configuration for the state machine
+idle:
+  big:
+    min: {{ kyoushi_sm_idle_big_min | default(600)}}
+    max: {{ kyoushi_sm_idle_big_max | default(3000)}} 
+  medium:
+    min: {{ kyoushi_sm_idle_medium_min | default(60)}}
+    max: {{ kyoushi_sm_idle_medium_max | default(300)}} 
+  small:
+    min: {{ kyoushi_sm_idle_small_min | default(5)}}
+    max: {{ kyoushi_sm_idle_small_max | default(30)}} 
+  tiny:
+    min: {{ kyoushi_sm_idle_tiny_min | default(0.5)}}
+    max: {{ kyoushi_sm_idle_tiny_max | default(1.5)}} 
+
+
+# The VPN connection config to use
+vpn: "{{ kyoushi_attacker_vpn }}"
+
+recon:
+  # The host to traceroute to
+  trace_target: "{{ kyoushi_attacker_recon_trace }}"
+  # The DMZ network to scan
+  dmz: "{{ kyoushi_attacker_recon_dmz }}"
+  # The intranet network to scan
+  intranet: "{{ kyoushi_attacker_recon_intranet }}"
+  # The DNS server to target during the domain scan
+  dns: "{{ kyoushi_attacker_recon_dns }}"
+  # The domain to brute force
+  domain: "{{ kyoushi_attacker_recon_domain }}"
+  # The hosts to target for the service sca
+  hosts:
+{{ kyoushi_attacker_recon_hosts | to_nice_yaml(indent=2) | indent(4, True)}}
+
+wordpress:
+  # The base URL for the wordpress instance
+  url: "{{ kyoushi_attacker_wp_url }}"
+
+  # The path to admin ajax endpoint (without leading slash).
+  admin_ajax: "{{ kyoushi_attacker_wp_admin_ajax | default('wp-admin/admin-ajax.php') }}"
+
+  # The wordlists to use. 
+  # By default `/usr/share/dirb/wordlists/common.txt` is used.
+  dirb_wordlists: {{ kyoushi_attacker_wp_dirb | default([]) }}
+
+  # The JPEG image to use to for the web shell upload exploit
+  rce_image: "{{ kyoushi_attacker_web_shell_image }}"
+  
+  # The commands to execute via the web shell
+  commands:
+{{ kyoushi_attacker_web_shell_commands | to_nice_yaml(indent=2) | indent(4, True)}}
+
+escalate:
+  # The user to escalate to in the 2nd part
+  user: "{{ kyoushi_attacker_reverse_shell_user }}"
+  # The password to use for escalation
+  password: "{{ kyoushi_attacker_reverse_shell_password }}"
+  # The command to execute via the web shell to establish a reverse shell
+  reverse_cmd:
+{{ kyoushi_attacker_reverse_shell | to_nice_yaml(indent=2) | indent(4, True)}}
+
+  # The port to bind the reverse shell to
+  reverse_port: {{ kyoushi_attacker_reverse_shell_port  | default(9999) }}
+  # The commands to execute via the reverse shell
+  commands:
+{{ kyoushi_attacker_reverse_shell_commands | to_nice_yaml(indent=2) | indent(4, True)}}

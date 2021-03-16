@@ -2,9 +2,6 @@ employee_packages:
   - firefox
   - chromium-browser
 
-
-management_user_key: "{{ lookup('file', ait_ssh_key_pub) }}"
-
 employee: "{{ employees[employee_id] }}"
 
 employee_user:

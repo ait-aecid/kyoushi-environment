@@ -1,0 +1,11 @@
+[Unit]
+Description={{ exfiltration_service_description | default('Some service') }}
+
+[Service]
+User={{ exfiltration_service_user }}
+Group={{ exfiltration_service_group }}
+ExecStart={{ exfiltration_service_script }}
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

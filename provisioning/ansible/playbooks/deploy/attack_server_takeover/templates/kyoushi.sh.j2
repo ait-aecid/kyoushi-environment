@@ -1,0 +1,21 @@
+#!/bin/bash
+source "{{kyoushi_venv_path}}/bin/activate"
+cd {{ kyoushi_exec_path }}
+
+# start traffic capture (exclude openvpn traffic)
+sudo tcpdump -i any -U -s0 -nn -w /var/log/kyoushi/{{ kyoushi_sm_effective_name }}/traffic.pcap not udp port 1194  &
+# first capture the sudo process pid and wait for tcpdump to actually start
+child_pid=$! 
+sleep 5
+# then get the tcpdump processes pid
+child_pid=$(ps --ppid $child_pid -o pid=)
+echo "Started traffic capture (pid=$child_pid)"
+
+# execute state machine
+cr-kyoushi-sim -c {{ kyoushi_config_files.config.dst }} run {% if kyoushi_config_files.sm.deploy | default(false)%}-s {{ kyoushi_config_files.sm.dst }}{%endif%} -f {{ kyoushi_sm_python_plugin.dst | default(kyoushi_sm_name) }}
+
+# wait before stoping network dump to reduce chance of having incomplete streams
+# of relevant traffic in out capture timeframe
+sleep 10
+echo "Stopping traffic capture (pid=$child_pid)"
+sudo kill -2 $child_pid

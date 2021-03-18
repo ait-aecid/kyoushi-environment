@@ -1,5 +1,7 @@
 # sm config templates
 
+kyoushi_executable_template: kyoushi.sh.j2
+
 kyoushi_config_files:
   config:
     src: config.yml.j2

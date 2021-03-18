@@ -29,6 +29,7 @@ inputs = {
     employee_capacity        = 7
     remote_employee_capacity = 3
     attacker_capacity = 1
+    attacker_flavor = "m1.medium"
     ext_user_capacity = 10
     
     shares = [

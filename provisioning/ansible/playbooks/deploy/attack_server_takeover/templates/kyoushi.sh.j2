@@ -1,9 +1,11 @@
 #!/bin/bash
 source "{{kyoushi_venv_path}}/bin/activate"
+export LD_PRELOAD="{{ sslkeylog_library }}"
+export SSLKEYLOGFILE="{{ sslkeylog_file }}"
 cd {{ kyoushi_exec_path }}
 
 # start traffic capture (exclude openvpn traffic)
-sudo tcpdump -i any -U -s0 -nn -w /var/log/kyoushi/{{ kyoushi_sm_effective_name }}/traffic.pcap not udp port 1194  &
+sudo tcpdump -i any -B 4096 -U -s0 -nn -w /var/log/kyoushi/{{ kyoushi_sm_effective_name }}/traffic.pcap not udp port 1194  &
 # first capture the sudo process pid and wait for tcpdump to actually start
 child_pid=$! 
 sleep 5

@@ -1,0 +1,5 @@
+sslkeylog_repo: https://git.lekensteyn.nl/peter/wireshark-notes.git
+sslkeylog_install_dir: /opt/sslkeylog
+sslkeylog_src_dir: "{{ sslkeylog_install_dir }}/src"
+sslkeylog_library: "{{ sslkeylog_src_dir }}/libsslkeylog.so"
+sslkeylog_file: "{{ kyoushi_log_dir }}/premaster.txt"

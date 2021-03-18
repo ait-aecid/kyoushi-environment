@@ -32,11 +32,13 @@ kyoushi_simulation_version: 0.3.7
 kyoushi_statemachines_version: 0.3.2
 #kyoushi_packages_reinstall: yes
 
-kyoushi_venv_python_version: 3.7
+kyoushi_venv_python_version: 3.8
 kyoushi_user_name: "{{ attacker.username }}"
 kyoushi_user_group: "{{ attacker.username }}"
 
 # sm logging config
+
+kyoushi_log_dir: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}"
 
 kyoushi_log_level: INFO
 # kyoushi_log_timestamp:
@@ -49,7 +51,7 @@ kyoushi_log_console:
 kyoushi_log_file:
   enabled: yes
   format: json
-  path: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}/sm.log"
+  path: "{{ kyoushi_log_dir }}/sm.log"
 
 
 # The idle configuration for the state machine

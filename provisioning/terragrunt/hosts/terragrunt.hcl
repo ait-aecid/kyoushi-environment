@@ -23,6 +23,7 @@ inputs = {
     employee_volume_size = 20
     ext_user_volume_size = 20
     share_volume_size = 50
+    mgmthost_flavor = "m1.medium"
 
     sshkey = "testbed-key"
 

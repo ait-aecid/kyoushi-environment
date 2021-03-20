@@ -161,4 +161,9 @@ roles:
     version: v1.1.3
     name: suricata
 
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kyoushi-gather.git
+    scm: git
+    version: master
+    name: kyoushi-gather
+
   

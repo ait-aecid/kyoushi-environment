@@ -3,3 +3,12 @@ openvpn_server_ca_cert_src: "{{ openvpn_ca_base_path }}/ca.crt"
 openvpn_server_cert_src: "{{ openvpn_ca_base_path }}/server.crt"
 openvpn_server_key_src: "{{ openvpn_ca_base_path }}/server.key"
 openvpn_server_verbosity: 3
+
+openvpn_server_instances:
+  - proto: udp
+    port: 1194
+    mask: "10.9.0.0 255.255.255.0"
+    cidr: "10.9.0.0/24"
+    server_extra_options: 
+      - 'push "redirect-gateway def1"'
+      - 'log-append /var/log/openvpn.log'

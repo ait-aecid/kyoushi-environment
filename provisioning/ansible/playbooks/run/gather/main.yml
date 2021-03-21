@@ -1,0 +1,10 @@
+- hosts: all,!monitoring,!mgmthost
+  gather_facts: yes
+  vars_prompt:
+    - name: kyoushi_gather_dir
+      prompt: Enter the gather directory path
+      private: no
+  roles:
+    - kyoushi-gather
+      
+    

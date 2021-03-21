@@ -6,7 +6,7 @@ inputs = {
     # firewall host
     host_name = "inet-firewall"
     host_image = "aecid-ubuntu-bionic-amd64"
-    host_tag = "firewall, dnsservers"
+    host_tag = "firewall, dnsservers, servers"
     host_ext_address_index = 42420
     host_size  = 40
     host_userdata = "firewallinit.yml"

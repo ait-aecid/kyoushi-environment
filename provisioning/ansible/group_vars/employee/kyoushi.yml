@@ -35,8 +35,28 @@ kyoushi_user_group: "{{ employee.username }}"
 
 # sm base config
 kyoushi_sm_errors: 1000
-#kyoushi_sm_start: 2021-01-20T9:00
-#kyoushi_sm_end: 2021-01-20T9:00
+kyoushi_sm_start: 2021-03-21T00:01
+kyoushi_sm_end: 2021-03-26T21:00
+kyoushi_sm_schedule:
+  monday:
+    start_time: "08:{{ '%02d' | format (59 | random(0, seed=inventory_hostname+'1')) }}"
+    end_time: "17:{{ '%02d' | format (59 | random(29, seed=inventory_hostname+'2')) }}"
+  tuesday:
+    start_time: "08:{{ '%02d' | format (59 | random(0, seed=inventory_hostname+'3')) }}"
+    end_time: "17:{{ '%02d' | format (59 | random(29, seed=inventory_hostname+'4')) }}"
+  wednesday:
+    start_time: "08:{{ '%02d' | format (59 | random(0, seed=inventory_hostname+'5')) }}"
+    end_time: "17:{{ '%02d' | format (59 | random(29, seed=inventory_hostname+'6')) }}"
+  thursday:
+    start_time: "08:{{ '%02d' | format (59 | random(0, seed=inventory_hostname+'7')) }}"
+    end_time: "17:{{ '%02d' | format (59 | random(29, seed=inventory_hostname+'8')) }}"
+  friday:
+    start_time: "08:{{ '%02d' | format (59 | random(0, seed=inventory_hostname+'9')) }}"
+    end_time: "17:{{ '%02d' | format (59 | random(29, seed=inventory_hostname+'10')) }}"
+  # for having initial emails etc on the system
+  sunday:
+    start_time: "08:00"
+    end_time: "22:30"
 
 # sm logging config
 
@@ -67,7 +87,7 @@ kyoushi_sm_idle_tiny_max: 1.5  # 1s500ms
 # sm selenium config
 
 # browser type to use
-kyoushi_sm_browser: firefox
+kyoushi_sm_browser: "{{ 'chromium' if (2 | random(seed=inventory_hostname)) == 1 else 'firefox' }}"
 kyoushi_sm_browser_insecure_ssl: yes
 kyoushi_sm_browser_headless: yes
 kyoushi_sm_browser_width: 1650

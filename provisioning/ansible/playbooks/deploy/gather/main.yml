@@ -1,0 +1,9 @@
+- name: Gather facts about other hosts
+  hosts: servers
+  tasks:
+    - name: Install aditional fact gather packages
+      package:
+        name: [facter, ohai]
+        state: present
+      become: yes
+    

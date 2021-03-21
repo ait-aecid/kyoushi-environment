@@ -66,10 +66,10 @@ kyoushi_sm_idle_tiny_max: 3
 
 # The attack start time 
 # (can also be defined as timedelta relative to the current time)
-kyoushi_attacker_start: 0
+kyoushi_attacker_start: 2021-03-22T20:31
 # The host user escalation start time 
 # (can also be defined as timedelta relative to the attack start time)
-kyoushi_attacker_escalate_start: 0
+kyoushi_attacker_escalate_start: +P02DT00H05M
 
 # The VPN connection config to use
 kyoushi_attacker_vpn: "/home/{{ attacker.username }}/.openvpn/stolen.ovpn"

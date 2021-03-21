@@ -9,6 +9,20 @@ end_time: {{ kyoushi_sm_end }}
 {% else %}
 #end_time: 2021-01-29T00:01
 {% endif %}
+{% if kyoushi_sm_schedule is defined %}
+schedule:
+  work_days:
+{{ kyoushi_sm_schedule | to_nice_yaml(indent=2) | indent(4, True) }}
+{% else %}
+#schedule:
+#  work_days:
+#      monday:
+#          start_time: 09:00
+#          end_time: 17:30
+#      friday:
+#          start_time: 11:21
+#          end_time: 19:43
+{% endif %}
 
 selenium:
   # browser type to use

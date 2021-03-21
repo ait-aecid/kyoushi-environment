@@ -7,18 +7,18 @@
   hosts: dnsservers
   become: true
   tasks:
+    - name: Temporarly use upstream DNS server as main
+      ansible.builtin.lineinfile:
+        path: /etc/resolv.conf
+        regexp: '^nameserver\s+.*'
+        line: nameserver {{ dns_bootstrap_upstream | default('8.8.8.8') }}
+      become: yes
+
     - name: Update apt cache
       apt:
         update_cache: yes
         cache_valid_time: 3600
       tags: [install]
-
-    - name: Temporarly use upstream DNS server as main
-      ansible.builtin.lineinfile:
-        path: /etc/hosts
-        regexp: '^nameserver\s+.*'
-        line: nameserver {{ dns_bootstrap_upstream | default('8.8.8.8') }}
-      become: yes
 
 - name: Configure the dns servers
   hosts: dnsservers
@@ -29,7 +29,7 @@
   tasks:
     - name: Re-configure to use system resolver
       ansible.builtin.lineinfile:
-        path: /etc/hosts
+        path: /etc/resolv.conf
         regexp: '^nameserver\s+.*'
         line: nameserver 127.0.0.53
       become: yes

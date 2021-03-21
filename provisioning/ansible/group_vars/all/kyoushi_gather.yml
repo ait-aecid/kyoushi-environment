@@ -1,0 +1,28 @@
+kyoushi_gather_ignore_errors: yes
+kyoushi_gather_ignore_facts_extra:
+  - ait_.*
+  - ansible_ssh_common_args
+  - openstack
+  - ca_base_path 
+  - ca_cert
+  - ca_servers_path
+  - ca_smimes_path
+  - openvpn_ca_base_path
+  - openvpn_ca_certs_path
+  - exim_tls_cert_src
+  - exim_tls_key_src
+  - ssh_keys_base_path
+  - horde_certificate
+  - horde_cert_key
+  - horde_cert
+  - dovecot_ssl_cert_src
+  - dovecot_ssl_key_src
+  - openvpn_server_ca_cert_src
+  - openvpn_server_cert_src
+  - openvpn_server_key_src
+  - openvpn_user_cert_src
+  - wp_apache_ssl_cert
+  - wp_apache_ssl_key
+  - apache2_proxy_vhosts
+  - apache2_vhosts
+  - apache2_webserver_vhosts

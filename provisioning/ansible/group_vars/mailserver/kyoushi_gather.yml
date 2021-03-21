@@ -1,0 +1,51 @@
+kyoushi_gather_logs:
+  - /var/log/auth.log*
+  - /var/log/exim4
+  - /var/log/horde
+  - /var/log/mail.err*
+  - /var/log/mail.info*
+  - /var/log/mail.log*
+  - /var/log/mail.warn*
+  - /var/log/messages*
+  - /var/log/syslog*
+  - /var/log/user.log*
+kyoushi_gather_configs:
+  - /etc/clamav
+  - /etc/cron.d
+  - /etc/cron.daily
+  - /etc/cron.hourly
+  - /etc/cron.monthly
+  - /etc/crontab
+  - /etc/cron.weekly
+  - /etc/dovecot
+  - /etc/email-addresses
+  - /etc/exim4
+  - /etc/horde
+  - /etc/libaudit.conf
+  - /etc/logcheck
+  - /etc/logrotate.conf
+  - /etc/logrotate.d
+  - /etc/mailname
+  - /etc/mysql
+  - /etc/ntp.conf
+  - /etc/pam.conf
+  - /etc/pam.d
+  - /etc/passwd
+  - /etc/php
+  - /etc/rsyslog.conf
+  - /etc/rsyslog.d
+  - /etc/security
+  - /etc/selinux
+  - /etc/shadow
+  - /etc/ssh
+  - /etc/subgid
+  - /etc/subuid
+  - /etc/sudoers
+  - /etc/sudoers.d
+  - /etc/sysctl.conf
+  - /etc/sysctl.d
+  - /etc/systemd
+  - /etc/timezone
+  - /etc/ufw
+
+

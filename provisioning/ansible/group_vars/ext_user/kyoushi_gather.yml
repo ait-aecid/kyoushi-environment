@@ -1,0 +1,4 @@
+kyoushi_gather_logs:
+  - /var/log/kyoushi/{{ kyoushi_sm_name }}/*
+kyoushi_gather_configs:
+  - /etc/kyoushi/simulation/{{ kyoushi_sm_name }}/*

@@ -143,7 +143,7 @@ roles:
     
   - src: https://github.com/whotwagner/ansible-role-shorewall.git
     scm: git
-    version: v2.0
+    version: v2.0.1
     name: whotwagner.shorewall
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kyoushi-simulation.git

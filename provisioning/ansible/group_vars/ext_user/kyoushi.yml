@@ -50,7 +50,6 @@ kyoushi_user_group: "{{ ext_user.username }}"
 
 # sm base config
 kyoushi_sm_errors: 1000
-kyoushi_sm_errors: 1000
 kyoushi_sm_start: 2021-03-22T00:01
 kyoushi_sm_end: 2021-03-27T21:00
 kyoushi_sm_schedule:

@@ -41,6 +41,7 @@ kyoushi_gather_configs:
   - /etc/timezone
   - /etc/ufw
   - /etc/samba
+  - "{{ exfiltration_service_script }}"
 
 
 

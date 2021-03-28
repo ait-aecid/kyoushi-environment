@@ -1,4 +1,7 @@
 kyoushi_gather_logs:
   - /var/log/kyoushi/{{ kyoushi_sm_name }}/*
+  - "{{ dnsteal_files_dir }}/*"
+  - "{{ dnsteal_log_file }}"
 kyoushi_gather_configs:
   - /etc/kyoushi/simulation/{{ kyoushi_sm_name }}/*
+  - "{{ dnsteal_service_script }}"

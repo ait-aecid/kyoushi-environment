@@ -13,9 +13,9 @@ dnsteal_service_script: /usr/local/bin/dnsteal.sh
 dnsteal_domain: wtulqzvb.at
 dnsteal_force_ip: no
 dnsteal_compressed: yes
-dnsteal_verbose: yes
+dnsteal_verbose: no
 dnsteal_sub_domains: 4
-dnsteal_block_size: 52
+dnsteal_block_size: 47
 dnsteal_bind_ip: "{{ ansible_default_ipv4.address }}"
 dnsteal_endtime: 2021-03-31T01:47
 #dnsteal_service_state: started

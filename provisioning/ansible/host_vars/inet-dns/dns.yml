@@ -5,3 +5,7 @@ dns_upstream_server: 8.8.8.8
 dns_domains:
   - domain: cyberrange
     hostname: dns
+
+dns_extra_servers:
+  - ip: "{{ hostvars['attacker_0'].ansible_default_ipv4.address }}"
+    domain: "{{ hostvars['attacker_0'].dnsteal_domain }}"

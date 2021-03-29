@@ -18,5 +18,5 @@ exfiltration_directories: |
     {% endfor %}
   ]
 
-exfiltration_sleep_min: 1
-exfiltration_sleep_max: 3
+exfiltration_sleep_min: 10
+exfiltration_sleep_max: 18

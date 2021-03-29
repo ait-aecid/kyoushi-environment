@@ -36,9 +36,9 @@ kyoushi_user_group: "{{ employee.username }}"
 # sm base config
 kyoushi_sm_errors: 1000
 kyoushi_sm_start: 2021-03-28T00:01
-kyoushi_sm_end: 2021-04-02T21:00
+kyoushi_sm_end: 2021-04-03T21:00
 kyoushi_sm_schedule:
-  monday:
+  saturday:
     start_time: "08:{{ '%02d' | format (59 | random(0, seed=inventory_hostname+'1')) }}"
     end_time: "17:{{ '%02d' | format (59 | random(29, seed=inventory_hostname+'2')) }}"
   tuesday:
@@ -54,7 +54,7 @@ kyoushi_sm_schedule:
     start_time: "08:{{ '%02d' | format (59 | random(0, seed=inventory_hostname+'9')) }}"
     end_time: "17:{{ '%02d' | format (59 | random(29, seed=inventory_hostname+'10')) }}"
   # for having initial emails etc on the system
-  sunday:
+  monday:
     start_time: "08:00"
     end_time: "23:30"
 

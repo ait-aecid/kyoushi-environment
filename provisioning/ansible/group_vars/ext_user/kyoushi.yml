@@ -51,7 +51,7 @@ kyoushi_user_group: "{{ ext_user.username }}"
 # sm base config
 kyoushi_sm_errors: 1000
 kyoushi_sm_start: 2021-03-28T00:01
-kyoushi_sm_end: 2021-04-02T21:00
+kyoushi_sm_end: 2021-04-03T21:00
 kyoushi_sm_schedule:
   saturday:
     start_time: "08:{{ '%02d' | format (59 | random(0, seed=inventory_hostname+'1')) }}"

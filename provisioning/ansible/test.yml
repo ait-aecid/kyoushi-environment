@@ -1,10 +1,9 @@
-- hosts: all
-  gather_facts: yes
-
-- name: test
-  hosts: attacker_0
-  tasks:
+- name: Placeholder playbook
+  hosts: employee:ext_user
+  tasks: 
+    - shell: ps aux | grep -E "/opt/kyoushi/simulation/ait.beta_user/bin/python /opt/kyoushi/simulation/ait.beta_user/bin/cr-kyoushi-sim -c /etc/kyoushi/simulation/ait.beta_user/config.yml run -s /etc/kyoushi/simulation/ait.beta_user/sm.yml -f ait.beta_user"
+      become: yes
+      register: psaux 
     - debug:
-        var: kyoushi_attacker_reverse_shell
-    - debug:
-        msg: "{{ kyoushi_attacker_reverse_shell }} "
+        msg: "{{ psaux }}"
+  

@@ -1,5 +1,5 @@
 - name: Kill all user processes
-  hosts: employee
+  hosts: employee:ext_user
   gather_facts: no
   tasks:
     - name: Show ps

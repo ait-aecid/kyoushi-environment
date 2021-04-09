@@ -1,0 +1,47 @@
+kyoushi_gather_logs:
+  - /var/log/audit
+  - /var/log/auth.log*
+  - /var/log/journal
+  - /var/log/suricata
+  - /var/log/syslog*
+  - /var/log/openvpn.log*
+kyoushi_gather_configs:
+  - /etc/apparmor
+  - /etc/apparmor.d
+  - /etc/audisp
+  - /etc/audit
+  - /etc/cron.d
+  - /etc/cron.daily
+  - /etc/cron.hourly
+  - /etc/cron.monthly
+  - /etc/crontab
+  - /etc/cron.weekly
+  - /etc/group
+  - /etc/gshadow
+  - /etc/libaudit.conf
+  - /etc/logcheck
+  - /etc/logrotate.conf
+  - /etc/logrotate.d
+  - /etc/pam.conf
+  - /etc/pam.d
+  - /etc/passwd
+  - /etc/rsyslog.conf
+  - /etc/rsyslog.d
+  - /etc/security
+  - /etc/selinux
+  - /etc/shadow
+  - /etc/ssh
+  - /etc/subgid
+  - /etc/subuid
+  - /etc/sudoers
+  - /etc/sudoers.d
+  - /etc/suricata
+  - /etc/sysctl.conf
+  - /etc/sysctl.d
+  - /etc/systemd
+  - /etc/timezone
+  - /etc/ufw
+  - /etc/openvpn
+
+
+

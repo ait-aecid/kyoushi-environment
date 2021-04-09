@@ -143,12 +143,12 @@ roles:
     
   - src: https://github.com/whotwagner/ansible-role-shorewall.git
     scm: git
-    version: v2.0
+    version: v2.0.1
     name: whotwagner.shorewall
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kyoushi-simulation.git
     scm: git
-    version: v1.0.1
+    version: v1.0.2
     name: kyoushi-simulation
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/auditd.git
@@ -160,5 +160,10 @@ roles:
     scm: git
     version: v1.1.3
     name: suricata
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kyoushi-gather.git
+    scm: git
+    version: master
+    name: kyoushi-gather
 
   

@@ -64,6 +64,16 @@
         state: directory
         recurse: yes
     
+    - name: Copy dnssteal service script file to attacker server
+      ansible.builtin.template:
+        src: dnsteal.sh.j2
+        dest: "{{ dnsteal_service_script }}"
+        owner: root
+        group: root
+        mode: "0755"
+      notify:
+        - reload dnsteal
+    
     - name: Copy systemd service file to attacker server
       ansible.builtin.template:
         src: dnsteal.service.j2

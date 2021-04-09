@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# start traffic capture (exclude openvpn traffic)
+sudo tcpdump -i any -B 4096 -U -s0 -nn -w {{ dnsteal_files_dir }}/traffic.pcap &
+# first capture the sudo process pid and wait for tcpdump to actually start
+child_pid=$! 
+sleep 5
+# then get the tcpdump processes pid
+child_pid=$(ps --ppid $child_pid -o pid=)
+echo "Started traffic capture (pid=$child_pid)"
+
+# execute dnssteal server
+{{ dnsteal_venv }}/bin/python {{ dnsteal_install_dir }}/dnsteal.py --no-color --log-file {{ dnsteal_log_file }} {% if dnsteal_endtime is defined %} --endtime "{{ dnsteal_endtime }}" {% endif %} {% if dnsteal_domain is defined %} --domain "{{ dnsteal_domain }}" {% endif %} {% if dnsteal_force_ip %} --force_ip {% endif %} {% if dnsteal_compressed %} -z {% endif %} {% if dnsteal_verbose %} -v {% endif %} -s {{ dnsteal_sub_domains|default(4) }} -b {{ dnsteal_block_size|default(56) }} {{ dnsteal_bind_ip }}
+
+# wait before stoping network dump to reduce chance of having incomplete streams
+# of relevant traffic in out capture timeframe
+sleep 10
+echo "Stopping traffic capture (pid=$child_pid)"
+sudo kill -2 $child_pid

@@ -41,6 +41,19 @@
         state: present
       tags: [install, packages]
 
+    - name: Install sslkeylog library
+      ansible.builtin.git:
+        repo: "{{ sslkeylog_repo }}"
+        dest: "{{ sslkeylog_install_dir }}"
+      become: yes
+      tags: [install, sslkeylog]
+
+    - name: Build the sslkeylog library
+      community.general.make:
+        chdir: "{{ sslkeylog_install_dir }}/src"
+      become: yes
+      tags: [install, sslkeylog]
+
     - name: Install wpscan
       become: yes
       community.general.gem:

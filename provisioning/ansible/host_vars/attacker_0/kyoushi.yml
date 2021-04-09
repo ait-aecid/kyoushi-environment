@@ -1,5 +1,7 @@
 # sm config templates
 
+kyoushi_executable_template: kyoushi.sh.j2
+
 kyoushi_config_files:
   config:
     src: config.yml.j2
@@ -30,11 +32,13 @@ kyoushi_simulation_version: 0.3.7
 kyoushi_statemachines_version: 0.3.2
 #kyoushi_packages_reinstall: yes
 
-kyoushi_venv_python_version: 3.7
+kyoushi_venv_python_version: 3.8
 kyoushi_user_name: "{{ attacker.username }}"
 kyoushi_user_group: "{{ attacker.username }}"
 
 # sm logging config
+
+kyoushi_log_dir: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}"
 
 kyoushi_log_level: INFO
 # kyoushi_log_timestamp:
@@ -47,7 +51,7 @@ kyoushi_log_console:
 kyoushi_log_file:
   enabled: yes
   format: json
-  path: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}/sm.log"
+  path: "{{ kyoushi_log_dir }}/sm.log"
 
 
 # The idle configuration for the state machine
@@ -62,10 +66,10 @@ kyoushi_sm_idle_tiny_max: 3
 
 # The attack start time 
 # (can also be defined as timedelta relative to the current time)
-kyoushi_attacker_start: 0
+kyoushi_attacker_start: 2021-03-23T20:31
 # The host user escalation start time 
 # (can also be defined as timedelta relative to the attack start time)
-kyoushi_attacker_escalate_start: 0
+kyoushi_attacker_escalate_start: +P02DT00H05M
 
 # The VPN connection config to use
 kyoushi_attacker_vpn: "/home/{{ attacker.username }}/.openvpn/stolen.ovpn"

@@ -1,4 +1,5 @@
 dnsmasq_log_file: /var/log/dnsmasq.log
+dns_extra_servers: []
 dnsmasq_config:
     - name: custom
       content: |
@@ -22,6 +23,9 @@ dnsmasq_config:
         server=/{{ dns_entry.ip.split('.') | reverse | join('.') }}.in-addr.arpa/127.0.0.1
         {% endfor %}
         {% endif %}
+        {% endfor %}
+        {% for _extra_server in dns_extra_servers %}
+        server=/{{ _extra_server.domain }}/{{_extra_server.ip }}
         {% endfor %}
         {% if dns_upstream_server is defined %}
         server={{ dns_upstream_server }}

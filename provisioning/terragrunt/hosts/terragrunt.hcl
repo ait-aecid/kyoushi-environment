@@ -14,21 +14,23 @@ inputs = {
 
     # image configuration
     image = "aecid-ubuntu-bionic-amd64"
-    employee_image = "aecid-employee-bionic-amd64-2020-09-15T20-46-23Z"
-    ext_user_image = "aecid-employee-bionic-amd64-2020-09-15T20-46-23Z"
-    share_image = "aecid-samba-4.5.9-bionic-amd64-2020-09-15T21-20-23Z"
+    employee_image = "aecid-employee-bionic-amd64-2021-03-22T14-13-37Z"
+    ext_user_image = "aecid-employee-bionic-amd64-2021-03-22T14-13-37Z"
+    share_image = "aecid-samba-4.5.9-bionic-amd64-2021-03-22T14-35-45Z"
     mail_image = "aecid-debian-stretch-amd64"
     ext_mail_image = "aecid-debian-stretch-amd64"
 
     employee_volume_size = 20
     ext_user_volume_size = 20
     share_volume_size = 50
+    mgmthost_flavor = "m1.medium"
 
     sshkey = "testbed-key"
 
     employee_capacity        = 7
     remote_employee_capacity = 3
     attacker_capacity = 1
+    attacker_flavor = "m1.medium"
     ext_user_capacity = 10
     
     shares = [

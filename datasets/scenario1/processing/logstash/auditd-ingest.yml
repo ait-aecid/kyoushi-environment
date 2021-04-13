@@ -2056,10 +2056,12 @@ processors:
     ignore_missing: true
     field: process.ppid
     type: long
-- rename:
+# modified version we copy the field instead of rename
+# since we want to retain the original value
+- set:
     ignore_failure: true
-    field: auditd.log.cmd
-    target_field: process.args
+    field: process.args
+    value: "{{ auditd.log.cmd }}"
 - split:
     ignore_failure: true
     field: process.args

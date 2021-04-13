@@ -1,0 +1,177 @@
+#parser:
+#  log_level: debug
+pre_processors:
+  - name: Ensure processing config directory exists
+    type: mkdir
+    path: processing/config
+
+  - name: Prepare server list
+    type: template
+    context:
+      vars:
+        exclude_groups: ["Region.*", "envvars.*", "instance-.*", "meta-.*", "nova"]
+        exclude_hosts: ["monitoring", "mgmthost"]
+      var_files: gather/inet-firewall/facts.json
+    src: processing/templates/groups.json.j2
+    dest: processing/config/groups.yaml
+
+
+  - name: Prepare server facts
+    type: template
+    context:
+      var_files: processing/config/groups.yaml
+    template_context:
+      vars:
+        exclude_groups: ["Region.*", "envvars.*", "instance-.*", "meta-.*", "nova"]
+        exclude_interfaces: ["lo", 'tun\d*']
+        servers: "{{ all }}"
+      var_files: |
+        {
+        {% for server in all %}
+          "server_logs": "processing/config/logs.yaml",
+          "{{ server }}": "gather/{{ server }}/facts.json"{% if not loop.last %},{% endif %}
+        {% endfor %}
+        }
+    src: processing/templates/servers.json.j2
+    dest: processing/config/servers.yaml
+  
+  - name: Ensure attacker config directory exists
+    type: mkdir
+    path: processing/config/attacker
+  
+  - name: Extract attacker information
+    type: template
+    context:
+      var_files:
+        attacker_facts: gather/attacker_0/facts.json
+    template_context:
+      vars:
+        vpn_server: vpn
+        attacker_server: attacker_0
+        vpn_user: "remote_employee_{{ attacker_facts.attack_openvpn_employee_index }}"
+      var_files:
+        servers: processing/config/servers.yaml
+        attacker_sm: gather/attacker_0/configs/sm.yml
+    src: processing/templates/attacker/attacker.yaml.j2
+    dest: processing/config/attacker/attacker.yaml
+  
+  - name: Decompress all GZIP logs
+    type: gzip
+    path: gather
+    glob: "*/logs/**/*.gz"
+
+  - name: Convert attacker pcap to elasticsearch json
+    type: pcap.elasticsearch
+    pcap: gather/attacker_0/logs/traffic.pcap
+    dest: gather/attacker_0/logs/traffic.json
+    tls_keylog: gather/attacker_0/logs/premaster.txt
+    read_filter: "tcp or udp or icmp"
+    protocol_match_filter_parent: >-
+      tcp
+      tcp.srcport
+      tcp.dstport
+      tcp.len
+      tcp.seq
+      udp
+      udp.srcport
+      udp.dstport
+      udp.length
+      tls
+      tls.record
+      tls.record.opaque_type
+      tls.record.version
+      tls.record.length
+      tls.app_data_proto
+      tls.record.content_type
+      dns
+      dns.flags.response
+      dns.count.queries
+      dns.count.answers
+      dns.count.auth_rr
+      dns.count.add_rr
+      text
+      dns.id
+      dns.flags
+      dns.qry.name
+      dns.qry.name.len
+      dns.qry.type
+      dns.qry.class
+      dns.resp.name
+      dns.resp.len
+      dns.resp.ttl
+      dns.resp.type
+      dns.resp.class
+      dns.response_to
+      dns.response_in
+      dns.a
+      dns.aaaa
+      dns.ptr
+      dns.soa.mname
+      dns.soa.rname
+      http
+      http.host
+      http.server
+      http.text
+      http.accept
+      http.cache_control
+      http.request_number
+      http.date
+      http.last_modified
+      http.content_length
+      http.content_length_header
+      http.content_type
+      http.user_agent
+      http.request
+      http.request.version
+      http.request.method
+      http.request.uri
+      http.request.full_uri
+      http.request_method
+      http.request.line
+      http.response
+      http.response.version
+      http.response.code
+      http.response.code.desc
+      http.response.phrase
+      http.response.line    
+      http.response_number
+      http.prev_request_in
+      http.prev_response_in
+      http.request_in
+      http.response_for.uri
+      http.file_data
+      data-text-lines
+
+  
+  - name: Add pcap index mapping
+    type: elasticsearch.template
+    template: processing/logstash/pcap-index-template.json
+    template_name: pcap
+    index_patterns: ["pcap-*"]
+  
+  - name: Add auditd ingest pipeline to elasticsearch
+    type: elasticsearch.ingest
+    ingest_pipeline: processing/logstash/auditd-ingest.yml
+    ingest_pipeline_id: auditd-logs
+  
+  - name: Setup logstash pipeline
+    type: logstash.setup
+    context:
+      var_files:
+        servers: processing/config/servers.yaml
+    servers: "{{ servers }}"
+
+post_processors:
+  - name: Trim server logs to observation time
+    type: dataset.trim
+    context:
+      var_files:
+        groups: processing/config/groups.yaml
+    # we only want to trim the logs of servers that will be part
+    # of the IDS dataset
+    indices: |
+      [
+      {% for server in groups["servers"] %}
+        "*-{{ server }}"{% if not loop.last %},{% endif %}
+      {% endfor %}
+      ]

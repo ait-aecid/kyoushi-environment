@@ -1,0 +1,111 @@
+- type: elasticsearch.query
+  id: attacker.foothold.vpn.ip
+  labels:
+    - attacker_vpn
+    - foothold
+  description: >-
+    This rule applies the labels to all openvpn log rows that have 
+    the attacker server as source ip and are within the foothold phase.
+  index:
+    - openvpn-vpn
+  filter:
+    range:
+      "@timestamp":
+        # foothold phase start
+        gte: "2021-03-23T20:31:00.000Z"
+        # foothold phase stop
+        lte: "2021-03-23T21:13:52.000Z"
+  query:
+    - match:
+        source.ip: '192.42.0.255'
+
+- type: elasticsearch.sequence
+  id: attacker.foothold.vpn.duplicate
+  labels: 
+    - attacker_vpn
+    - foothold
+  description: >-
+    This rule labels the openvpn log rows related to duplicate connections
+    with a single certificate resulting from the attacker and user connecting at
+    the same time. Some of these log lines do not contain remote IP information
+    and as such we match them by connecting defining the sequence of log actions.
+  index:
+    - openvpn-vpn
+  # we need the line number as tie breaker since openvpn logs
+  # only have second precision
+  tiebreaker_field: log.file.line
+  max_span: 1m
+  filter:
+    range:
+      "@timestamp":
+        # foothold phase start
+        gte: "2021-03-23T20:31:00.000Z"
+        # foothold phase stop
+        lte: "2021-03-23T21:13:52.000Z"
+  sequences:
+    - '[ openvpn where source.ip == "192.42.0.255" and source.user.name == "ffeichtner" ]'
+    - '[ openvpn where openvpn.peer.duplicate == "ffeichtner" ]'
+    - '[ openvpn where source.ip == "192.42.0.255" and source.user.name == "ffeichtner" and destination.ip != null ]'
+    - '[ openvpn where source.ip == "192.42.0.255" and source.user.name == "ffeichtner" and destination.ip != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+  until: '[ openvpn where source.ip == "192.42.0.255" and source.user.name == "ffeichtner" and openvpn.push.message != null ]'
+
+
+- type: elasticsearch.query
+  id: attacker.escalate.vpn.ip
+  labels:
+    - attacker_vpn
+    - escalate
+  description: >-
+    This rule applies the labels to all openvpn log rows that have 
+    the attacker server as source ip and are within the escalation phase.
+  index:
+    - openvpn-vpn
+  filter:
+    range:
+      "@timestamp":
+        # escalation phase start
+        gte: "2021-03-25T20:36:00.000Z"
+        # escalation phase stop
+        lte: "2021-03-25T20:37:11.000Z"
+  query:
+    - match:
+        source.ip: '192.42.0.255'
+
+
+- type: elasticsearch.sequence
+  id: attacker.escalate.vpn.duplicate
+  labels: 
+    - attacker_vpn
+    - escalate
+  description: >-
+    This rule labels the openvpn log rows related to duplicate connections
+    with a single certificate resulting from the attacker and user connecting at
+    the same time. Some of these log lines do not contain remote IP information
+    and as such we match them by connecting defining the sequence of log actions.
+  index:
+    - openvpn-vpn
+  # we need the line number as tie breaker since openvpn logs
+  # only have second precision
+  tiebreaker_field: log.file.line
+  max_span: 1m
+  filter:
+    range:
+      "@timestamp":
+        # escalation phase start
+        gte: "2021-03-25T20:36:00.000Z"
+        # escalation phase stop
+        lte: "2021-03-25T20:37:11.000Z"
+  sequences:
+    - '[ openvpn where source.ip == "192.42.0.255" and source.user.name == "ffeichtner" ]'
+    - '[ openvpn where openvpn.peer.duplicate == "ffeichtner" ]'
+    - '[ openvpn where source.ip == "192.42.0.255" and source.user.name == "ffeichtner" and destination.ip != null ]'
+    - '[ openvpn where source.ip == "192.42.0.255" and source.user.name == "ffeichtner" and destination.ip != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+  until: '[ openvpn where source.ip == "192.42.0.255" and source.user.name == "ffeichtner" and openvpn.push.message != null ]'

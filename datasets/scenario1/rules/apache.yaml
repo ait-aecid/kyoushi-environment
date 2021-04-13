@@ -16,9 +16,9 @@
     range:
       "@timestamp":
         # foothold phase start
-        gte: "2021-03-23T20:31:00.064Z"
+        gte: "2021-03-23T20:31:00.000Z"
         # foothold phase stop
-        lte: "2021-03-23T21:13:51.407Z"
+        lte: "2021-03-23T21:13:52.000Z"
   sequences:
     - '[ apache where event.action == "access" and source.address == "172.16.100.151" ]'
     - '[ http where source.ip == "172.16.0.217" and layers.http.http_http_response == true ]'
@@ -41,9 +41,9 @@
     range:
       "@timestamp":
         # foothold phase start
-        gte: "2021-03-23T20:31:00.064Z"
+        gte: "2021-03-23T20:31:00.000Z"
         # foothold phase stop
-        lte: "2021-03-23T21:13:51.407Z"
+        lte: "2021-03-23T21:13:52.000Z"
   sequences:
     - '[ apache where event.action == "error" and source.address == "172.16.100.151" ]'
     - '[ http where source.ip == "172.16.0.217" and layers.http.http_http_response == true ]'
@@ -92,9 +92,9 @@
     range:
       "@timestamp":
         # foothold phase start
-        gte: "2021-03-23T20:31:00.064Z"
+        gte: "2021-03-23T20:31:00.000Z"
         # foothold phase stop
-        lte: "2021-03-23T21:13:51.407Z"
+        lte: "2021-03-23T21:13:52.000Z"
   sequences:
     - '[ apache where event.action == "access" and url.original == "/" ]'
     - '[ apache where event.action == "access" and url.original == "/?p=5" ]'

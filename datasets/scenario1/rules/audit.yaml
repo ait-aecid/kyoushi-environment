@@ -1,0 +1,112 @@
+- type: elasticsearch.sequence
+  id: attacker.escalate.audit.su.login
+  labels: 
+    - attacker_change_user
+    - escalate
+  description: >-
+    This rule labels the user escalation events created by the attacker
+    calling /bin/su and changing to the hijacked user. We map this events as a single 
+  index:
+    - audit-intranet_server
+  # we use the auditd sequence as tiebreaker for identical timestamps
+  tiebreaker_field: auditd.log.sequence
+  filter:
+    range:
+      "@timestamp":
+        # escalation phase start
+        gte: "2021-03-25T20:36:00.000Z"
+        # escalation phase stop
+        lte: "2021-03-25T20:37:11.000Z"
+  # the following sequence contains the evaluation step taken by /bin/su and systemd to change
+  # from a user to another and create a new session
+  sequences:
+    # /bin/su 
+    - '[ authentication where event.action == "authenticated" and auditd.log.uid == "33" and user.name == "msperl" and process.executable == "/bin/su" and event.outcome == "success" ]'
+    - '[ authentication where event.action == "was-authorized" and auditd.log.uid == "33" and user.name == "msperl" and process.executable == "/bin/su" and event.outcome == "success" ]'
+    - '[ authentication where event.action == "acquired-credentials" and auditd.log.uid == "33" and user.name == "msperl" and process.executable == "/bin/su" and event.outcome == "success" ]'
+    # systemd session
+    - '[ authentication where event.action == "was-authorized" and user.name == "msperl" and process.executable == "/lib/systemd/systemd" and event.outcome == "success" ]'
+    - '[ authentication where event.action == "acquired-credentials" and user.name == "msperl" and process.executable == "/lib/systemd/systemd" and event.outcome == "success" ]'
+    - '[ authentication where event.action == "changed-login-id-to" and user.audit.id == "1001" and event.outcome == "1" ]'
+    - '[ session where event.action == "started-session" and user.name == "msperl" and user.audit.id == "1001" and process.executable == "/lib/systemd/systemd" and event.outcome == "success" ]'
+    - '[ process where event.action == "started-service" and auditd.log.unit == "user@1001" and process.executable == "/lib/systemd/systemd" and event.outcome == "success" ]'
+    # /bin/su pam session
+    - '[ session where event.action == "started-session" and auditd.log.uid == "33" and user.name == "msperl" and process.executable == "/bin/su" and event.outcome == "success" ]'
+
+- type: elasticsearch.sequence
+  id: attacker.escalate.audit.sudo.command.start
+  labels: 
+    - escalated_command
+    - escalated_sudo_command
+    - escalate
+  description: >-
+    This rule matches auditd ran-command events for sudo commands with
+    their respective auth log lines which are already labeled. The rule is relatively
+    lax in terms of matching the actual commands to each other as we cannot join them 
+    via `by` since auth log command strings use absolute binary paths and auditd logs do not.
+  # ToDO in the future we might want to template this rule as a via a loop over the commands
+  # so that we can fix the matching command string in each resulting sequence rule
+  index:
+    - auth-intranet_server
+    - audit-intranet_server
+  # !WARNING we cannot use a tiebreaker here since we are matching two different log files
+  filter:
+    - range:
+        "@timestamp":
+          # escalation phase start
+          gte: "2021-03-25T20:36:00.000Z"
+          # escalation phase stop
+          lte: "2021-03-25T20:37:11.000Z"
+    # we further filter to only consider commands the user actually executed
+    - bool:
+        should:
+          - match:
+              auditd.log.cmd: "ls -laR /root/" 
+          - match:
+              auditd.log.cmd: "cat /etc/shadow"
+          # match rule to include the auth events we are interested in
+          - match:
+              kyoushi_labels.rules: "attacker.escalate.sudo.open"
+
+  # this sequence matches already detected sudo escalation events in the auth log with a similar command event in the audit log
+  # as such it must be ensured that the auth rules are applied first
+  sequences:
+    - '[ auth where system.auth.program == "sudo" and kyoushi_labels.rules like "attacker.escalate.sudo.open" and system.auth.user == "msperl" ] by system.auth.sudo.tty,  system.auth.sudo.pwd'
+    - '[ process where event.action == "ran-command" and user.id == "1001" ] by user.terminal, process.working_directory'
+
+
+- type: elasticsearch.sequence
+  id: attacker.escalate.audit.sudo.command.events
+  labels: 
+    - escalated_command
+    - escalated_sudo_command
+    - escalate
+  description: >-
+    This rule labels all expected audit events for a sudo command (e.g., CRED_REFR)
+    to a attacker command that was labeled by `attacker.escalate.audit.sudo.command.start`.
+    Since we can join the events directly via the process id we can be fairly certain that 
+    resulting labels are correct as long as the parent rule is correct.
+  index:
+    - audit-intranet_server
+  # we use the auditd sequence as tiebreaker for identical timestamps
+  tiebreaker_field: auditd.log.sequence
+  filter:
+    - range:
+        "@timestamp":
+          # escalation phase start
+          gte: "2021-03-25T20:36:00.000Z"
+          # escalation phase stop
+          lte: "2021-03-25T20:37:11.000Z"
+  # we match by pid
+  by: process.pid
+  # the sequence from the user cmd event to the cred dispose event
+  # due current limitations of EQL we sadly cannot define and arbitrary sequence that
+  # matches all events with the process id until we observe the process end event.
+  # A rule type with such a functionality could probably implemented by using multiple
+  # elasticsearch queries. 
+  sequences:
+    - '[ process where event.action == "ran-command" and kyoushi_labels.rules like "attacker.escalate.audit.sudo.command.start" ]'
+    - '[ authentication where event.action == "refreshed-credentials" ]'
+    - '[ session where event.action == "started-session" ]'
+    - '[ session where event.action == "ended-session" ]'
+    - '[ authentication where event.action == "disposed-credentials" ]'

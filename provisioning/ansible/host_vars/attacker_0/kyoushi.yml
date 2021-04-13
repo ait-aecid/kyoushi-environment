@@ -85,7 +85,7 @@ kyoushi_attacker_recon_intranet: "{{ firewall_cidrs.lan }}"
 kyoushi_attacker_recon_dns: "{{ hostvars['inet-firewall'].openstack.addresses.dmz[0].addr }}"
 # The domain to brute force
 kyoushi_attacker_recon_domain: "{{ domains.company_external.domain }}"
-# The hosts to target for the service sca
+# The hosts to target for the service scan
 kyoushi_attacker_recon_hosts:
   - 172.16.0.254
 

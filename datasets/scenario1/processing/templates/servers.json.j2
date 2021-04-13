@@ -1,0 +1,51 @@
+{
+{% for server in servers %}
+{% set _server = context()[server] %}
+{% set _server_groups = _server['group_names'] | reject("match_any", (exclude_groups | default([]))) | list %}
+{% set _server_host_logs = (server_logs.hosts | default({}))[server] | default([]) %}
+{% set _server_group_logs = [] %}
+{% for _group in _server_groups %}{% do _server_group_logs.extend((server_logs.groups | default({}))[_group] | default([])) %}{% endfor %}
+{% set _server_interfaces = [] %}
+{% for _interface in (_server.ansible_interfaces | reject("match_any", (exclude_interfaces | default([])))) %}{% do _server_interfaces.append(_server.ansible_facts[_interface]) %}{% endfor %}
+{% set _ipv4_addresses = [] %}
+{% set _ipv6_addresses = [] %}
+{% for _interface in _server_interfaces %}
+{% if _interface.ipv4.address is defined and _interface.ipv4.address is not none %}
+    {% do _ipv4_addresses.append(_interface.ipv4.address) %}
+{% endif %}
+{% if _interface.ipv6 is defined %}
+    {% do _ipv6_addresses.extend(( _interface.ipv6 | selectattr("address", "defined") | map(attribute="address") ))%}
+{% endif %}
+{% endfor %}
+ "{{ server }}": {
+     "hostname": "{{ _server.ansible_facts.hostname }}",
+     "groups": {{ _server_groups }},
+{% if "employee" is in _server_groups %}
+     "username": "{{ _server.employee_user.name }}",
+{% endif %}
+{% if "remote_employee" is in _server_groups %}
+     "openvpn_user": "{{ _server.openvpn_client_user }}",
+{% endif %}
+     "distribution": "{{ _server.ansible_facts.distribution }}",
+     "distribution_release": "{{ _server.ansible_facts.distribution_release }}",
+     "distribution_version": "{{ _server.ansible_facts.distribution_version }}",
+{%- if _server_interfaces[0].ipv4.address is defined and  _server_interfaces[0].ipv4.address is not none %}
+     "default_ipv4_address": "{{ _server_interfaces[0].ipv4.address }}",
+{%- else %}
+     "default_ipv4_address": {{ None }},
+{%- endif %}
+{%- if _server_interfaces[0].ipv6[0].address is defined and _server_interfaces[0].ipv6[0].address is not none %}
+     "default_ipv6_address": "{{ _server_interfaces[0].ipv6[0].address }}",
+{%- else %}
+     "default_ipv6_address": {{ None }},
+{%- endif %}
+     "ipv4_addresses": {{ _ipv4_addresses }},
+     "ipv6_addresses": {{ _ipv6_addresses }},
+{%- if _server.dns is defined %}
+     "fqdns": {{ _server.dns.values() | selectattr("fqdn", "defined") | map(attribute="fqdn") | list | tojson}},
+{%- endif %}
+     "logs": {{ _server_host_logs + _server_group_logs }},
+     "timezone": "{{ _server.ansible_facts.date_time.tz }}"
+ }{% if not loop.last %},{% endif %}
+{% endfor %}
+}

@@ -1,0 +1,158 @@
+- type: elasticsearch.sequence
+  id: attacker.foothold.apache.access
+  labels:
+    - attacker_http
+    - foothold
+  description: >-
+    This rule matches the attackers recorded HTTP traffic to access log lines
+    based on the web paths. Note that we prefix the web paths with the servers FQDN
+    in the parsing phase to match the PCAP records.
+  index:
+    - pcap-attacker_0
+    - apache_access-intranet_server
+  by: url.full
+  max_span: 30s
+  filter:
+    range:
+      "@timestamp":
+        # foothold phase start
+        gte: "2021-03-23T20:31:00.064Z"
+        # foothold phase stop
+        lte: "2021-03-23T21:13:51.407Z"
+  sequences:
+    - '[ apache where event.action == "access" and source.address == "172.16.100.151" ]'
+    - '[ http where source.ip == "172.16.0.217" and layers.http.http_http_response == true ]'
+
+- type: elasticsearch.sequence
+  id: attacker.foothold.apache.error
+  labels:
+    - attacker_http
+    - foothold
+  description: >-
+    This rule matches the attackers recorded HTTP traffic to error log lines
+    based on the web server file the error occurred for. We do this by converting
+    the reported server file paths to web paths in the parsing phase.
+  index:
+    - pcap-attacker_0
+    - apache_error-intranet_server
+  by: url.full
+  max_span: 30s
+  filter:
+    range:
+      "@timestamp":
+        # foothold phase start
+        gte: "2021-03-23T20:31:00.064Z"
+        # foothold phase stop
+        lte: "2021-03-23T21:13:51.407Z"
+  sequences:
+    - '[ apache where event.action == "error" and source.address == "172.16.100.151" ]'
+    - '[ http where source.ip == "172.16.0.217" and layers.http.http_http_response == true ]'
+
+- type: elasticsearch.query
+  id: attacker.dirb.time
+  labels: [dirb]
+  description: >-
+    This labels attacker http traffic within the recorded dirb execution
+    time with dirb.
+  index:
+    - apache_access-intranet_server
+    - apache_error-intranet_server
+  # obligatory match all
+  query:
+    match_all: {}
+  filter:
+    - range:
+        "@timestamp":
+          # dirb phase start
+          gte: "2021-03-23T20:32:09.309Z"
+          # dirb phase stop
+          lte: "2021-03-23T21:12:52.152Z"
+    # use script query to match only entries that
+    # are already tagged for as attacker http in the foothold phase
+    - script:
+        script:
+          id: test_dataset_kyoushi_label_filter
+          params:
+            labels: [attacker_http]
+
+- type: elasticsearch.sequence
+  id: attacker.webshell.upload.seq
+  labels: [webshell_upload]
+  description: >-
+    This rule labels the web shell upload step by matching the 3 step sequence
+    within the foothold phase.
+  index:
+    - apache_access-intranet_server
+  # since we do these requests very fast
+  # we need the line number as tie breaker
+  tiebreaker_field: log.file.line
+  by: source.address
+  max_span: 2m
+  filter:
+    range:
+      "@timestamp":
+        # foothold phase start
+        gte: "2021-03-23T20:31:00.064Z"
+        # foothold phase stop
+        lte: "2021-03-23T21:13:51.407Z"
+  sequences:
+    - '[ apache where event.action == "access" and url.original == "/" ]'
+    - '[ apache where event.action == "access" and url.original == "/?p=5" ]'
+    - '[ apache where event.action == "access" and http.request.method == "POST" and url.original == "/wp-admin/admin-ajax.php" ]'
+
+
+- type: elasticsearch.query
+  id: attacker.escalate.webshell.cmd.http
+  labels: [webshell_cmd]
+  description: >-
+    This rule matches the web shell web requests via the recorded
+    web shell URI and web shell request params.
+  index:
+    - apache_access-intranet_server
+  # we cannot use a time range filter for this one as
+  # the log line does not have a timestamp
+  query:
+    # match the VPN server as source
+    - match:
+        source.address: '172.16.100.151'
+    # match web shell URI without protocol
+    - regexp:
+        url.full: 'intranet.company.cyberrange.at/wp-content/uploads/2021/03/special-1616533976.4603.php.*'
+    # match any of the sent command params in the URI
+    # ToDo when writing this as template this needs to be a loop over the commands
+    # Also URL encode the value parts
+    - bool:
+        should:
+          - regexp:
+              url.original: ".*wp_meta=WyJpcCIsICJhZGRyIl0%3D.*"
+          - regexp:
+              url.original: ".*wp_meta=WyJpZCJd.*"
+          - regexp:
+              url.original: ".*wp_meta=WyJjYXQiLCAiL2V0Yy9wYXNzd2QiXQ%3D%3D.*"
+          - regexp:
+              url.original: ".*wp_meta=WyJscyIsICItbGFSIiwgIi92YXIvd3d3Il0%3D.*"
+          - regexp:
+              url.original: ".*wp_meta=WyJjYXQiLCAiL3Zhci93d3cvaW50cmFuZXQuY29tcGFueS5jeWJlcnJhbmdlLmF0L3dwLWNvbmZpZy5waHAiXQ%3D%3D.*"
+          - regexp:
+              url.original: ".*wp_meta=WyJteXNxbCIsICItdSIsICJ3b3JkcHJlc3MiLCAiLXB0YWlub294M2FlZGVlU2giLCAid29yZHByZXNzX2RiIiwgIi1lIiwgIidzZWxlY3QgKiBmcm9tIHdwX3VzZXJzJyJd.*"
+          - regexp:
+              url.original: ".*wp_meta=WyJwd2QiXQ%3D%3D.*"
+
+- type: elasticsearch.query
+  id: attacker.escalate.shell.descriptor
+  labels:
+    - reverse_shell
+    - escalate
+  description: >-
+    The reverse shell command used does not do redirection
+    nicely so we get a file descriptor error.
+  index:
+    - apache_access-intranet_server
+    - apache_error-intranet_server
+  # we cannot use a time range filter for this one as
+  # the log line does not have a timestamp
+  query:
+    - match_phrase:
+        message: 'Bad file descriptor'
+    - match:
+        message: bash

@@ -1,0 +1,172 @@
+{%- set index = "kyoushi-attacker_0" %}
+{%- set vpn_connect = Search(index=index).query(queries.foothold.vpn_connect.start)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set vpn_connected = Search(index=index).query(queries.foothold.vpn_connect.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set vpn_disconnect = Search(index=index).query(queries.foothold.vpn_disconnect.start)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set vpn_disconnected = Search(index=index).query(queries.foothold.vpn_disconnect.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set host_discover_local_start = Search(index=index).query(queries.foothold.host_discover_local.start)
+                            .source(["@timestamp", "networks"]).extra(size=1)
+                            .execute().hits.hits[0]._source
+-%}
+{%- set host_discover_local_stop = Search(index=index).query(queries.foothold.host_discover_local.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set host_discover_dmz_start = Search(index=index).query(queries.foothold.host_discover_dmz.start)
+                            .source(["@timestamp", "networks"]).extra(size=1)
+                            .execute().hits.hits[0]._source
+-%}
+{%- set host_discover_dmz_stop = Search(index=index).query(queries.foothold.host_discover_dmz.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set dns_brute_force_start = Search(index=index).query(queries.foothold.dns_brute_force.start)
+                            .source(["@timestamp","domain", "dns_servers"]).extra(size=1)
+                            .execute().hits.hits[0]._source
+-%}
+{%- set dns_brute_force_stop = Search(index=index).query(queries.foothold.dns_brute_force.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set service_scan_start = Search(index=index).query(queries.foothold.service_scan.start)
+                            .source(["@timestamp", "networks"]).extra(size=1)
+                            .execute().hits.hits[0]._source
+-%}
+{%- set service_scan_stop = Search(index=index).query(queries.foothold.service_scan.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set wpscan_start = Search(index=index).query(queries.foothold.wpscan.start)
+                            .source(["@timestamp", "url"]).extra(size=1)
+                            .execute().hits.hits[0]._source
+-%}
+{%- set wpscan_output = Search(index=index).query(queries.foothold.wpscan.output)
+                            .source(["stdout_lines"]).extra(size=1)
+                            .execute().hits.hits[0]._source["stdout_lines"] | list
+-%}
+{%- set wpscan_stop = Search(index=index).query(queries.foothold.wpscan.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set dirb_scan_start = Search(index=index).query(queries.foothold.dirb_scan.start)
+                            .source(["@timestamp", "urls"]).extra(size=1)
+                            .execute().hits.hits[0]._source
+-%}
+{%- set dirb_scan_stop = Search(index=index).query(queries.foothold.dirb_scan.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set upload_rce_shell_page_load = Search(index=index).query(queries.foothold.upload_rce_shell.load_posts_page.start)
+                            .source(["@timestamp", "url", "admin_ajax", "image_name"]).extra(size=1)
+                            .execute().hits.hits[0]._source
+-%}
+{%- set upload_rce_shell_page_loaded = Search(index=index).query(queries.foothold.upload_rce_shell.load_posts_page.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set upload_rce_shell_load_info = Search(index=index).query(queries.foothold.upload_rce_shell.load_post_info.start)
+                            .source(["@timestamp", "post_id", "post_url"]).extra(size=1)
+                            .execute().hits.hits[0]._source
+-%}
+{%- set upload_rce_shell_loaded_info = Search(index=index).query(queries.foothold.upload_rce_shell.load_post_info.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set upload_rce_shell_start = Search(index=index).query(queries.foothold.upload_rce_shell.upload.start)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set upload_rce_shell_stop = Search(index=index).query(queries.foothold.upload_rce_shell.upload.stop)
+                            .source(["@timestamp","web_shell"]).extra(size=1)
+                            .execute().hits.hits[0]._source
+-%}
+{%- set host_recon_commands = EQL(index=index, body=queries.foothold.web_shell_cmds)["hits"]["sequences"] -%}
+start: "{{ vpn_connect }}"
+stop: "{{ vpn_disconnected }}"
+
+vpn_connect: 
+    start: "{{ vpn_connect }}"
+    stop: "{{ vpn_connected }}"
+
+vpn_disconnect: 
+    start: "{{ vpn_disconnect }}"
+    stop: "{{ vpn_disconnected }}"
+
+host_discover_local: 
+    start: "{{ host_discover_local_start['@timestamp'] }}"
+    stop: "{{ host_discover_local_stop }}"
+    networks: {{ host_discover_local_start['networks'] | list | tojson }}
+
+
+host_discover_dmz: 
+    start: "{{ host_discover_dmz_start['@timestamp'] }}"
+    stop: "{{ host_discover_dmz_stop }}"
+    networks: {{ host_discover_dmz_start['networks'] | list | tojson }}
+
+dns_brute_force_start:
+    start: "{{ dns_brute_force_start['@timestamp'] }}"
+    stop: "{{ dns_brute_force_stop }}"
+    domain: "{{ dns_brute_force_start['domain'] }}"
+    dns_servers: {{ dns_brute_force_start['dns_servers'] | list | tojson }}
+
+service_scan: 
+    start: "{{ service_scan_start['@timestamp'] }}"
+    stop: "{{ service_scan_stop }}"
+    networks: {{ service_scan_start['networks'] | list | tojson }}
+
+wpscan: 
+    start: "{{ wpscan_start['@timestamp'] }}"
+    stop: "{{ wpscan_stop }}"
+    url: "{{ wpscan_start['url']['full'] }}"
+    failed: {{ True if 'Scan Aborted' in (wpscan_output | join("")) else False }}
+
+dirb_scan: 
+    start: "{{ dirb_scan_start['@timestamp'] }}"
+    stop: "{{ dirb_scan_stop }}"
+    urls: {{ dirb_scan_start['urls'] | list | tojson }}
+
+upload_rce_shell:
+    url: "{{ upload_rce_shell_page_load['url']['full'] }}"
+    admin_ajax: "{{ upload_rce_shell_page_load['admin_ajax'] }}"
+    image_name: "{{ upload_rce_shell_page_load['image_name'] }}"
+    post_id: "{{ upload_rce_shell_load_info['post_id'] }}"
+    post_url: "{{ upload_rce_shell_load_info['post_url'] }}"
+    web_shell: "{{ upload_rce_shell_stop['web_shell'] }}"
+    start: "{{ upload_rce_shell_page_load['@timestamp'] }}"
+    stop: "{{ upload_rce_shell_stop['@timestamp'] }}"
+    load_posts_page: 
+        start: "{{ upload_rce_shell_page_load['@timestamp'] }}"
+        stop: "{{ upload_rce_shell_page_loaded }}"
+    load_post_info:
+        start: "{{ upload_rce_shell_load_info['@timestamp'] }}"
+        stop: "{{ upload_rce_shell_loaded_info }}"
+    upload:
+        start: "{{ upload_rce_shell_start}}"
+        stop: "{{ upload_rce_shell_stop['@timestamp'] }}"
+{% if host_recon_commands | length > 0 %}
+host_recon_commands:
+{% for _host_recon_cmd_seq in host_recon_commands %}
+{%- set _start = _host_recon_cmd_seq["events"][0] %}{%- set _stop = _host_recon_cmd_seq["events"][1] %}
+    - id: "{{ _start["_source"]["transition"] }}"
+      start: "{{ _start["_source"]["@timestamp"] }}"
+      stop: "{{ _stop["_source"]["@timestamp"] }}"
+      http_param: 
+        name: "{{ _start["_source"]["cmd_param"] }}"
+        value: "{{ _start["_source"]["params"][_start["_source"]["cmd_param"]] }}"
+      cmd: {{ _start["_source"]["cmd"] | tojson }}
+{% endfor %}
+{%- else %}
+host_recon_commands: []
+{% endif %}
+    

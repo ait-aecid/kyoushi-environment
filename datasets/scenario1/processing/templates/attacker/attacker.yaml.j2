@@ -39,6 +39,12 @@ vpn_user:
 {%- endif %}
     ipv4_addresses: {{ servers[vpn_user].ipv4_addresses | default([]) | tojson }}
     ipv6_addresses: {{ servers[vpn_user].ipv6_addresses | default([]) | tojson }}
+web_service_user:
+    username: "www-data"
+    uid: "{{ intranet_server_facts.ohai_etc.passwd["www-data"].uid }}"
+    gid: "{{ intranet_server_facts.ohai_etc.passwd["www-data"].gid }}"
 escalate_user:
     username: "{{ attacker_sm.escalate.user }}"
     password: "{{ attacker_sm.escalate.password }}"
+    uid: "{{ intranet_server_facts.ohai_etc.passwd[attacker_sm.escalate.user].uid }}"
+    gid: "{{ intranet_server_facts.ohai_etc.passwd[attacker_sm.escalate.user].gid }}"

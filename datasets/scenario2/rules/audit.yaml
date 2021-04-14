@@ -3,6 +3,7 @@
   labels:
     - dnsteal
     - exfiltration-service
+    - attacker
   description: >-
     The exfiltration service does not produce any notable logs in the current
     scenario and testbed definition. As such this rule simply captures the

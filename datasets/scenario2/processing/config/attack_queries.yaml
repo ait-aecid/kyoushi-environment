@@ -1,0 +1,25 @@
+dnsteal:
+  start:
+    bool:
+      must:
+        - match:
+            event.action: start
+        - match:
+            event.category: dnsteal
+  stop:
+    bool:
+      must:
+        - match:
+            event.action: shutdown
+        - match:
+            event.category: dnsteal
+
+# this is only partial query for detecting the stop event
+# you still need to add a match for auditd.log.unit == "{{ exfil_service_name }}" in the template logic
+partial_exfil_stop:
+  bool:
+    must:
+      - match:
+          event.action: stopped-service
+      - match:
+          event.category: process

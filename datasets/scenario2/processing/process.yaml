@@ -10,7 +10,7 @@ pre_processors:
     context:
       vars:
         exclude_groups: ["Region.*", "envvars.*", "instance-.*", "meta-.*", "nova"]
-        exclude_hosts: ["monitoring", "mgmthost"]
+        exclude_hosts: ["monitoring", "mgmthost", "internal_employee_6"] # internal_employee_6 broke simulation
       var_files: gather/inet-firewall/facts.json
     src: processing/templates/groups.json.j2
     dest: processing/config/groups.yaml
@@ -35,26 +35,6 @@ pre_processors:
     src: processing/templates/servers.json.j2
     dest: processing/config/servers.yaml
   
-  - name: Ensure attacker config directory exists
-    type: mkdir
-    path: processing/config/attacker
-  
-  - name: Extract attacker information
-    type: template
-    context:
-      var_files:
-        attacker_facts: gather/attacker_0/facts.json
-    template_context:
-      vars:
-        vpn_server: vpn
-        attacker_server: attacker_0
-        vpn_user: "remote_employee_{{ attacker_facts.attack_openvpn_employee_index }}"
-      var_files:
-        servers: processing/config/servers.yaml
-        attacker_sm: gather/attacker_0/configs/sm.yml
-    src: processing/templates/attacker/attacker.yaml.j2
-    dest: processing/config/attacker/attacker.yaml
-  
   - name: Decompress all GZIP logs
     type: gzip
     path: gather
@@ -64,8 +44,8 @@ pre_processors:
     type: pcap.elasticsearch
     pcap: gather/attacker_0/logs/traffic.pcap
     dest: gather/attacker_0/logs/traffic.json
-    tls_keylog: gather/attacker_0/logs/premaster.txt
-    read_filter: "tcp or udp or icmp"
+    # we are only interested in DNS traffic for this scenario
+    read_filter: "dns"
     protocol_match_filter_parent: >-
       tcp
       tcp.srcport
@@ -162,6 +142,19 @@ pre_processors:
     servers: "{{ servers }}"
 
 post_processors:
+  - name: Extract attacker information
+    type: template
+    context:
+      vars:
+        attacker_server: attacker_0
+      var_files:
+        servers: processing/config/servers.yaml
+        attacker_facts: gather/attacker_0/facts.json
+        share_facts: gather/internal_share/facts.json
+        queries: processing/config/attack_queries.yaml
+    src: processing/templates/attacker.yaml.j2
+    dest: processing/config/attacker.yaml
+
   - name: Trim server logs to observation time
     type: dataset.trim
     context:

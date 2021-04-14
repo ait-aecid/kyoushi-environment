@@ -32,13 +32,9 @@ hosts:
     # - path: owncloud.log*
     #   type: owncloud.log
   attacker_0:
-    - path: sm.log*
-      type: kyoushi
+    - path: dnsteal.log*
+      type: dnsteal
       codec: json
-      # attack output lines can be **very** long
-      file_chunk_size: 66000000
-      add_field:
-        "[@metadata][kyoushi][sm]": "attacker"
     - path: traffic.json
       type: pcap
       file_chunk_size: 20000000

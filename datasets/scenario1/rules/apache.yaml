@@ -11,17 +11,112 @@
     - pcap-attacker_0
     - apache_access-intranet_server
   by: url.full
-  max_span: 30s
+  # # we use the type field as tie breaker so that apache logs are
+  # # considered first when the timestamps are equal
+  # tiebreaker_field: type
+  max_span: 3m
   filter:
-    range:
-      "@timestamp":
-        # foothold phase start
-        gte: "2021-03-23T20:31:00.000Z"
-        # foothold phase stop
-        lte: "2021-03-23T21:13:52.000Z"
+    - exists:
+        field: "url.full"
+    - range:
+        "@timestamp":
+          # foothold phase start
+          gte: "2021-03-23T20:31:00.000Z"
+          # foothold phase stop
+          lte: "2021-03-23T21:13:52.000Z"
   sequences:
     - '[ apache where event.action == "access" and source.address == "172.16.100.151" ]'
     - '[ http where source.ip == "172.16.0.217" and layers.http.http_http_response == true ]'
+
+
+- type: elasticsearch.sequence
+  id: attacker.foothold.pcap.requests
+  labels:
+    - attacker_http
+    - foothold
+  description: >-
+    This rule matches attacker HTTP request pcap logs with their HTTP responses
+    when the response has already been marked as attacker traffic. We do this so we
+    can apply followup rules only on requests that have not been marked yet. Such cases
+    can happen when the response did not make it to the attacker.
+  index:
+    - pcap-attacker_0
+  by: url.full
+  tiebreaker_field: log.file.line
+  max_span: 3m
+  filter:
+    - exists:
+        field: "url.full"
+    - range:
+        "@timestamp":
+          # foothold phase start
+          gte: "2021-03-23T20:31:00.000Z"
+          # foothold phase stop
+          lte: "2021-03-23T21:13:52.000Z"
+    # only look at http traffic
+    - match:
+        event.category: "http"
+    
+  sequences:
+    # source and destination is swapped for request and response pairs
+    - '[ http where destination.ip == "172.16.0.217" and layers.http.http_http_request == true ] by source.ip, source.port, destination.ip, destination.port'
+    - '[ http where kyoushi_labels.flat.attacker.foothold.apache.access != null and layers.http.http_http_response == true ] by destination.ip, destination.port, source.ip, source.port'
+
+- type: elasticsearch.sub_query
+  id: attacker.foothold.apache.access_dropped
+  labels:
+    - attacker_http
+    - foothold
+  description: >-
+    This rule tries to match attacker requests that we where unable to
+    match to a labeled response with access log entries. Such cases can
+    happen if the corresponding response gets lost in the network or 
+    otherwise is not sent. 
+  index:
+    - pcap-attacker_0
+  # obligatory match all
+  query:
+    - term:
+        destination.ip: "172.16.0.217"
+  filter:
+    - term:
+        event.category: http
+    - term:
+        event.action: request
+    - range:
+        "@timestamp":
+          # dirb phase start
+          gte: "2021-03-23T20:32:09.309Z"
+          # dirb phase stop
+          lte: "2021-03-23T21:12:52.152Z"
+    # we are looking for requests that have not been marked as attacker http yet
+    # most likely they did not have a matching response due to some network error
+    # or timeout
+    - bool:
+        must_not:
+          - script:
+              script:
+                id: test_dataset_kyoushi_label_filter
+                params:
+                  labels: [attacker_http]
+  sub_query:
+    index:
+      - apache_access-intranet_server
+    query:
+      - term:
+          url.full: "{{ HIT.url.full }}"
+      - term:
+          source.address: "172.16.100.151"
+    filter:
+      - range:
+          "@timestamp":
+            # the access log entry should be after the request, but since the access log
+            # does not have microseconds we drop them here as well
+            gte: "{{ (HIT['@timestamp'] | as_datetime).replace(microsecond=0) }}"
+            # the type of error we are looking for should create an access log entry almost immediately
+            # se we keep the time frame short
+            lte: "{{ ( HIT['@timestamp'] | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+            
 
 - type: elasticsearch.sequence
   id: attacker.foothold.apache.error
@@ -35,8 +130,39 @@
   index:
     - pcap-attacker_0
     - apache_error-intranet_server
+  # # we use the type field as tie breaker so that apache logs are
+  # # considered first when the timestamps are equal
+  # tiebreaker_field: type
   by: url.full
-  max_span: 30s
+  max_span: 3m
+  filter:
+    - exists:
+        field: "url.full"
+    - range:
+        "@timestamp":
+          # foothold phase start
+          gte: "2021-03-23T20:31:00.000Z"
+          # foothold phase stop
+          lte: "2021-03-23T21:13:52.000Z"
+  sequences:
+    - '[ apache where event.action == "error" and source.address == "172.16.100.151" ]'
+    - '[ http where source.ip == "172.16.0.217" and layers.http.http_http_response == true ]'
+
+
+- type: elasticsearch.sequence
+  id: attacker.foothold.apache.access_error
+  labels:
+    - attacker_http
+    - foothold
+  description: >-
+    This rule matches already identified access lines to error log lines.
+  index:
+    - apache_access-intranet_server
+    - apache_error-intranet_server
+  by: url.full
+  # the two lines should occur at approximately the same time, but we can still
+  # leave some room for error
+  max_span: 10s
   filter:
     range:
       "@timestamp":
@@ -45,8 +171,183 @@
         # foothold phase stop
         lte: "2021-03-23T21:13:52.000Z"
   sequences:
+    - '[ apache where event.action == "access" and source.address == "172.16.100.151" and kyoushi_labels.flat.attacker.foothold.apache.access != null ]'
     - '[ apache where event.action == "error" and source.address == "172.16.100.151" ]'
-    - '[ http where source.ip == "172.16.0.217" and layers.http.http_http_response == true ]'
+
+
+- type: elasticsearch.sub_query
+  id: attacker.foothold.apache.error_index
+  labels:
+    - attacker_http
+    - foothold
+  description: >-
+    This rule applies the attacker http label to all errors produced by requests
+    to directories that map to an index.php file. This is done by first getting all
+    labeled directory requests and then searching for matching error lines with index.php
+    prefixed.
+  index:
+    - apache_access-intranet_server
+  # obligatory match all
+  query:
+    regexp:
+      url.full: ".*/"
+  filter:
+    - range:
+        "@timestamp":
+          # dirb phase start
+          gte: "2021-03-23T20:32:09.309Z"
+          # dirb phase stop
+          lte: "2021-03-23T21:12:52.152Z"
+    # use script query to match only entries that
+    # are already tagged for as attacker http in the foothold phase
+    - script:
+        script:
+          id: test_dataset_kyoushi_label_filter
+          params:
+            labels: [attacker_http]
+    # reduce the search space by not including access to error matched row
+    - bool:
+        must_not:
+          - exists:
+              field: kyoushi_labels.flat.attacker.foothold.apache.access_error
+  sub_query:
+    index:
+      - apache_error-intranet_server
+    query:
+      - term:
+          url.full: "{{ HIT.url.full }}index.php"
+      - term:
+          source.address: "{{ HIT.source.address }}"
+    filter:
+      - range:
+          "@timestamp":
+            # error happened at most 3 seconds before access log entry
+            gte: "{{ (HIT['@timestamp'] | as_datetime) - timedelta(seconds=3) }}"
+            # error event must have happened before access log event
+            # also we need to round the next second since error log has
+            # milli precision and access log only second 
+            lte: "{{ ( HIT['@timestamp'] | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+
+- type: elasticsearch.parent_query
+  id: attacker.foothold.apache.error_access
+  labels:
+    - attacker_http
+    - foothold
+  description: >-
+    This rule looks for unlabeled error messages resulting from VPN server
+    traffic within the attack time and tries to match it to an already labeled
+    access log row.
+  index:
+    - apache_error-intranet_server
+  query:
+    match:
+      source.address: "172.16.100.151"
+  filter:
+    - range:
+        "@timestamp":
+          # dirb phase start
+          gte: "2021-03-23T20:32:09.309Z"
+          # dirb phase stop
+          lte: "2021-03-23T21:12:52.152Z"
+    # use script query to match only entries that
+    # are not already tagged for as attacker http in the foothold phase
+    - bool:
+        must_not:
+          - script:
+              script:
+                id: test_dataset_kyoushi_label_filter
+                params:
+                  labels: [attacker_http]
+  
+  parent_query:
+    index:
+      - apache_access-intranet_server
+    query:
+      - term:
+          url.full: "{{ HIT.url.full }}"
+      - term:
+          source.address: "{{ HIT.source.address }}"
+      
+      # we are looking for parents that are labeled as attacker http
+      - bool:
+          must:
+            - script:
+                script:
+                  id: test_dataset_kyoushi_label_filter
+                  params:
+                    labels: [attacker_http]
+    filter:
+      - range:
+          # parent must be within +-1s of potential child 
+          "@timestamp":
+            gte: "{{ (HIT['@timestamp'] | as_datetime) - timedelta(seconds=1) }}"
+            lte: "{{ ( HIT['@timestamp'] | as_datetime) + timedelta(seconds=1) }}"
+
+- type: elasticsearch.parent_query
+  id: attacker.foothold.apache.php_warns
+  labels:
+    - attacker_http
+    - foothold
+  description: >-
+    This rule tries to apply missing labels to error lines that result from multiple
+    PHP errors/warnings in a single request. First all PHP errors that are potentially
+    from the attacker are retrieved and then we try to find a labeled parent by
+    matching pid, port, url.full and the approximate error time.
+  index:
+    - apache_error-intranet_server
+  query:
+    # might be the attacker
+    - match:
+        source.address: "172.16.100.151"
+    # is a php error
+    - exists:
+        field: "php.error.level"
+  filter:
+    - range:
+        "@timestamp":
+          # dirb phase start
+          gte: "2021-03-23T20:32:09.309Z"
+          # dirb phase stop
+          lte: "2021-03-23T21:12:52.152Z"
+    # use script query to match only entries that
+    # are not already tagged for as attacker http in the foothold phase
+    - bool:
+        must_not:
+          - script:
+              script:
+                id: test_dataset_kyoushi_label_filter
+                params:
+                  labels: [attacker_http]
+  
+  parent_query:
+    index:
+      - apache_error-intranet_server
+    query:
+      - term:
+          url.full: "{{ HIT.url.full }}"
+      - term:
+          source.address: "{{ HIT.source.address }}"
+      - term:
+          source.port: "{{ HIT.source.port }}"
+      - term:
+          process.pid: "{{ HIT.process.pid }}"
+      
+      # we are looking for parents that are labeled as attacker http
+      - bool:
+          must:
+            - script:
+                script:
+                  id: test_dataset_kyoushi_label_filter
+                  params:
+                    labels: [attacker_http]
+    filter:
+      - range:
+          # parent must be within +-5s of potential child 
+          # this avoids subsequent requests with reused port and pid numbers
+          # but might not catch errors of long requests
+          "@timestamp":
+            gte: "{{ (HIT['@timestamp'] | as_datetime) - timedelta(seconds=5) }}"
+            lte: "{{ ( HIT['@timestamp'] | as_datetime) + timedelta(seconds=5) }}"
 
 - type: elasticsearch.query
   id: attacker.dirb.time
@@ -64,7 +365,7 @@
     - range:
         "@timestamp":
           # dirb phase start
-          gte: "2021-03-23T20:32:09.309Z"
+          gte: "2021-03-23T20:32:09.000Z"
           # dirb phase stop
           lte: "2021-03-23T21:12:52.152Z"
     # use script query to match only entries that

@@ -52,6 +52,7 @@ pre_processors:
       var_files:
         servers: processing/config/servers.yaml
         attacker_sm: gather/attacker_0/configs/sm.yml
+        intranet_server_facts: gather/intranet_server/facts.json
     src: processing/templates/attacker/attacker.yaml.j2
     dest: processing/config/attacker/attacker.yaml
   
@@ -192,4 +193,31 @@ post_processors:
         attacker_sm: gather/attacker_0/configs/sm.yml
     src: processing/templates/attacker/escalate.yaml.j2
     dest: processing/config/attacker/escalate.yaml
-    
+
+  - name: Ensure rules directory exists
+    type: mkdir
+    path: rules
+
+  - name: Render labeling rules
+    type: foreach
+    # processing/templates/rules
+    items:
+      - src: 0_auth.yaml.j2
+        dest: 0_auth.yaml
+      - src: apache.yaml.j2
+        dest: apache.yaml
+      - src: audit.yaml.j2
+        dest: audit.yaml
+      - src: openvpn.yaml.j2
+        dest: openvpn.yaml
+    processor:
+      type: template
+      name: Rendering labeling rule {{ item.src }}
+      template_context:
+        var_files:
+          attacker: processing/config/attacker/attacker.yaml
+          escalate: processing/config/attacker/escalate.yaml
+          foothold: processing/config/attacker/foothold.yaml
+          servers: processing/config/servers.yaml
+      src: "processing/templates/rules/{{ item.src }}"
+      dest: "rules/{{ item.dest }}"

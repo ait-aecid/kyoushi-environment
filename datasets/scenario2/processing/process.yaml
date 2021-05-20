@@ -168,3 +168,24 @@ post_processors:
         "*-{{ server }}"{% if not loop.last %},{% endif %}
       {% endfor %}
       ]
+  
+  - name: Ensure rules directory exists
+    type: mkdir
+    path: rules
+
+  - name: Render labeling rules
+    type: foreach
+    items:
+      - src: audit.yaml.j2
+        dest: audit.yaml
+      - src: dnsmasq.yaml.j2
+        dest: dnsmasq.yaml
+    processor:
+      type: template
+      name: Rendering labeling rule {{ item.src }}
+      template_context:
+        var_files:
+          attacker: processing/config/attacker.yaml
+          servers: processing/config/servers.yaml
+      src: "processing/templates/rules/{{ item.src }}"
+      dest: "rules/{{ item.dest }}"

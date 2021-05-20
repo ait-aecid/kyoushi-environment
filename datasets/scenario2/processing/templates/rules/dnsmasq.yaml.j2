@@ -1,0 +1,129 @@
+- type: elasticsearch.query
+  id: dnsteal.domain.match
+  labels:
+    - dnsteal
+    - attacker
+  description: >-
+    This rule simply matches all DNS queries and answers that end with the
+    sub domain used in the dnsteal exfiltration. Now this rule only works
+    if we assume that users will not query our malicious sub-domain which is
+    a reasonable assumption, if the testbed scenario includes a simulated
+    SOC or some other response team then would have to do some more filtering.
+    For example we could use sequence queries to match requests to dnsteal server
+    log lines or do negative matches with the simulated user logs.
+  index:
+    - dnsmasq-inet-firewall
+  query:
+    bool:
+      # match answer or question field
+      should:
+        {# use replace as a poormans regex_escape filter #}
+        - regexp:
+            dns.answers.name: '.*\.{{ attacker.dnsteal.domain | replace('.', '\.') }}'
+        - regexp:
+            dns.question.name: '.*\.{{ attacker.dnsteal.domain | replace('.', '\.') }}'
+
+
+- type: elasticsearch.query
+  id: dnsteal.domain.received
+  labels: [dnsteal-received]
+  description: >-
+    This rule applies the dnsteal received label to all dnsteal marked
+    log lines that occurred while the dnsteal server was active.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        # dnsteal start up time (this is probably before observation start)
+        gte: "{{ attacker.dnsteal.start }}"
+        # dnsteal stop time
+        lte: "{{ attacker.dnsteal.stop }}"
+  # only apply to lines that are marked dnsteal
+  query:
+    match:
+      kyoushi_labels.rules: dnsteal.domain.match
+
+
+- type: elasticsearch.query
+  id: dnsteal.domain.dropped
+  labels: [dnsteal-dropped]
+  description: >-
+    This rule applies the dnsteal dropped label to all dnsteal marked
+    log lines that occurred while the dnsteal server was inactive.
+    We define this time range to be from the moment dnsteal stopped until
+    the exfiltration service stopped.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        # dnsteal stop time (note this is matched without equality)
+        gt: "{{ attacker.dnsteal.stop }}"
+        # exfiltration service stop
+        lte: "{{ attacker.exfiltration_service.stop }}"
+  # only apply to lines that are marked dnsteal
+  query:
+    match:
+      kyoushi_labels.rules: dnsteal.domain.match
+
+- type: elasticsearch.parent_query
+  id: dnsteal.domain.dropped-retry
+  labels: [dnsteal-dropped]
+  description: >-
+    This rule applied the dnsteal dropped label to dnsteal marked log lines
+    that occurred when both the dnsteal server and the exfiltration script where inactive.
+    Specifically we try to correctly label DNS query retries that occurred after the time frame
+    considered for the `dnsteal.domain.dropped` rule. Such logs can occur if the system resolver
+    retries queries even if the requesting process has already shut down. To make sure that we do not match
+    other traffic we use a parent query to first get all remaining logs not labeled as either
+    dnsteal received or dnsteal dropped. We then check if we can find a matching identical parent
+    request already labeled as dnsteal dropped. If we find such a parent we apply the label.
+
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        # exfiltration service stop
+        gt: "{{ attacker.exfiltration_service.stop }}"
+        # we assume that query retries happen within 3 minutes of the service shutting down
+        lte: "{{ (attacker.exfiltration_service.stop | as_datetime) + timedelta(minutes=3) }}"
+
+  query:
+    bool:
+      # only apply to lines that are marked dnsteal
+      must:
+        - match:
+            kyoushi_labels.rules: dnsteal.domain.match
+      # but not dnsteal-dropped
+      must_not:
+        - match:
+            kyoushi_labels.rules: dnsteal.domain.dropped
+
+  parent_query:
+    index:
+      - dnsmasq-inet-firewall
+    filter:
+      {% raw %}
+      range:
+        "@timestamp":
+          # we assume parent query for retry happend at most 3 minutes before retry
+          gt: "{{ ( HIT['@timestamp'] | as_datetime) - timedelta(minutes=3) }}"
+          # parent query must have happend before retry
+          lt: "{{ HIT['@timestamp'] }}"
+      {% endraw %}
+    query:
+      bool:
+        {% raw %}
+        must:
+          # must have equal query string
+          - term:
+              dns.question.name: "{{ HIT.dns.question.name }}"
+          # and query type
+          - term:
+              event.action: "{{ HIT.event.action }}"
+          # and destination/source must also match depending on query type
+          - term:
+              "{{ 'source.ip' if HIT.event.action == 'query' else 'destination.ip'}}":  "{{ HIT.source.ip if HIT.event.action == 'query' else HIT.destination.ip }}"
+        {% endraw %}

@@ -1,0 +1,20 @@
+- type: elasticsearch.query
+  id: exfil.service
+  labels:
+    - dnsteal
+    - exfiltration-service
+    - attacker
+  description: >-
+    The exfiltration service does not produce any notable logs in the current
+    scenario and testbed definition. As such this rule simply captures the
+    services process events (e.g., start and stop). As the start time probably
+    precedes the observation time we will only match the stop event with this.
+  index:
+    - audit-internal_share
+  # match any process event for the service unit of
+  # the exfiltration service
+  query:
+    - match:
+        event.category: process
+    - match:
+        auditd.log.unit: "{{ attacker.exfiltration_service.name }}"

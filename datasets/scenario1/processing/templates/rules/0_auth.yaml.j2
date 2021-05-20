@@ -1,0 +1,104 @@
+- type: elasticsearch.sequence
+  id: attacker.escalate.su.login
+  labels: 
+    - attacker_change_user
+    - escalate
+  description: >-
+    This rule labels auth log rows resulting from the attacker escalating to
+    a different user. This is done by relating the event sequence using the
+    target and source user.
+  index:
+    - auth-intranet_server
+  # we need the line number as tie breaker since auth logs
+  # only have second precision and all our events are
+  # expected to occur at the same time
+  tiebreaker_field: log.file.line
+  max_span: 30s
+  filter:
+    range:
+      {# round start time down and stop time up #}
+      "@timestamp":
+        # escalation phase start
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0) }}"
+        # escalation phase stop
+        lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+  sequences:
+    # we only need to specify the target user once since we are joining the events with it
+    - '[ auth where system.auth.session.status == "new" and system.auth.user == "{{ attacker.escalate_user.username }}" ] by system.auth.user'
+    - '[ auth where system.auth.su.result == "successful" and source.user.name == "{{ attacker.web_service_user.username }}" ] by system.auth.user'
+    - '[ auth where system.auth.su.result == "successful" and source.user.name == "{{ attacker.web_service_user.username }}" ] by system.auth.user'
+    - '[ auth where system.auth.pam.session_state == "opened" and system.auth.pam.origin == "su:session" ] by user.name'
+    - '[ auth where system.auth.pam.session_state == "opened" and system.auth.pam.origin == "systemd-user:session" ] by user.name'
+
+
+
+- type: elasticsearch.sequence
+  id: attacker.escalate.sudo.command
+  labels: 
+    - escalated_command
+    - escalated_sudo_command
+    - escalate
+  description: >-
+    This rule labels auth log rows resulting from the attacker invoking
+    a sudo command through the hijacked user. We label this by relating a
+    already labeled change user event to the sudo events via the used TTY and user.
+  index:
+    - auth-intranet_server
+  # we need the line number as tie breaker since auth logs
+  # only have second precision and all our events are
+  # expected to occur at the same time
+  tiebreaker_field: log.file.line
+  filter:
+    range:
+      "@timestamp":
+        # escalation phase start
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0) }}"
+        # escalation phase stop
+        lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+  # global by since all events use the same key for the user
+  by: system.auth.user
+  sequences:
+    # since EQL does not allow us to define an arbritary amount of equal events 
+    # we have to count the sudo events during the post processing phase and add
+    # a event per recorded sudo command
+    - '[ auth where kyoushi_labels.rules like "attacker.escalate.su.login" ] by system.auth.su.tty'
+    - '[ auth where system.auth.program == "sudo" ] by system.auth.sudo.tty'
+    - '[ auth where system.auth.program == "sudo" ] by system.auth.sudo.tty'
+    - '[ auth where system.auth.program == "sudo" ] by system.auth.sudo.tty'
+
+- type: elasticsearch.sequence
+  id: attacker.escalate.sudo.open
+  labels: 
+    - escalated_command
+    - escalated_sudo_command
+    - escalated_sudo_session
+    - escalate
+  description: >-
+    This rule labels auth log rows resulting from the attacker invoking
+    a sudo command that opens a pam session through the hijacked user.
+    We label this by relating it to an already labeled sudo command based
+    on proximity, i.e., the next sudo open and close session events after the command event
+    will be labeled. This rule can be very in accurate if pam events are interleaved.
+  index:
+    - auth-intranet_server
+  # we need the line number as tie breaker since auth logs
+  # only have second precision and all our events are
+  # expected to occur at the same time
+  tiebreaker_field: log.file.line
+  filter:
+    range:
+      "@timestamp":
+        # escalation phase start
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0) }}"
+        # escalation phase stop
+        lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+  # ToDO possible improvements:
+  # - add one rule per command invoked since not all commands open a session
+  # - in addition to -^ add hard time range match checks to the opened and closed events
+  #   time constraint checks might also make the rule more stable in cases where you have long running sessions
+  #   the current dataset only uses short sudo commands that terminate immediately so we are fine without the refinement
+  sequences:
+    - '[ auth where kyoushi_labels.flat.attacker.escalate.sudo.command != null and system.auth.sudo.command != "list" ]'
+    - '[ auth where process.name == "sudo" and system.auth.pam.session_state == "opened" ]'
+    - '[ auth where process.name == "sudo" and system.auth.pam.session_state == "closed" ]'
+

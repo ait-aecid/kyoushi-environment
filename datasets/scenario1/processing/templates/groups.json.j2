@@ -1,0 +1,9 @@
+{
+{% for group in groups.keys() | reject("match_any", (exclude_groups | default([]))) %}
+    "{{ group }}": [
+{% for server in groups[group] | reject("in", (exclude_hosts | default([]))) %}
+        "{{ server }}"{% if not loop.last %},{% endif %}
+{% endfor %}
+    ]{% if not loop.last %},{% endif %}
+{% endfor %}
+}

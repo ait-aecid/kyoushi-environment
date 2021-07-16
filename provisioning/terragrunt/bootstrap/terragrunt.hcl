@@ -26,28 +26,30 @@ inputs = {
     router_name = "aecid-testbed-router"
     sshkey = "testbed-key"
     floating_ip_pool = "provider-aecid-208"
-    networks = { 
-	local = { 
-                network = "local",
-                host_address_index = "1",
-		subnet = "local-subnet", 
-		cidr = "172.16.0.0/24", 
-                dns = [],
-                host_as_dns = true,
-                routes = null
-	}
+    networks = {
+        local = {
+            network = "local",
+            host_address_index = "1",
+            subnet = "local-subnet",
+            cidr = "172.16.0.0/24",
+            dns = [],
+            host_as_dns = true,
+            routes = null
+            fw_routes = null
+        }
         dmz = {
-                network = "dmz",
-                host_address_index = "1",
-		subnet = "dmz-subnet"
-		cidr = "172.16.100.0/24"
-                dns = [],
-                host_as_dns = true,
-                routes = null
+            network = "dmz",
+            host_address_index = "1",
+            subnet = "dmz-subnet"
+            cidr = "172.16.100.0/24"
+            dns = [],
+            host_as_dns = true,
+            routes = null
+            fw_routes = null
         }
     }
 }
 
 include {
-  path = find_in_parent_folders()
+    path = find_in_parent_folders()
 }

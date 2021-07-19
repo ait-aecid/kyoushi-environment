@@ -13,6 +13,12 @@ variable "networks" {
           gw   = string
         }
       ))
+      fw_routes = list(object(
+        {
+          cidr = string
+          gw   = string
+        }
+      ))
     })
   )
   description = "map of internal networks to be created. (Note that if host_as_dns is true host_address_index must not be null)"

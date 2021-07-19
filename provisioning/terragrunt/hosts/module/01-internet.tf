@@ -37,7 +37,7 @@ module "attackers" {
 ## External Mail Servers
 module "ext_mail" {
   count              = length(var.ext_mail)
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4"
+  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4.3"
   hostname           = "${var.ext_mail[count.index].name}_mail"
   host_address_index = var.ext_mail[count.index].ip_index
   tag                = "internet, ext_mail, mailserver"

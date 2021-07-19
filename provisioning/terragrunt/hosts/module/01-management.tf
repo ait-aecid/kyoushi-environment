@@ -1,6 +1,6 @@
 module "mgmthost" {
   count              = var.mgmthost_active ? 1 : 0
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4"
+  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4.3"
   hostname           = "mgmthost"
   tag                = "management"
   host_address_index = var.mgmthost_ip_index

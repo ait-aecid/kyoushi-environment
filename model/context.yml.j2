@@ -1,0 +1,25 @@
+{% set network_classes = ["a", "b", "c"] %}
+{% do random.shuffle(network_classes) %}
+{% set internet_ips = [] %}
+{% set internet_ips_count = 10 %}
+employees:
+{% set employees_internal_count = random.randint(1, 10) %}
+{% set employees_remote_count = random.randint(1, 10) %}
+    internal:
+{% for i in range(0, employees_internal_count) %}
+        - {{ i }}
+{% endfor %}
+    external:
+{% for i in range(0, employees_remote_count) %}
+        - {{ i }}
+{% endfor %}
+networks:
+    internet: 
+        address: '{{ faker.ipv4(network=True, address_class=network_classes[0], private=True).split("/")[0] }}'
+        mask: {{ random.randint(8, 24) }}
+    dmz:
+        address: '{{ faker.ipv4(network=True, address_class=network_classes[1], private=True).split("/")[0] }}'
+        mask: {{ random.randint(16, 24) }}
+    local:
+        address: '{{ faker.ipv4(network=True, address_class=network_classes[2], private=True).split("/")[0] }}'
+        mask: {{ random.randint(16, 24) }}

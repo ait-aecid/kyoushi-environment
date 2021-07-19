@@ -27,8 +27,8 @@ inputs = {
 
     sshkey = "testbed-key"
 
-    employee_capacity        = 7
-    remote_employee_capacity = 3
+    employee_capacity        = \var{context.employees.internal | length }
+    remote_employee_capacity = \var{context.employees.external | length }
     attacker_capacity = 1
     attacker_flavor = "m1.medium"
     ext_user_capacity = 10

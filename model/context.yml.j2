@@ -5,13 +5,57 @@
 employees:
 {% set employees_internal_count = random.randint(1, 10) %}
 {% set employees_remote_count = random.randint(1, 10) %}
+{% set ssh_admin_defined = false %}
     internal:
-{% for i in range(0, employees_internal_count) %}
-        - {{ i }}
-{% endfor %}
+{% for i in range(0, employees_internal_count + employees_remote_count) %}
+{% if i == employees_internal_count %}
     external:
-{% for i in range(0, employees_remote_count) %}
-        - {{ i }}
+{% endif %}
+        m{{ (i | string()).zfill(2) }}:
+          {% set first_name = faker.first_name() %}
+          first_name: {{ first_name }}
+          {% set last_name = faker.last_name() %}
+          last_name: {{ last_name }}
+          username: {{ (first_name[0] | lower) + (last_name | lower) }}
+          email_user: {{ (first_name | lower) + '.' + (last_name | lower) }}
+          email_domain: {% raw %} "{{ domains.company.domain }}" {% endraw %}
+          password: {{ faker.password(length=12, special_chars=False) }}
+          password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+          {% set wp_role = random.choice(['editor', 'administrator', '']) %}
+          {% if wp_role != '' %}
+          wp_role: {{ wp_role }}
+          {% endif %}
+          {% set samba_groups = random.choices(['admin', 'employees', 'management', 'accounting', ''], k=random.choice([1, 1, 1, 2])) %}
+          {% if (samba_groups | length) > 1 or samba_groups[0] != '' %}
+          samba_groups:
+          {% for samba_group in (samba_groups | unique) %}
+              {% if samba_group != '' %}
+              - {{ samba_group }}
+              {% endif %}
+          {% endfor %}
+          {% endif %}
+          {% set owncloud_groups = random.choices(['admin', 'employees', 'management', 'accounting', ''], k=random.choice([1, 1, 1, 2])) %}
+          {% if (owncloud_groups | length) > 1 or owncloud_groups[0] != '' %}
+          owncloud_groups:
+          {% for owncloud_group in (owncloud_groups | unique) %}
+              {% if owncloud_group != '' %}
+              - {{ owncloud_group }}
+              {% endif %}
+          {% endfor %}
+          {% endif %}
+          {% set is_admin = random.choice([false, false, false, true]) %}
+          {% if is_admin == true or (ssh_admin_defined == false and i == employees_internal_count + employees_remote_count - 1) %}
+          {% set ssh_admin_defined = true %}
+          ssh_key: yes
+          horde_admin: yes
+          ssh_admin: yes
+          shell: /bin/bash
+          sudo:
+              hosts: ALL
+              as: ALL
+              commands: ALL
+              nopasswd: yes
+          {% endif %}
 {% endfor %}
 networks:
     internet: 

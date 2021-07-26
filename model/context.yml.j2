@@ -5,7 +5,7 @@
 employees:
 {% set employees_internal_count = random.randint(1, 10) %}
 {% set employees_remote_count = random.randint(1, 10) %}
-{% set ssh_admin_defined = false %}
+{% set ssh_admin_with_wp_defined = [false] %}
     internal:
 {% for i in range(0, employees_internal_count + employees_remote_count) %}
 {% if i == employees_internal_count %}
@@ -22,6 +22,15 @@ employees:
           password: {{ faker.password(length=12, special_chars=False) }}
           password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
           {% set wp_role = random.choice(['editor', 'administrator', '']) %}
+          {% set ssh_admin = random.choice([false, false, false, true]) %}
+          {% if ssh_admin_with_wp_defined[0] == false and i == employees_internal_count + employees_remote_count - 1 %}
+          {% set wp_role = 'administrator' %}
+          {% set ssh_admin = true %}
+          {% endif %}
+          {% if wp_role == 'administrator' and ssh_admin == true %}
+          {% do ssh_admin_with_wp_defined.pop() %}
+          {% do ssh_admin_with_wp_defined.append(true) %}
+          {% endif %}
           {% if wp_role != '' %}
           wp_role: {{ wp_role }}
           {% endif %}
@@ -43,9 +52,7 @@ employees:
               {% endif %}
           {% endfor %}
           {% endif %}
-          {% set is_admin = random.choice([false, false, false, true]) %}
-          {% if is_admin == true or (ssh_admin_defined == false and i == employees_internal_count + employees_remote_count - 1) %}
-          {% set ssh_admin_defined = true %}
+          {% if ssh_admin == true %}
           ssh_key: yes
           horde_admin: yes
           ssh_admin: yes

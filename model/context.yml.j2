@@ -1,3 +1,4 @@
+{% set domain_names = ['umbrella', 'acme', 'xyz'] %} 
 {% set network_classes = ["a", "b", "c"] %}
 {% do random.shuffle(network_classes) %}
 {% set internet_ips = [] %}
@@ -5,7 +6,7 @@
 employees:
 {% set employees_internal_count = random.randint(1, 10) %}
 {% set employees_remote_count = random.randint(1, 10) %}
-{% set ssh_admin_with_wp_defined = [false] %}
+{% set ns = namespace(ssh_admin_with_wp_defined = false) %}
     internal:
 {% for i in range(0, employees_internal_count + employees_remote_count) %}
 {% if i == employees_internal_count %}
@@ -22,19 +23,18 @@ employees:
           password: {{ faker.password(length=12, special_chars=False) }}
           password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
           {% set wp_role = random.choice(['editor', 'administrator', '']) %}
-          {% set ssh_admin = random.choice([false, false, false, true]) %}
-          {% if ssh_admin_with_wp_defined[0] == false and i == employees_internal_count + employees_remote_count - 1 %}
+          {% set ssh_admin = numpy.choice([false, true], p=[0.75, 0.25]) %}
+          {% if ns.ssh_admin_with_wp_defined == false and i == employees_internal_count + employees_remote_count - 1 %}
           {% set wp_role = 'administrator' %}
           {% set ssh_admin = true %}
           {% endif %}
-          {% if wp_role == 'administrator' and ssh_admin == true %}
-          {% do ssh_admin_with_wp_defined.pop() %}
-          {% do ssh_admin_with_wp_defined.append(true) %}
+          {% if (wp_role == 'administrator' or wp_role == 'editor') and ssh_admin == true %}
+          {% set ns.ssh_admin_with_wp_defined = true %}
           {% endif %}
           {% if wp_role != '' %}
           wp_role: {{ wp_role }}
           {% endif %}
-          {% set samba_groups = random.choices(['admin', 'employees', 'management', 'accounting', ''], k=random.choice([1, 1, 1, 2])) %}
+          {% set samba_groups = random.choices(['admin', 'employees', 'management', 'accounting', ''], k=numpy.choice([1, 2], p=[0.75, 0.25])) %}
           {% if (samba_groups | length) > 1 or samba_groups[0] != '' %}
           samba_groups:
           {% for samba_group in (samba_groups | unique) %}
@@ -43,7 +43,7 @@ employees:
               {% endif %}
           {% endfor %}
           {% endif %}
-          {% set owncloud_groups = random.choices(['admin', 'employees', 'management', 'accounting', ''], k=random.choice([1, 1, 1, 2])) %}
+          {% set owncloud_groups = random.choices(['admin', 'employees', 'management', 'accounting', ''], k=numpy.choice([1, 2], p=[0.75, 0.25])) %}
           {% if (owncloud_groups | length) > 1 or owncloud_groups[0] != '' %}
           owncloud_groups:
           {% for owncloud_group in (owncloud_groups | unique) %}
@@ -64,6 +64,43 @@ employees:
               nopasswd: yes
           {% endif %}
 {% endfor %}
+ext_mail_users:
+{% set ext_mail_users_count = random.randint(1, 10) %}
+{% for i in range(0, ext_mail_users_count) %}
+    {% set first_name = faker.first_name() %}
+    - first_name: {{ first_name }}
+      {% set last_name = faker.last_name() %}
+      {% set domain_name = random.choice(domain_names) %}
+      last_name: {{ last_name }}
+      {% if domain_names.index(domain_name) == 0 %}
+      username: {{ (first_name | lower) + '.' + (last_name | lower) }}
+      {% else %}
+      username: {{ (last_name | lower) + (first_name[0] | lower) }}
+      {% endif %}
+      email_user: {{ (first_name | lower) + '.' + (last_name | lower) }}
+      email_domain: {{ '"{{' }} domains.{{ domain_name }}.domain {{ '}}"' }}
+      password: {{ faker.password(length=12, special_chars=False) }}
+      password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+{% endfor %}
+service_users:
+    owncloud_samba:
+        username: owncloud
+        password: {{ faker.password(length=12, special_chars=False) }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+        samba_groups:
+          - management
+    owncloud:
+        username: owncloud
+        password: {{ faker.password(length=12, special_chars=False) }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+    ext_mail:
+        username: horde
+        password: {{ faker.password(length=12, special_chars=False) }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+    mail:
+        username: horde
+        password: {{ faker.password(length=12, special_chars=False) }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
 networks:
     internet: 
         address: '{{ faker.ipv4(network=True, address_class=network_classes[0], private=True).split("/")[0] }}'
@@ -74,3 +111,20 @@ networks:
     local:
         address: '{{ faker.ipv4(network=True, address_class=network_classes[2], private=True).split("/")[0] }}'
         mask: {{ random.randint(16, 24) }}
+dnsteal_repo: https://github.com/max-frank/dnsteal.git
+dnsteal_tag: v2.1
+dnsteal_service_user: root
+dnsteal_service_group: root
+dnsteal_install_dir: /opt/dnsteal
+dnsteal_venv: {{ '"{{' }} dnsteal_install_dir {{ '}}' }}/venv"
+dnsteal_log_file: /var/log/dnsteal.log
+dnsteal_files_dir: /var/log/dnsteal
+dnsteal_service_script: /usr/local/bin/dnsteal.sh
+dnsteal_domain: wtulqzvb{{ ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=8)) }}.at
+dnsteal_force_ip: {{ random.choice(['no', 'yes']) }}
+dnsteal_compressed: {{ random.choice(['no', 'yes']) }}
+dnsteal_verbose: {{ random.choice(['no', 'yes']) }}
+dnsteal_sub_domains: {{ random.randint(4, 16) }}
+dnsteal_block_size: {{ random.randint(32, 63) }}
+dnsteal_bind_ip: {{ '"{{' }} ansible_default_ipv4.address {{ '}}"' }}
+dnsteal_endtime: 2021-03-31T23:30

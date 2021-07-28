@@ -111,20 +111,86 @@ networks:
     local:
         address: '{{ faker.ipv4(network=True, address_class=network_classes[2], private=True).split("/")[0] }}'
         mask: {{ random.randint(16, 24) }}
-dnsteal_repo: https://github.com/max-frank/dnsteal.git
-dnsteal_tag: v2.1
-dnsteal_service_user: root
-dnsteal_service_group: root
-dnsteal_install_dir: /opt/dnsteal
-dnsteal_venv: {{ '"{{' }} dnsteal_install_dir {{ '}}' }}/venv"
-dnsteal_log_file: /var/log/dnsteal.log
-dnsteal_files_dir: /var/log/dnsteal
-dnsteal_service_script: /usr/local/bin/dnsteal.sh
-dnsteal_domain: wtulqzvb{{ ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=8)) }}.at
+attacker:
+    {% set first_name = faker.first_name() %}
+    {% set last_name = faker.last_name() %}
+    username: {{ (first_name[0] | lower) + (last_name | lower) }}
+    password: {{ faker.password(length=12, special_chars=False) }}
+    password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+kyoushi_attacker_start: +P02DT{{ (random.randint(0, 12) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M
+kyoushi_attacker_escalate_start: +P02DT{{ (random.randint(0, 12) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M
+kyoushi_attacker_recon_hosts:
+  - 172.16.0.254
+  - {{ faker.ipv4(network=True, address_class=network_classes[1], private=True).split("/")[0] }}
+kyoushi_attacker_web_shell_name: {{ ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=10)) }}
+kyoushi_attacker_reverse_shell_port: {{ random.randint(9900, 9999) }}
+{% set web_shell_commands_options = ["check_user_id", "check_network_config", "check_pwd", "read_passwd"] %}
+{% set web_shell_commands_selected = random.sample(web_shell_commands_options, random.randint(2, (web_shell_commands_options | length))) %}
+{% do web_shell_commands_selected.append("list_web_dir") %}
+{% do random.shuffle(web_shell_commands_selected) %}
+kyoushi_attacker_web_shell_commands:
+{% for web_shell_command in web_shell_commands_selected %}
+  {% if web_shell_command == "check_user_id" %}
+  - name: "check_user_id"
+    cmd: ["id"]
+  {% elif web_shell_command == "check_network_config" %}
+  - name: "check_network_config"
+    cmd: ["ip", "addr"]
+  {% elif web_shell_command == "check_pwd" %}
+  - name: "check_pwd"
+    cmd: ["pwd"]
+  {% elif web_shell_command == "read_passwd" %}
+  - name: "read_passwd"
+    cmd: ["cat", "/etc/passwd"]
+  {% elif web_shell_command == "list_web_dir" %}
+  - name: "list_web_dir"
+    cmd: ["ls", "-laR", "/var/www"]
+    children:
+      - name: "check_wp_config"
+        cmd: ["cat", "/var/www/{{ '{{' }} hostvars['intranet_server'].wp_apache_hostname {{ '}}' }}/wp-config.php"]
+        children:
+          - name: "dump_wp_users"
+            cmd: ["mysql", "-u", "{{ '{{' }} hostvars['intranet_server'].wp_mysqldb_user {{ '}}' }}" ,"-p{{ '{{' }} hostvars['intranet_server'].wp_mysqldb_password {{ '}}' }}", "{{ '{{' }} hostvars['intranet_server'].wp_mysqldb_dbname {{ '}}' }}", "-e", "'select * from wp_users'"]
+  {% endif %}
+{% endfor %}
+{% set reverse_shell_commands_options = ["check_ssh_keys", "check_groups", "check_sudo"] %}
+{% set reverse_shell_commands_selected = random.sample(reverse_shell_commands_options, random.randint(2, (reverse_shell_commands_options | length))) %}
+{% do random.shuffle(reverse_shell_commands_selected) %}
+kyoushi_attacker_reverse_shell_commands:
+{% for reverse_shell_command in reverse_shell_commands_selected %}
+  {% if reverse_shell_command == "check_ssh_keys" %}
+  - name: "check_ssh_keys"
+    cmd: "ls -la ~/.ssh"
+  {% elif reverse_shell_command == "check_groups" %}
+  - name: "check_groups"
+    cmd: "groups"
+  {% elif reverse_shell_command == "check_sudo" %}
+  - name: "check_sudo"
+    cmd: "sudo -l"
+    children:
+        - name: "read_shadow"
+          cmd: "sudo cat /etc/shadow"
+        - name: "list_root"
+          cmd: "sudo ls -laR /root/"
+  {% endif %}
+{% endfor %}
+{% set kyoushi_sm_idle_big_min = random.randint(20, 50) %}
+kyoushi_sm_idle_big_min: {{ kyoushi_sm_idle_big_min }}
+kyoushi_sm_idle_big_max: {{ random.randint(kyoushi_sm_idle_big_min + 10, 80) }}
+{% set kyoushi_sm_idle_medium_min = random.randint(15, 25) %}
+kyoushi_sm_idle_medium_min: {{ kyoushi_sm_idle_medium_min }}
+kyoushi_sm_idle_medium_max: {{ random.randint(kyoushi_sm_idle_medium_min + 5, 35) }}
+{% set kyoushi_sm_idle_small_min = random.randint(3, 5) %}
+kyoushi_sm_idle_small_min: {{ kyoushi_sm_idle_small_min }}
+kyoushi_sm_idle_small_max: {{ random.randint(kyoushi_sm_idle_small_min + 5, 15) }}
+{% set kyoushi_sm_idle_tiny_min = random.randint(1, 2) %}
+kyoushi_sm_idle_tiny_min: {{ kyoushi_sm_idle_tiny_min }}
+kyoushi_sm_idle_tiny_max: {{ random.randint(kyoushi_sm_idle_tiny_min + 1, 4) }}
+dnsteal_domain: {{ ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=8)) }}.com
 dnsteal_force_ip: {{ random.choice(['no', 'yes']) }}
 dnsteal_compressed: {{ random.choice(['no', 'yes']) }}
 dnsteal_verbose: {{ random.choice(['no', 'yes']) }}
 dnsteal_sub_domains: {{ random.randint(4, 16) }}
 dnsteal_block_size: {{ random.randint(32, 63) }}
 dnsteal_bind_ip: {{ '"{{' }} ansible_default_ipv4.address {{ '}}"' }}
-dnsteal_endtime: 2021-03-31T23:30
+dnsteal_endtime: +P02DT{{ (random.randint(0, 12) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M

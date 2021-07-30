@@ -28,22 +28,22 @@
   src: provisioning/ansible/group_vars/all/employees.yml.j2
   dest: provisioning/ansible/group_vars/all/employees.yml
 
-{% set ns = namespace(cnt = 0) %}
-{% for employee in employees.internal.keys() %}
-- name: Internal employee dir
-  type: dir
-  src: provisioning/ansible/host_vars/internal_employee_{{ ns.cnt }}
-  dest: provisioning/ansible/host_vars/internal_employee_{{ ns.cnt }}
-  contents: []
-  delete: false
-
-- name: Internal employee configuration
+- name: Employee group configuration
   type: file
-{% if "ssh_admin" in employees.internal[employee] %}
-  src: provisioning/ansible/host_vars/internal_employee_6/kyoushi.yml.j2
-{% else %}
-  src: provisioning/ansible/host_vars/internal_employee_1/kyoushi.yml.j2
-{% endif %}
-  dest: provisioning/ansible/host_vars/internal_employee_{{ ns.cnt }}/kyoushi.yml
-{% set ns.cnt = ns.cnt + 1 %}
+  src: provisioning/ansible/group_vars/employee/kyoushi.yml.j2
+  dest: provisioning/ansible/group_vars/employee/kyoushi.yml
+
+{% for employee in employees.internal.values() %}
+- name: Internal employee
+  type: dir
+  src: model/templates/employees/
+  dest: provisioning/ansible/host_vars/internal_employee_{{ employee.id }}
+  contents:
+    - name: Internal employee configuration
+      type: file
+      src: kyoushi.yml.j2
+      dest: kyoushi.yml
+      extra:
+        employee: {{ employee }}
+  delete: false
 {% endfor %}

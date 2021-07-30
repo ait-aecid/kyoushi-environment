@@ -13,6 +13,7 @@ employees:
     external:
 {% endif %}
         m{{ (i | string()).zfill(2) }}:
+          id: {{ i }}
           {% set first_name = faker.first_name() %}
           first_name: {{ first_name }}
           {% set last_name = faker.last_name() %}
@@ -123,57 +124,43 @@ kyoushi_attacker_recon_hosts:
   - 172.16.0.254
   - {{ faker.ipv4(network=True, address_class=network_classes[1], private=True).split("/")[0] }}
 kyoushi_attacker_web_shell_name: {{ ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=10)) }}
-kyoushi_attacker_reverse_shell_port: {{ random.randint(9900, 9999) }}
-{% set web_shell_commands_options = ["check_user_id", "check_network_config", "check_pwd", "read_passwd"] %}
+kyoushi_attacker_reverse_shell_port: {{ random.randint(1100, 65000) }}
+{% set web_shell_commands_options = [
+{"name": "check_user_id", 
+ "cmd": ["id"]}, 
+{"name": "check_network_config", 
+ "cmd": ["ip", "addr"]}, 
+{"name": "check_pwd", 
+ "cmd": ["pwd"]}, 
+{"name": "read_passwd", 
+ "cmd": ["cat", "/etc/passwd"]}] %}
 {% set web_shell_commands_selected = random.sample(web_shell_commands_options, random.randint(2, (web_shell_commands_options | length))) %}
-{% do web_shell_commands_selected.append("list_web_dir") %}
-{% do random.shuffle(web_shell_commands_selected) %}
-kyoushi_attacker_web_shell_commands:
-{% for web_shell_command in web_shell_commands_selected %}
-  {% if web_shell_command == "check_user_id" %}
-  - name: "check_user_id"
-    cmd: ["id"]
-  {% elif web_shell_command == "check_network_config" %}
-  - name: "check_network_config"
-    cmd: ["ip", "addr"]
-  {% elif web_shell_command == "check_pwd" %}
-  - name: "check_pwd"
-    cmd: ["pwd"]
-  {% elif web_shell_command == "read_passwd" %}
-  - name: "read_passwd"
-    cmd: ["cat", "/etc/passwd"]
-  {% elif web_shell_command == "list_web_dir" %}
-  - name: "list_web_dir"
-    cmd: ["ls", "-laR", "/var/www"]
-    children:
-      - name: "check_wp_config"
-        cmd: ["cat", "/var/www/{{ '{{' }} hostvars['intranet_server'].wp_apache_hostname {{ '}}' }}/wp-config.php"]
-        children:
-          - name: "dump_wp_users"
-            cmd: ["mysql", "-u", "{{ '{{' }} hostvars['intranet_server'].wp_mysqldb_user {{ '}}' }}" ,"-p{{ '{{' }} hostvars['intranet_server'].wp_mysqldb_password {{ '}}' }}", "{{ '{{' }} hostvars['intranet_server'].wp_mysqldb_dbname {{ '}}' }}", "-e", "'select * from wp_users'"]
-  {% endif %}
-{% endfor %}
-{% set reverse_shell_commands_options = ["check_ssh_keys", "check_groups", "check_sudo"] %}
+{% do web_shell_commands_selected.append(
+{"name": "list_web_dir", 
+ "cmd": ["ls", "-laR", "/var/www"], 
+ "children": [
+  {"name": "check_wp_config", 
+   "cmd": ["cat", "/var/www/{{ '{{' }} hostvars['intranet_server'].wp_apache_hostname {{ '}}' }}/wp-config.php"], 
+   "children": [
+    {"name": "dump_wp_users", 
+     "cmd": ["mysql", "-u", "{{ '{{' }} hostvars['intranet_server'].wp_mysqldb_user {{ '}}' }}" ,"-p{{ '{{' }} hostvars['intranet_server'].wp_mysqldb_password {{ '}}' }}", "{{ '{{' }} hostvars['intranet_server'].wp_mysqldb_dbname {{ '}}' }}", "-e", "'select * from wp_users'"]}]}]}) %}
+kyoushi_attacker_web_shell_commands: {{ web_shell_commands_selected }}
+{% set reverse_shell_commands_options = [
+{"name": "check_ssh_keys",
+ "cmd": "ls -la ~/.ssh"}, 
+{"name": "check_groups", 
+ "cmd": "groups"},
+{"name": "check_sudo",
+ "cmd": "sudo -l",
+ "children": [
+  {"name": "read_shadow",
+   "cmd": "sudo cat /etc/shadow"},
+  {"name": "list_root",
+   "cmd": "sudo ls -laR /root/"}]}] %}
 {% set reverse_shell_commands_selected = random.sample(reverse_shell_commands_options, random.randint(2, (reverse_shell_commands_options | length))) %}
-{% do random.shuffle(reverse_shell_commands_selected) %}
-kyoushi_attacker_reverse_shell_commands:
-{% for reverse_shell_command in reverse_shell_commands_selected %}
-  {% if reverse_shell_command == "check_ssh_keys" %}
-  - name: "check_ssh_keys"
-    cmd: "ls -la ~/.ssh"
-  {% elif reverse_shell_command == "check_groups" %}
-  - name: "check_groups"
-    cmd: "groups"
-  {% elif reverse_shell_command == "check_sudo" %}
-  - name: "check_sudo"
-    cmd: "sudo -l"
-    children:
-        - name: "read_shadow"
-          cmd: "sudo cat /etc/shadow"
-        - name: "list_root"
-          cmd: "sudo ls -laR /root/"
-  {% endif %}
-{% endfor %}
+kyoushi_attacker_reverse_shell_commands: {{ reverse_shell_commands_selected  }}
+kyoushi_sm_start: 2021-03-28T00:01
+kyoushi_sm_end: 2021-04-03T21:00
 {% set kyoushi_sm_idle_big_min = random.randint(20, 50) %}
 kyoushi_sm_idle_big_min: {{ kyoushi_sm_idle_big_min }}
 kyoushi_sm_idle_big_max: {{ random.randint(kyoushi_sm_idle_big_min + 10, 80) }}
@@ -183,14 +170,17 @@ kyoushi_sm_idle_medium_max: {{ random.randint(kyoushi_sm_idle_medium_min + 5, 35
 {% set kyoushi_sm_idle_small_min = random.randint(3, 5) %}
 kyoushi_sm_idle_small_min: {{ kyoushi_sm_idle_small_min }}
 kyoushi_sm_idle_small_max: {{ random.randint(kyoushi_sm_idle_small_min + 5, 15) }}
-{% set kyoushi_sm_idle_tiny_min = random.randint(1, 2) %}
+{% set kyoushi_sm_idle_tiny_min = random.uniform(1, 2) %}
 kyoushi_sm_idle_tiny_min: {{ kyoushi_sm_idle_tiny_min }}
-kyoushi_sm_idle_tiny_max: {{ random.randint(kyoushi_sm_idle_tiny_min + 1, 4) }}
-dnsteal_domain: {{ ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=8)) }}.com
+kyoushi_sm_idle_tiny_max: {{ random.uniform(kyoushi_sm_idle_tiny_min + 1, 4) }}
+{% if random.random() < 0.5 %}
+dnsteal_domain: {{ faker.dga() }}
+{% else %}
+dnsteal_domain: {{ faker.hostname() }}
+{% endif %}
 dnsteal_force_ip: {{ random.choice(['no', 'yes']) }}
 dnsteal_compressed: {{ random.choice(['no', 'yes']) }}
 dnsteal_verbose: {{ random.choice(['no', 'yes']) }}
 dnsteal_sub_domains: {{ random.randint(4, 16) }}
 dnsteal_block_size: {{ random.randint(32, 63) }}
-dnsteal_bind_ip: {{ '"{{' }} ansible_default_ipv4.address {{ '}}"' }}
-dnsteal_endtime: +P02DT{{ (random.randint(0, 12) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M
+dnsteal_endtime: 2021-03-31T23:30

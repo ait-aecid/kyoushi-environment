@@ -161,16 +161,41 @@ kyoushi_sm_ssh_password: "\var{local_context.employee.password}"
 #kyoushi_sm_ssh_key: /some/path
 
 # If the user should verify the SSH servers host key by default
-kyoushi_sm_ssh_verify: True
+\{% set ext_employees_id_list = [] } \{% for ext_employee in (context.employees.external.values() | list) } \{% do ext_employees_id_list.append(ext_employee.id) } \{% endfor }
+\{% if local_context.employee.id in ext_employees_id_list }
+kyoushi_sm_ssh_verify: False
 
-# Optional SSH Proxy Config
-# The host or IP of the default SSH proxy server
-#kyoushi_sm_ssh_proxy_host: some.host
-#kyoushi_sm_ssh_proxy_port: 22
-#kyoushi_sm_ssh_proxy_username: defaults to ssh user
-#kyoushi_sm_ssh_proxy_key: defaults to ssh key
-# If the SSH host key should be verified or not
-# kyoushi_sm_ssh_proxy_verify: True
+# Default list of command chains the user can execute on the hosts.
+kyoushi_sm_ssh_commands:
+  - date
+  - ip addr
+  - ps aux
+  - - cmd: tail -F /var/log/syslog
+      sudo: yes
+      expect: '.*' # we just wait for something to show
+      idle_after: medium
+    - "\x03" # sigint
+  - - cmd: top
+      expect: "avail Mem"
+      idle_after: medium
+    - "\x03" # sigint
+
+# Mapping of host identifiers to the probabilities of them being selected.
+#   <host id>:<probability>
+kyoushi_sm_ssh_hosts:
+  \var{({"mail": random.uniform(0.2, 0.8), "intranet_server": random.uniform(0.2, 0.8)} | normalize_distribution)}
+
+# Mapping of host identifiers to their configurations.
+# <host id>:<HostConfig>
+kyoushi_sm_ssh_host_configs:
+  mail:
+    host: "{{ hostvars['mail'].openstack.addresses.dmz[0].addr }}"
+    include_default_commands: True
+  intranet_server:
+    host: "{{ hostvars['intranet_server'].openstack.addresses.local[0].addr }}"
+    include_default_commands: True
+\{% else }
+kyoushi_sm_ssh_verify: True
 
 # Default list of command chains the user can execute on the hosts.
 kyoushi_sm_ssh_commands: []
@@ -182,6 +207,17 @@ kyoushi_sm_ssh_hosts: {}
 # Mapping of host identifiers to their configurations.
 # <host id>:<HostConfig>
 kyoushi_sm_ssh_host_configs: {}
+\{% endif }
+
+
+# Optional SSH Proxy Config
+# The host or IP of the default SSH proxy server
+#kyoushi_sm_ssh_proxy_host: some.host
+#kyoushi_sm_ssh_proxy_port: 22
+#kyoushi_sm_ssh_proxy_username: defaults to ssh user
+#kyoushi_sm_ssh_proxy_key: defaults to ssh key
+# If the SSH host key should be verified or not
+# kyoushi_sm_ssh_proxy_verify: True
 
 # web browser config
 

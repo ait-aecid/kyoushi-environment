@@ -47,3 +47,18 @@
         employee: {{ employee }}
   delete: false
 {% endfor %}
+
+{% for employee in employees.external.values() %}
+- name: External employee
+  type: dir
+  src: model/templates/employees/
+  dest: provisioning/ansible/host_vars/remote_employee_{{ employee.id }}
+  contents:
+    - name: External employee configuration
+      type: file
+      src: kyoushi.yml.j2
+      dest: kyoushi.yml
+      extra:
+        employee: {{ employee }}
+  delete: false
+{% endfor %}

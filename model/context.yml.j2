@@ -112,6 +112,11 @@ networks:
     local:
         address: '{{ faker.ipv4(network=True, address_class=network_classes[2], private=True).split("/")[0] }}'
         mask: {{ random.randint(16, 24) }}
+min_sm_start_hour: 5
+max_sm_start_hour: 9
+min_sm_end_hour: 17
+max_sm_end_hour: 22
+kyoushi_files: ["BrooksMarshAndBray.docx", "HamiltonInc.docx", "JonesPlc.docx", "Travis-ramsey.docx", "WilliamsBallardAndWest.docx", "binoculars.png", "choose.zip", "control.txt", "everything.zip", "golf.png", "movie.png", "politics.zip", "ruby.png", "tag.png", "west.txt", "BrooksMarshAndBray.pdf", "HamiltonInc.pdf", "JonesPlc.pdf", "Travis-ramsey.pdf", "WilliamsBallardAndWest.pdf", "block.png", "claim.txt", "despite.zip", "expert.zip", "institution.zip", "must.zip", "program.txt", "send.png", "tag_green.png", "word.png", "FrazierLtd.docx", "Harris-gutierrez.docx", "MoralesGroup.docx", "White-martin.docx", "adobe.png", "century.zip", "conflict.png", "each.zip", "feed.png", "ip_addresses.xlsx", "offer.zip", "puzzle.png", "sister.txt", "unit.zip", "world.txt", "FrazierLtd.pdf", "Harris-gutierrez.pdf", "MoralesGroup.pdf", "White-martin.pdf", "between.zip", "chart.png", "contact.png", "environment.zip", "globe.png", "lot.txt", "pane.png", "reference.png", "smiley.png", "war.txt"]
 attacker:
     {% set first_name = faker.first_name() %}
     {% set last_name = faker.last_name() %}

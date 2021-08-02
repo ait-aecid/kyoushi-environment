@@ -18,23 +18,23 @@ kyoushi_user_group: "\var{local_context.employee.username}"
 \{% set max_sm_end_hour = 22 }
 kyoushi_sm_schedule:
   saturday:
-    start_time: "\var{(random.randint(min_sm_start_hour, max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
-    end_time: "\var{(random.randint(min_sm_end_hour, max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   monday:
-start_time: "\var{(random.randint(min_sm_start_hour, max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
-    end_time: "\var{(random.randint(min_sm_end_hour, max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   tuesday:
-start_time: "\var{(random.randint(min_sm_start_hour, max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
-    end_time: "\var{(random.randint(min_sm_end_hour, max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   wednesday:
-start_time: "\var{(random.randint(min_sm_start_hour, max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
-    end_time: "\var{(random.randint(min_sm_end_hour, max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   thursday:
-start_time: "\var{(random.randint(min_sm_start_hour, max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
-    end_time: "\var{(random.randint(min_sm_end_hour, max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   friday:
-start_time: "\var{(random.randint(min_sm_start_hour, max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
-    end_time: "\var{(random.randint(min_sm_end_hour, max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
 
 # idle config
 \{% set kyoushi_sm_idle_big_min = random.randint(400, 600) }
@@ -114,13 +114,9 @@ kyoushi_sm_horde_contacts:
 \{% endfor }
 
 # A dict of attachment files the user might send
-kyoushi_sm_horde_attachments: |
-  {
-    {# By default each file has equal chance to be chosen #}
-    {% for _file in kyoushi_files %}
-    "{{ kyoushi_files_dir }}/{{ _file | basename }}": 1{% if not loop.last %},{% endif %}
-    {% endfor %}
-  }
+kyoushi_sm_horde_attachments:
+\{% for file in context.kyoushi_files }  "{{ kyoushi_files_dir }}/\var{file}": \var{random.choice([0.0001, random.random()])}
+\{% endfor }
 #The probability that an additional recipient is added to a mail
 kyoushi_sm_horde_extra_recipient: \var{random.uniform(0.05, 0.2)}
 # The maximum amount of recipients
@@ -140,13 +136,9 @@ kyoushi_sm_owncloud_username: "\var{local_context.employee.username}"
 kyoushi_sm_owncloud_password: "\var{local_context.employee.password}"
 # Files the user might upload mapped to their propabilities
 #  <path>:<probability>
-kyoushi_sm_owncloud_upload_files: |
-  {
-    {# By default each file has equal chance to be chosen #}
-    {% for _file in kyoushi_files %}
-    "{{ kyoushi_files_dir }}/{{ _file | basename }}": 1{% if not loop.last %},{% endif %}
-    {% endfor %}
-  }
+kyoushi_sm_owncloud_upload_files:
+\{% for file in context.kyoushi_files }  "{{ kyoushi_files_dir }}/\var{file}": \var{random.choice([0.0001, random.random()])}
+\{% endfor }
 # List of regular expresions used to control which 
 # directories can be modified. i.e., dir create, file upload, delete
 # (default means any directory other than root)
@@ -261,87 +253,43 @@ kyoushi_sm_states_horde_selecting_menu:
   \var{({"nav_mail": random.uniform(0.2, 0.4), "nav_preferences": random.uniform(0.05, 0.15), "nav_admin": 0, "nav_notes": random.uniform(0.1, 0.2), "nav_tasks": random.uniform(0.05, 0.15), "nav_address_book": random.uniform(0.05, 0.15), "nav_calendar": random.uniform(0.1, 0.2), "return": random.uniform(0.05, 0.1), "extra": {"return_increase": random.uniform(1.2, 1.8)}} | normalize_distribution)}
 
 kyoushi_sm_states_horde_mails_page:
-  view_mail: 0.45
-  new_mail: 0.35
-  refresh_mail: 0.1
-  return: 0.1
-  extra: 
-    return_increase: 1.2
+  \var{({"view_mail": random.uniform(0.3, 0.5), "new_mail": random.uniform(0.2, 0.4), "refresh_mail": random.uniform(0.05, 0.15), "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.1, 1.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_horde_mail_view:
-  delete_mail: 0.3
-  open_mail: 0.4
-  do_nothing: 0.3
+  \var{({"delete_mail": random.uniform(0.1, 0.4), "open_mail": random.uniform(0.2, 0.6), "do_nothing": random.uniform(0.1, 0.5)} | normalize_distribution)}
 
 kyoushi_sm_states_horde_mail_info:
-  delete_mail: 0.3
-  reply_mail: 0.7
+  \var{({"delete_mail": random.uniform(0.1, 0.5), "reply_mail": random.uniform(0.4, 0.9)} | normalize_distribution)}
 
 kyoushi_sm_states_horde_admin_page:
-  nav_config: 0.15
-  nav_groups: 0.15
-  nav_users: 0.09
-  nav_sessions: 0.09
-  nav_alarms: 0.09
-  nav_locks: 0.09
-  nav_permissions: 0.09
-  nav_php_shell: 0.05
-  nav_sql_shell: 0.05
-  nav_cli_shell: 0.05
-  return: 0.1
-  extra: 
-    return_increase: 2
+  \var{({"nav_config": random.uniform(0.05, 0.25), "nav_groups": random.uniform(0.05, 0.25), "nav_users": random.uniform(0.01, 0.1), "nav_sessions": random.uniform(0.01, 0.1), "nav_alarms": random.uniform(0.01, 0.1), "nav_locks": random.uniform(0.01, 0.1), "nav_permissions": random.uniform(0.01, 0.1), "nav_php_shell": random.uniform(0.01, 0.05), "nav_sql_shell": random.uniform(0.01, 0.05), "nav_cli_shell": random.uniform(0.01, 0.05), "return": random.uniform(0.05, 0.2), "extra": {"return_increase": random.uniform(1.5, 2.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_horde_admin_groups_page:
-  group_add: 0.45
-  group_delete: 0.25
-  return: 0.3
-  extra: 
-    return_increase: 2
+  \var{({"group_add": random.uniform(0.2, 0.6), "group_delete": random.uniform(0.1, 0.3), "return": random.uniform(0.2, 0.4), "extra": {"return_increase": random.uniform(1.5, 2.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_horde_notes_page:
-  new_note: 0.5
-  edit_note: 0.4
-  return: 0.1
-  extra: 
-    return_increase: 2
+  \var{({"new_note": random.uniform(0.3, 0.8), "edit_note": random.uniform(0.2, 0.6), "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.5, 2.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_horde_note_editor:
-  write_note: 0.6
-  delete_note: 0.4
+  \var{({"write_note": random.uniform(0.3, 0.8), "delete_note": random.uniform(0.2, 0.5)} | normalize_distribution)}
 
 kyoushi_sm_states_horde_tasks_page:
-  new_task: 0.5
-  edit_task: 0.4
-  return: 0.1
-  extra: 
-    return_increase: 1.4
+  \var{({"new_task": random.uniform(0.3, 0.8), "edit_task": random.uniform(0.2, 0.5), "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.1, 2)}} | normalize_distribution)}
 
 kyoushi_sm_states_horde_address_book_page:
-  new_contact: 0.2
-  browse_contacts: 0.675
-  return: 0.125
-  extra: 
-    return_increase: 1.4
+  \var{({"new_contact": random.uniform(0.1, 0.3), "browse_contacts": random.uniform(0.5, 0.9), "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.1, 1.7)}} | normalize_distribution)}
 
 kyoushi_sm_states_horde_contacts_browser:
-  new_contact: 0.35
-  view_contact: 0.65
+  \var{({"new_contact": random.uniform(0.1, 0.4), "view_contact": random.uniform(0.5, 0.9)} | normalize_distribution)}
 
 kyoushi_sm_states_horde_contact_info:
-  delete_contact: 0.4
-  do_nothing: 0.6
+  \var{({"delete_contact": random.uniform(0.2, 0.5), "do_nothing": random.uniform(0.5, 0.9)} | normalize_distribution)}
 
 kyoushi_sm_states_horde_calendar_page:
-  new_event: 0.4
-  edit_event: 0.35
-  return: 0.25
-  extra: 
-    return_increase: 2
+  \var{({"new_event": random.uniform(0.2, 0.5), "edit_event": random.uniform(0.1, 0.4), "return": random.uniform(0.2, 0.3), "extra": {"return_increase": random.uniform(1.5, 2.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_horde_event_edit:
-  write_event: 0.6
-  delete_event: 0.4
+  \var{({"write_event": random.uniform(0.4, 0.7), "delete_event": random.uniform(0.2, 0.5)} | normalize_distribution)}
 
 
 # owncloud activity states configs
@@ -359,115 +307,47 @@ kyoushi_sm_states_owncloud:
 
 kyoushi_sm_states_owncloud_login_page:
   # The chance the user will use an incorrect password
-  fail_chance: 0.05
+  fail_chance: \var{random.uniform(0.01, 0.1)}
   # Fail chance decrease factor
-  fail_decrease: 0.9
+  fail_decrease: \var{random.uniform(0.8, 0.95)}
 
 kyoushi_sm_states_owncloud_logout_choice:
   # The chance the user will logout when stopping the owncloud activity
-  logout_chance: 0.05
+  logout_chance: \var{random.uniform(0.01, 0.1)}
 
 kyoushi_sm_states_owncloud_selecting_menu:
-  nav_all: 0.25
-  nav_favorites: 0.2
-  nav_sharing_in: 0.25
-  nav_sharing_out: 0.2
-  return: 0.1
-  extra:
-    return_increase: 1.25
+  \var{({"nav_all": random.uniform(0.1, 0.4), "nav_favorites": random.uniform(0.1, 0.3), "nav_sharing_in": random.uniform(0.1, 0.4), "nav_sharing_out": random.uniform(0.1, 0.3), "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.1, 1.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_owncloud_all_files:
-  scroll_down: 0.1
-  favorite: 0.05
-  remove_favorite: 0.05
-  open_directory: 0.1
-  nav_root: 0.075
-  download_file: 0.1
-  delete_file: 0.075
-  upload_file: 0.075
-  download_directory: 0.05
-  delete_directory: 0.05
-  create_directory: 0.075
-  view_details: 0.125
-  return: 0.075
-  extra:
-    return_increase: 1.25
+  \var{({"scroll_down": random.uniform(0.05, 0.15), "favorite": random.uniform(0.01, 0.1), "remove_favorite": random.uniform(0.01, 0.1), "open_directory": random.uniform(0.05, 0.15), "nav_root": random.uniform(0.05, 0.1), "download_file": random.uniform(0.05, 0.15), "delete_file": random.uniform(0.05, 0.1), "upload_file": random.uniform(0.05, 0.1), "download_directory": random.uniform(0.01, 0.1), "delete_directory": random.uniform(0.01, 0.1), "create_directory": random.uniform(0.05, 0.1), "view_details": random.uniform(0.1, 0.15), "return": random.uniform(0.05, 0.1), "extra": {"return_increase": random.uniform(1.1, 1.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_owncloud_favorites:
-  scroll_down: 0.15
-  favorite: 0.05
-  remove_favorite: 0.05
-  open_directory: 0.2
-  download_file: 0.1
-  delete_file: 0.1
-  download_directory: 0.05
-  delete_directory: 0.05
-  view_details: 0.15
-  return: 0.1
-  extra:
-    return_increase: 1.25
-  
+  \var{({"scroll_down": random.uniform(0.1, 0.2), "favorite": random.uniform(0.01, 0.1), "remove_favorite": random.uniform(0.01, 0.1), "open_directory": random.uniform(0.1, 0.3), "download_file": random.uniform(0.05, 0.15), "delete_file": random.uniform(0.05, 0.15), "download_directory": random.uniform(0.01, 0.1), "delete_directory": random.uniform(0.01, 0.1), "view_details": random.uniform(0.1, 0.2), "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.1, 1.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_owncloud_sharing_in:
-  scroll_down: 0.15
-  accept: 0.4
-  decline: 0.35
-  return: 0.1
-  extra:
-    return_increase: 1.25
+  \var{({"scroll_down": random.uniform(0.1, 0.2), "accept": random.uniform(0.2, 0.5), "decline": random.uniform(0.2, 0.4), "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.1, 1.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_owncloud_sharing_out:
-  scroll_down: 0.15
-  favorite: 0.05
-  remove_favorite: 0.05
-  open_directory: 0.2
-  download_file: 0.1
-  delete_file: 0.1
-  download_directory: 0.05
-  delete_directory: 0.05
-  view_details: 0.15
-  return: 0.1
-  extra:
-    return_increase: 1.25
+  \var{({"scroll_down": random.uniform(0.1, 0.2), "favorite": random.uniform(0.01, 0.1), "remove_favorite": random.uniform(0.01, 0.1), "open_directory": random.uniform(0.1, 0.3), "download_file": random.uniform(0.05, 0.15), "delete_file": random.uniform(0.05, 0.15), "download_directory": random.uniform(0.01, 0.1), "delete_directory": random.uniform(0.01, 0.1), "view_details": random.uniform(0.1, 0.2), "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.1, 1.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_owncloud_file_details:
-  view_comments: 0.25
-  view_sharing: 0.4
-  view_versions: 0.25
-  return: 0.1
-  extra:
-    return_increase: 1.25
+  \var{({"view_comments": random.uniform(0.1, 0.4), "view_sharing": random.uniform(0.2, 0.6), "view_versions": random.uniform(0.1, 0.4), "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.1, 1.5)}} | normalize_distribution)}
 
+# Dictionary of users to share to
+#   <username>:<probability>
+# The maximum number of users to share a single file/dir to
+# (optional)
+# note random range is defined as (min, max]
 kyoushi_sm_states_owncloud_sharing_details:
-  share: 0.4
-  unshare: 0.35
-  return: 0.25
-  extra:
-    return_increase: 1.25
-    # Dictionary of users to share to
-    #   <username>:<probability>
-    share_users: "{{ kyoushi_sm_states_owncloud_sharing_details_share_users | normalize_distribution }}"
-    # The maximum number of users to share a single file/dir to
-    # (optional)
-    # note random range is defined as (min, max]
-    max_shares: "{{ (employees|length + 1) | random(2, seed=inventory_hostname)}}"
+  \var{({"share": random.uniform(0.2, 0.6), "unshare": random.uniform(0.1, 0.5), "return": random.uniform(0.2, 0.3), "extra": {"return_increase": random.uniform(1.1, 1.5), "share_users": "{{ kyoushi_sm_states_owncloud_sharing_details_share_users | normalize_distribution }}", "max_shares": "{{ (employees|length + 1) | random(2, seed=inventory_hostname)}}"}} | normalize_distribution)}
 
-kyoushi_sm_states_owncloud_sharing_details_share_users: |
-  {
-  {# 
-    By default every employee can share to every other employee with equal chance.
-    (Distribution normalization is done in the config template.)
-  #}
-  {% for share_user in (employees.values() | rejectattr('username', 'equalto', employee.username)) %}
-  "{{ share_user.username }}": 1{% if not loop.last %},{% endif %}
-  {% endfor %}
-  }
-  
+kyoushi_sm_states_owncloud_sharing_details_share_users:
+\{% for share_user in (context.employees.internal.values() | list) + (context.employees.external.values() | list)} \{% if share_user.username != local_context.employee.username }  "\var{share_user.username}": \var{random.choice([0.0001, random.random()])} \{% endif }
+\{% endfor }
+ 
 
 kyoushi_sm_states_owncloud_upload_menu:
-  keep_new: 0.6
-  keep_both: 0.3
-  keep_old: 0.1
+  \var{({"keep_new": random.uniform(0.4, 0.8), "keep_both": random.uniform(0.1, 0.5), "keep_old": random.uniform(0.05, 0.15)} | normalize_distribution)}
 
 
 # ssh user activity states configs
@@ -476,17 +356,11 @@ kyoushi_sm_states_ssh_user:
   sudo_dialog: "{{ kyoushi_sm_states_ssh_user_sudo_dialog }}"
 
 kyoushi_sm_states_ssh_user_connected:
-  select_chain: 0.9
-  disconnect: 0.1
-  extra:
-    disconnect_increase: 3
+  \var{({"select_chain": random.uniform(0.7, 0.95), "disconnect": random.uniform(0.05, 0.15), "extra": {"disconnect_increase": random.uniform(2, 4)}} | normalize_distribution)}
 
+# fail_increase: factor to increase fail chance by with each consecutive fail
 kyoushi_sm_states_ssh_user_sudo_dialog:
-  enter_password: 0.95
-  fail: 0.05
-  extra:
-    # factor to increase fail chance by with each consecutive fail
-    fail_increase: 4
+  \var{({"enter_password": random.uniform(0.8, 0.99), "fail": random.uniform(0.01, 0.05), "extra": {"fail_increase": random.uniform(3, 5)}} | normalize_distribution)}
 
 
 # web browser activity states configs
@@ -495,14 +369,11 @@ kyoushi_sm_states_web_browser:
   leaving_website: "{{ kyoushi_sm_states_web_browser_leaving_website }}"
 
 kyoushi_sm_states_web_browser_on_website:
-  visit_link: 0.7
-  leave_website: 0.3
+  \var{({"visit_link": random.uniform(0.5, 0.9), "leave_website": random.uniform(0.1, 0.5)} | normalize_distribution)}
 
 kyoushi_sm_states_web_browser_leaving_website:
-  # leave the website open in the background
-  background: 0.5
-  # leave the website (i.e., replace it with an empty window)
-  close: 0.5
+  # leave the website open in the background or leave the website (i.e., replace it with an empty window)
+  \var{({"background": random.uniform(0.3, 0.7), "close": random.uniform(0.3, 0.7)} | normalize_distribution)}
 
 # wp editor activity states configs
 kyoushi_sm_states_wp_editor:
@@ -514,38 +385,24 @@ kyoushi_sm_states_wp_editor:
 
 kyoushi_sm_states_wp_editor_login_page:
   # The chance the user will use an incorrect password
-  fail_chance: 0.05
+  fail_chance: \var{random.uniform(0.01, 0.1)}
   # Fail chance decrease factor
-  fail_decrease: 0.9
+  fail_decrease: \var{random.uniform(0.8, 0.95)}
 
 kyoushi_sm_states_wp_editor_logout_choice:
   # The chance the user will logout when stopping the wp editor activity
-  logout_chance: 0.05
+  logout_chance: \var{random.uniform(0.01, 0.1)}
 
 kyoushi_sm_states_wp_editor_selecting_menu:
-  nav_dashboard: 0.15
-  nav_comments: 0.25
-  nav_media: 0.15
-  nav_posts: 0.3
-  return: 0.15
-  extra:
-    return_increase: 1.25
+  \var{({"nav_dashboard": random.uniform(0.1, 0.2), "nav_comments": random.uniform(0.2, 0.3), "nav_media": random.uniform(0.1, 0.2), "nav_posts": random.uniform(0.2, 0.4), "return": random.uniform(0.1, 0.2), "extra": {"return_increase": random.uniform(1.1, 1.5)}} | normalize_distribution)}
 
 kyoushi_sm_states_wp_editor_comments_page:
-  new_reply: 0.45
-  return: 0.55
-  extra: 
-    return_increase: 1.25
-    # If the user should only reply to guest comments
-    reply_only_guests: True
+  # reply_only_guests: True if the user should only reply to guest comments
+  \var{({"new_reply": random.uniform(0.3, 0.5), "return": random.uniform(0.5, 0.8), "extra": {"return_increase": random.uniform(1.1, 1.5), "reply_only_guests": random.choice([True, False])}} | normalize_distribution)}
 
 kyoushi_sm_states_wp_editor_posts_page:
-  new_post: 0.5
-  return: 0.5
-  extra:
-    return_increase: 1.25
-    # The maximum number of posts a user will post in a day
-    max_posts_daily: 1
+  # max_posts_daily: The maximum number of posts a user will post in a day
+  \var{({"new_post": random.uniform(0.2, 0.8), "return": random.uniform(0.2, 0.8), "extra": {"return_increase": random.uniform(1.1, 1.5), "max_posts_daily": random.randint(1, 5)}} | normalize_distribution)}
 
 
 # wp reader activity states configs
@@ -555,33 +412,15 @@ kyoushi_sm_states_wpdiscuz:
   post_page: "{{ kyoushi_sm_states_wpdiscuz_post_page }}"
 
 kyoushi_sm_states_wpdiscuz_posts_page:
-  nav_older: 0.15
-  nav_newer: 0.25
-  nav_post: 0.35
-  return: 0.25
-  extra: 
-    return_increase: 1.5
-    # The maximum posts page to navigate to
-    max_page: 3
+  # max_page: The maximum posts page to navigate to
+  \var{({"nav_older": random.uniform(0.1, 0.2), "nav_newer": random.uniform(0.1, 0.4), "nav_post": random.uniform(0.2, 0.5), "return": random.uniform(0.1, 0.4), "extra": {"return_increase": random.uniform(1.1, 2), "max_page": random.randint(1, 10)}} | normalize_distribution)}
 
 kyoushi_sm_states_wpdiscuz_close_choice:
-  # leave the wordpress page open in the background
-  leave_open: 0.6
-  # close the page
-  close: 0.4
+  # leave the wordpress page open in the background or close the page
+  \var{({"leave_open": random.uniform(0.4, 0.7), "close": random.uniform(0.3, 0.6)} | normalize_distribution)}
 
+  # max_level: The maximum comment depth level to reply to
+  # max_rating: The maximum star rating the user will give to a post
+  # min_rating: The minimum star rating the user will give to a post
 kyoushi_sm_states_wpdiscuz_post_page:
-  rate_post: 0.1
-  down_vote: 0.1
-  up_vote: 0.15
-  comment: 0.25
-  reply: 0.2
-  return: 0.2
-  extra: 
-    return_increase: 1.5
-    # The maximum comment depth level to reply to.
-    max_level: 3
-    # The maximum star rating the user will give to a post.
-    max_rating: 5
-    # The minimum star rating the user will give to a post.
-    min_rating: 1
+  \var{({"rate_post": random.uniform(0.05, 0.15), "down_vote": random.uniform(0.05, 0.15), "up_vote": random.uniform(0.1, 0.3), "comment": random.uniform(0.1, 0.5), "reply": random.uniform(0.05, 0.4), "return": random.uniform(0.1, 0.3), "extra": {"return_increase": random.uniform(1.1, 2), "max_level": random.randint(2, 6), "max_rating": random.randint(3, 5), "min_rating": random.randint(1, 2)}} | normalize_distribution)}

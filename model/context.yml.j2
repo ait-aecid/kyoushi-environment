@@ -1,4 +1,17 @@
-{% set domain_names = ['umbrella', 'acme', 'xyz'] %} 
+{% set mail_servers_internal_count = random.randint(2, 4) %}
+{% set mail_servers_external_count = random.randint(1, 3) %}
+{% set domain_names = [] %}
+mail:
+    internal:
+{% for i in range(0, mail_servers_internal_count + mail_servers_external_count) %}
+{% if i == mail_servers_internal_count %}
+    external:
+{% endif %}
+        {% set domain = (faker.company() | lower | alpha) %}
+        {% do domain_names.append(domain) %}
+        {{ domain }}:
+          id: {{ i }}
+{% endfor %}
 {% set network_classes = ["a", "b", "c"] %}
 {% do random.shuffle(network_classes) %}
 {% set internet_ips = [] %}

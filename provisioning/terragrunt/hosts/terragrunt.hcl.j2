@@ -31,7 +31,7 @@ inputs = {
     remote_employee_capacity = \var{context.employees.external | length }
     attacker_capacity = 1
     attacker_flavor = "m1.medium"
-    ext_user_capacity = 10
+    ext_user_capacity = \var{(context.ext_mail_users | length)}
     
     shares = [
         {
@@ -42,18 +42,12 @@ inputs = {
 
 
     ext_mail = [
+        \{% for domain_name in (context.mail.external.keys() | list) }
         {
-            name     = "xyz"
+            name     = "\var{domain_name}"
             ip_index = null
         },
-        {
-            name     = "acme"
-            ip_index = null
-        },
-        {
-            name     = "umbrella"
-            ip_index = null
-        }
+        \{% endfor }
     ]
 }
 

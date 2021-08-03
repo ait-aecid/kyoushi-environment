@@ -8,6 +8,32 @@
   src: provisioning/terragrunt/hosts/terragrunt.hcl.j2
   dest: provisioning/terragrunt/hosts/terragrunt.hcl
 
+- name: DNS configuration
+  type: file
+  src: provisioning/ansible/group_vars/all/dns.yml.j2
+  dest: provisioning/ansible/group_vars/all/dns.yml
+
+- name: Internal mail server
+  type: file
+  src: provisioning/ansible/host_vars/mail/dns.yml.j2
+  dest: provisioning/ansible/host_vars/mail/dns.yml
+
+{% for domain_name, mail_server in mail.external.items() %}
+- name: External mail server
+  type: dir
+  src: model/templates/mail
+  dest: provisioning/ansible/host_vars/{{ domain_name }}_mail
+  contents:
+    - name: DNS configuration
+      type: file
+      src: dns.yml.j2
+      dest: dns.yml
+      extra:
+        domain_name: {{ domain_name }}
+        mail_server: {{ mail_server }}
+  delete: false
+{% endfor %}
+
 - name: Dnsteal configuration
   type: file
   src: provisioning/ansible/host_vars/attacker_0/dnsteal.yml.j2
@@ -62,3 +88,9 @@
         employee: {{ employee }}
   delete: false
 {% endfor %}
+
+- name: Mail users configuration
+  type: file
+  src: provisioning/ansible/group_vars/all/mail_users.yml.j2
+  dest: provisioning/ansible/group_vars/all/mail_users.yml
+

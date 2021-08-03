@@ -1,16 +1,24 @@
-{% set mail_servers_internal_count = random.randint(2, 4) %}
-{% set mail_servers_external_count = random.randint(1, 3) %}
-{% set domain_names = [] %}
+{% set mail_servers_internal_count = 1 %}
+{% set mail_servers_external_count = random.randint(2, 4) %}
+{% set domain_names_internal = [] %}
+{% set domain_names_external = [] %}
+{% set records = ['mailserver', 'mail', 'smtp'] %}
 mail:
     internal:
 {% for i in range(0, mail_servers_internal_count + mail_servers_external_count) %}
 {% if i == mail_servers_internal_count %}
     external:
 {% endif %}
-        {% set domain = (faker.company() | lower | alpha) %}
-        {% do domain_names.append(domain) %}
-        {{ domain }}:
+        {% set domain_name = (faker.domain_word() | lower | alpha) %}
+        {% if i >= mail_servers_internal_count %}
+        {% do domain_names_external.append(domain_name) %}
+        {% else %}
+        {% do domain_names_internal.append(domain_name) %}
+        {% endif %}
+        {{ domain_name }}:
           id: {{ i }}
+          domain: {{ domain_name }}.{{ faker.tld() }}
+          record: {{ records[i % (records | length)] }}
 {% endfor %}
 {% set network_classes = ["a", "b", "c"] %}
 {% do random.shuffle(network_classes) %}
@@ -33,7 +41,7 @@ employees:
           last_name: {{ last_name }}
           username: {{ (first_name[0] | lower) + (last_name | lower) }}
           email_user: {{ (first_name | lower) + '.' + (last_name | lower) }}
-          email_domain: {% raw %} "{{ domains.company.domain }}" {% endraw %}
+          email_domain: {{ '"{{' }} domains.{{ random.choice(domain_names_internal) }}.domain {{ '}}"' }}
           password: {{ faker.password(length=12, special_chars=False) }}
           password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
           {% set wp_role = random.choice(['editor', 'administrator', '']) %}
@@ -84,9 +92,9 @@ ext_mail_users:
     {% set first_name = faker.first_name() %}
     - first_name: {{ first_name }}
       {% set last_name = faker.last_name() %}
-      {% set domain_name = random.choice(domain_names) %}
+      {% set domain_name = random.choice(domain_names_external) %}
       last_name: {{ last_name }}
-      {% if domain_names.index(domain_name) == 0 %}
+      {% if domain_names_external.index(domain_name) % 2 == 0 %}
       username: {{ (first_name | lower) + '.' + (last_name | lower) }}
       {% else %}
       username: {{ (last_name | lower) + (first_name[0] | lower) }}

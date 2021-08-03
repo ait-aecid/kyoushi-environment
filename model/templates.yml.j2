@@ -39,6 +39,11 @@
   src: provisioning/ansible/host_vars/attacker_0/dnsteal.yml.j2
   dest: provisioning/ansible/host_vars/attacker_0/dnsteal.yml
 
+- name: Dnsteal service configuration
+  type: file
+  src: provisioning/ansible/host_vars/internal_share/dnsteal.yml.j2
+  dest: provisioning/ansible/host_vars/internal_share/dnsteal.yml
+
 - name: Attacker configuration
   type: file
   src: provisioning/ansible/host_vars/attacker_0/attack.yml.j2

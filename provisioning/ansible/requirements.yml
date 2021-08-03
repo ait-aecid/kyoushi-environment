@@ -96,14 +96,14 @@ roles:
     version: master
     name: samba
 
-  - src: https://github.com/max-frank/owncloud.git
+  - src: https://github.com/owncloud-ansible/owncloud.git
     scm: git
-    version: ab7b8daed31f0613da1acb74408901976b1f02f3
+    version: ca2d72effd4dbad1b6d556503d0400c06ed90ea3
     name: owncloud
 
-  - src: https://github.com/max-frank/php.git
+  - src: https://github.com/owncloud-ansible/php.git
     scm: git
-    version: 898d2a64608220e02b31fcf9c12ab6e5ce2fd822
+    version: 68b811d4a4f769e7fbb4763ca94e73b1b189ce44
     name: owncloud-php
 
   - src: https://github.com/owncloud-ansible/apache.git

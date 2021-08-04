@@ -26,7 +26,7 @@ kyoushi_seed: "{{ 4294967295 | random(seed=inventory_hostname) }}"
 
 kyoushi_sm_name: ait.beta_user
 kyoushi_simulation_version: 0.3.7
-kyoushi_statemachines_version: 0.3.2
+kyoushi_statemachines_version: 0.3.3
 #kyoushi_packages_reinstall: yes
 
 kyoushi_venv_python_version: 3.7

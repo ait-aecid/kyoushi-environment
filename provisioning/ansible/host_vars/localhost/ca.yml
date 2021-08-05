@@ -70,7 +70,7 @@ cert_configs: |
           {% endfor %}
         ],
 
-        {%- if dns_entry.hostname is defined and dns_entry.hostname|length %}
+        {%- if dns_entry.hostname is defined and dns_entry.hostname is sequence and dns_entry.hostname|length %}
         "name": "{{ dns_entry.hostname }}.{{ dns_entry.domain }}",
         "common_name": "{{ dns_entry.hostname }}.{{ domains[dns_entry.domain].domain }}"
         {% elif dns_entry.proxy_host is defined and hostvars[dns_entry.proxy_host].proxied_name|length %}

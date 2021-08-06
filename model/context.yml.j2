@@ -39,8 +39,8 @@ employees:
           first_name: {{ first_name }}
           {% set last_name = faker.last_name() %}
           last_name: {{ last_name }}
-          username: {{ (first_name[0] | lower) + (last_name | lower) }}
-          email_user: {{ (first_name | lower) + '.' + (last_name | lower) }}
+          username: {{ (first_name[0] | lower | alpha) + (last_name | lower | alpha) }}
+          email_user: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
           email_domain: {{ '"{{' }} domains.{{ random.choice(domain_names_internal) }}.domain {{ '}}"' }}
           password: {{ faker.password(length=12, special_chars=False) }}
           password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
@@ -90,16 +90,17 @@ ext_mail_users:
 {% set ext_mail_users_count = random.randint(1, 10) %}
 {% for i in range(0, ext_mail_users_count) %}
     {% set first_name = faker.first_name() %}
-    - first_name: {{ first_name }}
+    - id: {{ i }}
+      first_name: {{ first_name }}
       {% set last_name = faker.last_name() %}
       {% set domain_name = random.choice(domain_names_external) %}
       last_name: {{ last_name }}
       {% if domain_names_external.index(domain_name) % 2 == 0 %}
-      username: {{ (first_name | lower) + '.' + (last_name | lower) }}
+      username: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
       {% else %}
-      username: {{ (last_name | lower) + (first_name[0] | lower) }}
+      username: {{ (last_name | lower | alpha) + (first_name[0] | lower | alpha) }}
       {% endif %}
-      email_user: {{ (first_name | lower) + '.' + (last_name | lower) }}
+      email_user: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
       email_domain: {{ '"{{' }} domains.{{ domain_name }}.domain {{ '}}"' }}
       password: {{ faker.password(length=12, special_chars=False) }}
       password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}

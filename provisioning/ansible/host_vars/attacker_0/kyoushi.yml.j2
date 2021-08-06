@@ -25,7 +25,7 @@ kyoushi_files:
 # cr cli config
 
 # use a consistent random value for seed
-kyoushi_seed: "{{ 4294967295 | random(seed=inventory_hostname) }}"
+kyoushi_seed: "\var{random.randint(1, 1000000000)}"
 
 kyoushi_sm_name: ait.aecid.attacker.wpdiscuz
 kyoushi_simulation_version: 0.3.7

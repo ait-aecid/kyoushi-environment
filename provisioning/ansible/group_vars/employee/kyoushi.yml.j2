@@ -1,0 +1,89 @@
+# sm config templates
+
+kyoushi_config_files:
+  config:
+    src: config.yml.j2
+    dst: "{{ kyoushi_sim_config_path }}/config.yml"
+    deploy: yes
+  sm:
+    src: user_beta.yml.j2
+    dst: "{{ kyoushi_sim_config_path }}/sm.yml"
+    deploy: yes
+
+# kyoushi simulation files config
+
+kyoushi_files_dir: "/home/{{ kyoushi_files_owner }}/files"
+kyoushi_files_glob: "files/**"
+kyoushi_files: "{{ query('fileglob', kyoushi_files_glob) }}"
+
+# cr cli config
+
+kyoushi_sm_name: ait.beta_user
+kyoushi_simulation_version: 0.3.7
+kyoushi_statemachines_version: 0.3.3
+#kyoushi_packages_reinstall: yes
+
+kyoushi_venv_python_version: 3.7
+
+# sm base config
+kyoushi_sm_errors: 1000
+kyoushi_sm_start: \var{context.kyoushi_sm_start}
+kyoushi_sm_end: \var{context.kyoushi_sm_end}
+
+# sm logging config
+
+kyoushi_log_level: INFO
+# kyoushi_log_timestamp:
+#   format: 'e.g. %m/%d/%Y, %H:%M:%S'
+#   utc: 'True'
+#   key: 'timestamp'
+kyoushi_log_console:
+  enabled: yes
+  format: plain
+kyoushi_log_file:
+  enabled: yes
+  format: json
+  path: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}/sm.log"
+
+# sm selenium config
+
+# Selenium Driver Manager config
+
+#kyoushi_sm_browser_driver_manager
+  # The webdriver cache path
+  #path: /some/path
+  # The base URL to download the webdriver from.
+  #url: https://chromedriver.storage.googleapis.com
+  # The URL for the latest version of the webdriver
+  #latest_release_url: <the url>
+  #log_level: INFO
+  # The validity of the driver cache in days.
+  #cache_valid_range: 1
+    
+
+# Download config
+
+kyoushi_sm_download_dir: "/var/log/kyoushi/{{ kyoushi_sm_effective_name }}/downloads/"
+kyoushi_sm_download_mimes:
+  - application/octet-stream
+  - application/zip
+  - application/vnd.rar
+  - application/x-7z-compressed
+  - application/msword
+  - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+  - application/vnd.ms-excel
+  - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+  - application/vnd.ms-powerpoint
+  - application/vnd.openxmlformats-officedocument.presentationml.presentation
+  - application/vnd.oasis.opendocument.text
+  - application/vnd.oasis.opendocument.spreadsheet
+  - application/vnd.oasis.opendocument.presentation
+  - text/plain
+  - application/pdf
+  - application/postscript
+  - image/jpeg
+  - image/bmp
+  - image/gif
+  - image/png
+  - image/svg+xml
+  - image/tiff

@@ -1,0 +1,111 @@
+- name: Terragrunt bootstrap configuration
+  type: file
+  src: provisioning/terragrunt/bootstrap/terragrunt.hcl.j2
+  dest: provisioning/terragrunt/bootstrap/terragrunt.hcl
+
+- name: Terragrunt bootstrap configuration
+  type: file
+  src: provisioning/terragrunt/hosts/terragrunt.hcl.j2
+  dest: provisioning/terragrunt/hosts/terragrunt.hcl
+
+- name: DNS configuration
+  type: file
+  src: provisioning/ansible/group_vars/all/dns.yml.j2
+  dest: provisioning/ansible/group_vars/all/dns.yml
+
+- name: Internal mail server
+  type: file
+  src: provisioning/ansible/host_vars/mail/dns.yml.j2
+  dest: provisioning/ansible/host_vars/mail/dns.yml
+
+{% for domain_name, mail_server in mail.external.items() %}
+- name: External mail server
+  type: dir
+  src: model/templates/mail
+  dest: provisioning/ansible/host_vars/{{ domain_name }}_mail
+  contents:
+    - name: DNS configuration
+      type: file
+      src: dns.yml.j2
+      dest: dns.yml
+      extra:
+        domain_name: {{ domain_name }}
+        mail_server: {{ mail_server }}
+  delete: false
+{% endfor %}
+
+- name: Dnsteal configuration
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/dnsteal.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/dnsteal.yml
+
+- name: Dnsteal service configuration
+  type: file
+  src: provisioning/ansible/host_vars/internal_share/dnsteal.yml.j2
+  dest: provisioning/ansible/host_vars/internal_share/dnsteal.yml
+
+- name: Attacker configuration
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/attack.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/attack.yml
+
+- name: Attack configuration
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/kyoushi.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/kyoushi.yml
+
+- name: Employee list
+  type: file
+  src: provisioning/ansible/group_vars/all/employees.yml.j2
+  dest: provisioning/ansible/group_vars/all/employees.yml
+
+- name: Employee group configuration
+  type: file
+  src: provisioning/ansible/group_vars/employee/kyoushi.yml.j2
+  dest: provisioning/ansible/group_vars/employee/kyoushi.yml
+
+{% for employee in employees.internal.values() %}
+- name: Internal employee
+  type: dir
+  src: model/templates/employees/
+  dest: provisioning/ansible/host_vars/internal_employee_{{ loop.index0 }}
+  contents:
+    - name: Internal employee configuration
+      type: file
+      src: kyoushi.yml.j2
+      dest: kyoushi.yml
+      extra:
+        employee: {{ employee }}
+  delete: false
+{% endfor %}
+
+{% for employee in employees.external.values() %}
+- name: External employee
+  type: dir
+  src: model/templates/employees/
+  dest: provisioning/ansible/host_vars/remote_employee_{{ loop.index0 }}
+  contents:
+    - name: External employee configuration
+      type: file
+      src: kyoushi.yml.j2
+      dest: kyoushi.yml
+      extra:
+        employee: {{ employee }}
+  delete: false
+{% endfor %}
+
+{% for ext_mail_user in ext_mail_users %}
+- name: External mail employee
+  type: dir
+  src: model/templates/employees/
+  dest: provisioning/ansible/host_vars/remote_employee_{{ loop.index0 }}
+  contents:
+    - name: External mail user configuration
+      type: file
+      src: kyoushi.yml.j2
+      dest: kyoushi.yml
+      extra:
+        employee: {{ ext_mail_user }}
+  delete: false
+{% endfor %}
+

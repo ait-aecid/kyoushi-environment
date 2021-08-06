@@ -1,0 +1,9 @@
+dns_certificate_info:
+  country: UK
+  state: England
+  locality: London
+  organization: \var{(local_context.domain_name | upper)} \var{faker.company_suffix()}
+  subject_alt_name: "{{ dns_certificate_subject_alt_names | default([]) }}"
+
+dns_domain: \var{local_context.domain_name}
+dns_hostname: \var{local_context.mail_server.record}

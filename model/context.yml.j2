@@ -1,0 +1,222 @@
+{% set mail_servers_internal_count = 1 %}
+{% set mail_servers_external_count = random.randint(2, 4) %}
+{% set domain_names_internal = [] %}
+{% set domain_names_external = [] %}
+{% set records = ['mailserver', 'mail', 'smtp'] %}
+mail:
+    internal:
+{% for i in range(0, mail_servers_internal_count + mail_servers_external_count) %}
+{% if i == mail_servers_internal_count %}
+    external:
+{% endif %}
+        {% set domain_name = (faker.domain_word() | lower | alpha) %}
+        {% if i >= mail_servers_internal_count %}
+        {% do domain_names_external.append(domain_name) %}
+        {% else %}
+        {% do domain_names_internal.append(domain_name) %}
+        {% endif %}
+        {{ domain_name }}:
+          id: {{ i }}
+          domain: {{ domain_name }}.{{ faker.tld() }}
+          record: {{ records[i % (records | length)] }}
+{% endfor %}
+{% set network_classes = ["a", "b", "c"] %}
+{% do random.shuffle(network_classes) %}
+{% set internet_ips = [] %}
+{% set internet_ips_count = 10 %}
+employees:
+{% set employees_internal_count = random.randint(1, 10) %}
+{% set employees_remote_count = random.randint(1, 10) %}
+{% set ns = namespace(ssh_admin_with_wp_defined = false) %}
+    internal:
+{% for i in range(0, employees_internal_count + employees_remote_count) %}
+{% if i == employees_internal_count %}
+    external:
+{% endif %}
+        m{{ (i | string()).zfill(2) }}:
+          id: {{ i }}
+          {% set first_name = faker.first_name() %}
+          first_name: {{ first_name }}
+          {% set last_name = faker.last_name() %}
+          last_name: {{ last_name }}
+          username: {{ (first_name[0] | lower | alpha) + (last_name | lower | alpha) }}
+          email_user: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
+          email_domain: {{ '"{{' }} domains.{{ random.choice(domain_names_internal) }}.domain {{ '}}"' }}
+          password: {{ faker.password(length=12, special_chars=False) }}
+          password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+          {% set wp_role = random.choice(['editor', 'administrator', '']) %}
+          {% set ssh_admin = numpy.choice([false, true], p=[0.75, 0.25]) %}
+          {% if ns.ssh_admin_with_wp_defined == false and i == employees_internal_count + employees_remote_count - 1 %}
+          {% set wp_role = 'administrator' %}
+          {% set ssh_admin = true %}
+          {% endif %}
+          {% if (wp_role == 'administrator' or wp_role == 'editor') and ssh_admin == true %}
+          {% set ns.ssh_admin_with_wp_defined = true %}
+          {% endif %}
+          {% if wp_role != '' %}
+          wp_role: {{ wp_role }}
+          {% endif %}
+          {% set samba_groups = random.choices(['admin', 'employees', 'management', 'accounting', ''], k=numpy.choice([1, 2], p=[0.75, 0.25])) %}
+          {% if (samba_groups | length) > 1 or samba_groups[0] != '' %}
+          samba_groups:
+          {% for samba_group in (samba_groups | unique) %}
+              {% if samba_group != '' %}
+              - {{ samba_group }}
+              {% endif %}
+          {% endfor %}
+          {% endif %}
+          {% set owncloud_groups = random.choices(['admin', 'employees', 'management', 'accounting', ''], k=numpy.choice([1, 2], p=[0.75, 0.25])) %}
+          {% if (owncloud_groups | length) > 1 or owncloud_groups[0] != '' %}
+          owncloud_groups:
+          {% for owncloud_group in (owncloud_groups | unique) %}
+              {% if owncloud_group != '' %}
+              - {{ owncloud_group }}
+              {% endif %}
+          {% endfor %}
+          {% endif %}
+          {% if ssh_admin == true %}
+          ssh_key: yes
+          horde_admin: yes
+          ssh_admin: yes
+          shell: /bin/bash
+          sudo:
+              hosts: ALL
+              as: ALL
+              commands: ALL
+              nopasswd: yes
+          {% endif %}
+{% endfor %}
+ext_mail_users:
+{% set ext_mail_users_count = random.randint(1, 10) %}
+{% for i in range(0, ext_mail_users_count) %}
+    {% set first_name = faker.first_name() %}
+    - id: {{ i }}
+      first_name: {{ first_name }}
+      {% set last_name = faker.last_name() %}
+      {% set domain_name = random.choice(domain_names_external) %}
+      last_name: {{ last_name }}
+      {% if domain_names_external.index(domain_name) % 2 == 0 %}
+      username: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
+      {% else %}
+      username: {{ (last_name | lower | alpha) + (first_name[0] | lower | alpha) }}
+      {% endif %}
+      email_user: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
+      email_domain: {{ '"{{' }} domains.{{ domain_name }}.domain {{ '}}"' }}
+      password: {{ faker.password(length=12, special_chars=False) }}
+      password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+{% endfor %}
+service_users:
+    owncloud_samba:
+        username: owncloud
+        password: {{ faker.password(length=12, special_chars=False) }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+        samba_groups:
+          - management
+    owncloud:
+        username: owncloud
+        password: {{ faker.password(length=12, special_chars=False) }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+    ext_mail:
+        username: horde
+        password: {{ faker.password(length=12, special_chars=False) }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+    mail:
+        username: horde
+        password: {{ faker.password(length=12, special_chars=False) }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+networks:
+    internet: 
+        address: '{{ faker.ipv4(network=True, address_class=network_classes[0], private=True).split("/")[0] }}'
+        mask: {{ random.randint(8, 24) }}
+    dmz:
+        address: '{{ faker.ipv4(network=True, address_class=network_classes[1], private=True).split("/")[0] }}'
+        mask: {{ random.randint(16, 24) }}
+    local:
+        address: '{{ faker.ipv4(network=True, address_class=network_classes[2], private=True).split("/")[0] }}'
+        mask: {{ random.randint(16, 24) }}
+min_sm_start_hour: 5
+max_sm_start_hour: 9
+min_sm_end_hour: 17
+max_sm_end_hour: 22
+kyoushi_files: ["BrooksMarshAndBray.docx", "HamiltonInc.docx", "JonesPlc.docx", "Travis-ramsey.docx", "WilliamsBallardAndWest.docx", "binoculars.png", "choose.zip", "control.txt", "everything.zip", "golf.png", "movie.png", "politics.zip", "ruby.png", "tag.png", "west.txt", "BrooksMarshAndBray.pdf", "HamiltonInc.pdf", "JonesPlc.pdf", "Travis-ramsey.pdf", "WilliamsBallardAndWest.pdf", "block.png", "claim.txt", "despite.zip", "expert.zip", "institution.zip", "must.zip", "program.txt", "send.png", "tag_green.png", "word.png", "FrazierLtd.docx", "Harris-gutierrez.docx", "MoralesGroup.docx", "White-martin.docx", "adobe.png", "century.zip", "conflict.png", "each.zip", "feed.png", "ip_addresses.xlsx", "offer.zip", "puzzle.png", "sister.txt", "unit.zip", "world.txt", "FrazierLtd.pdf", "Harris-gutierrez.pdf", "MoralesGroup.pdf", "White-martin.pdf", "between.zip", "chart.png", "contact.png", "environment.zip", "globe.png", "lot.txt", "pane.png", "reference.png", "smiley.png", "war.txt"]
+attacker:
+    {% set first_name = faker.first_name() %}
+    {% set last_name = faker.last_name() %}
+    username: {{ (first_name[0] | lower) + (last_name | lower) }}
+    password: {{ faker.password(length=12, special_chars=False) }}
+    password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+kyoushi_attacker_start: +P02DT{{ (random.randint(0, 12) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M
+kyoushi_attacker_escalate_start: +P02DT{{ (random.randint(0, 12) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M
+{% set recon_hosts_dict = {"cloud_share": "dmz", "vpn": "dmz", "webserver": "dmz", "inet-dns": "internet", "inet-firewall": "internet", "intranet_server": "intranet", "internal_share": "intranet"} %}
+{% for domain_name in domain_names_internal %}
+{% do recon_hosts_dict.update({(domain_name + "_mail"): "dmz"}) %}
+{% endfor %}
+{% for domain_name in domain_names_external %}
+{% do recon_hosts_dict.update({(domain_name + "_mail"): "internet"}) %}
+{% endfor %}
+{% set recon_hosts_selected = random.sample((recon_hosts_dict.keys() | list), random.randint(1, (recon_hosts_dict | length))) %}
+kyoushi_attacker_recon_hosts:
+{% for domain_name in recon_hosts_selected %}
+  - '{{ '{{' }} hostvars["{{ domain_name }}"].openstack.addresses.{{ recon_hosts_dict[domain_name] }}[0].addr {{ '}}' }}'
+{% endfor %}
+kyoushi_attacker_web_shell_name: {{ ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=10)) }}
+kyoushi_attacker_reverse_shell_port: {{ random.randint(1100, 65000) }}
+{% set web_shell_commands_options = [
+{"name": "check_user_id", 
+ "cmd": ["id"]}, 
+{"name": "check_network_config", 
+ "cmd": ["ip", "addr"]}, 
+{"name": "check_pwd", 
+ "cmd": ["pwd"]}, 
+{"name": "read_passwd", 
+ "cmd": ["cat", "/etc/passwd"]}] %}
+{% set web_shell_commands_selected = random.sample(web_shell_commands_options, random.randint(2, (web_shell_commands_options | length))) %}
+{% do web_shell_commands_selected.append(
+{"name": "list_web_dir", 
+ "cmd": ["ls", "-laR", "/var/www"], 
+ "children": [
+  {"name": "check_wp_config", 
+   "cmd": ["cat", "/var/www/{{ hostvars['intranet_server'].wp_apache_hostname }}/wp-config.php"], 
+   "children": [
+    {"name": "dump_wp_users", 
+     "cmd": ['mysql', '-u', '{{ hostvars["intranet_server"].wp_mysqldb_user }}', '-p{{ hostvars["intranet_server"].wp_mysqldb_password }}', '{{ hostvars["intranet_server"].wp_mysqldb_dbname }}', '-e', '"select * from wp_users"']}]}]}) %}
+kyoushi_attacker_web_shell_commands: {{ web_shell_commands_selected }}
+{% set reverse_shell_commands_options = [
+{"name": "check_ssh_keys",
+ "cmd": "ls -la ~/.ssh"}, 
+{"name": "check_groups", 
+ "cmd": "groups"},
+{"name": "check_sudo",
+ "cmd": "sudo -l",
+ "children": [
+  {"name": "read_shadow",
+   "cmd": "sudo cat /etc/shadow"},
+  {"name": "list_root",
+   "cmd": "sudo ls -laR /root/"}]}] %}
+{% set reverse_shell_commands_selected = random.sample(reverse_shell_commands_options, random.randint(2, (reverse_shell_commands_options | length))) %}
+kyoushi_attacker_reverse_shell_commands: {{ reverse_shell_commands_selected  }}
+kyoushi_sm_start: 2021-03-28T00:01
+kyoushi_sm_end: 2021-04-03T21:00
+{% set kyoushi_sm_idle_big_min = random.randint(20, 50) %}
+kyoushi_sm_idle_big_min: {{ kyoushi_sm_idle_big_min }}
+kyoushi_sm_idle_big_max: {{ random.randint(kyoushi_sm_idle_big_min + 10, 80) }}
+{% set kyoushi_sm_idle_medium_min = random.randint(15, 25) %}
+kyoushi_sm_idle_medium_min: {{ kyoushi_sm_idle_medium_min }}
+kyoushi_sm_idle_medium_max: {{ random.randint(kyoushi_sm_idle_medium_min + 5, 35) }}
+{% set kyoushi_sm_idle_small_min = random.randint(3, 5) %}
+kyoushi_sm_idle_small_min: {{ kyoushi_sm_idle_small_min }}
+kyoushi_sm_idle_small_max: {{ random.randint(kyoushi_sm_idle_small_min + 5, 15) }}
+{% set kyoushi_sm_idle_tiny_min = random.uniform(1, 2) %}
+kyoushi_sm_idle_tiny_min: {{ kyoushi_sm_idle_tiny_min }}
+kyoushi_sm_idle_tiny_max: {{ random.uniform(kyoushi_sm_idle_tiny_min + 1, 4) }}
+{% if random.random() < 0.5 %}
+dnsteal_domain: {{ faker.dga() }}
+{% else %}
+dnsteal_domain: {{ faker.hostname() }}
+{% endif %}
+dnsteal_force_ip: {{ random.choice(['no', 'yes']) }}
+dnsteal_compressed: {{ random.choice(['no', 'yes']) }}
+dnsteal_verbose: {{ random.choice(['no', 'yes']) }}
+dnsteal_sub_domains: {{ random.randint(4, 16) }}
+dnsteal_block_size: {{ random.randint(32, 63) }}
+dnsteal_endtime: 2021-03-31T23:30

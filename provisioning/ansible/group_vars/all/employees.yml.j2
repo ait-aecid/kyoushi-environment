@@ -1,0 +1,20 @@
+_employees:
+  \var{context.employees.internal}
+  \var{context.employees.external}
+
+# redefine employees to include the dict key as dict value
+# the key as part of the inner dict is sometimes needed
+# due to the limitations of the jinja2 syntax
+employees: |
+  {
+  {% for _eid,_employee in _employees.items() %}
+    {% do _employee.update({'key_': _eid}) %}
+    "{{ _eid }}":{{ _employee }}{% if not loop.last %},{% endif %}
+  {% endfor %}
+  }
+
+internal_employees:
+  \var{(context.employees.internal.keys() | list)}
+
+remote_employees:
+  \var{(context.employees.external.keys() | list)}

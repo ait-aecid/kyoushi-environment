@@ -1,0 +1,13 @@
+dnat_name: mailserver
+
+dns_domain: \var{(context.mail.internal.keys() | list)[0]}
+dns_hostname: mailserver
+dns_domains: 
+  - domain: \var{(context.mail.internal.keys() | list)[0]}
+    hostname: mailserver
+    certificate: yes
+    certificate_info: "{{ dns_certificate_info }}"
+  - domain: dmz
+    certificate: yes
+    certificate_info: "{{ dns_certificate_info }}"
+      

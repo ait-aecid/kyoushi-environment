@@ -13,7 +13,7 @@ inputs = {
     floating_ip_pool = "provider-aecid-208"
 
     # image configuration
-    image = "aecid-ubuntu-bionic-amd64"
+    image = "kyoushi-ubuntu-bionic"
     employee_image = "aecid-employee-bionic-amd64-2021-03-22T14-13-37Z"
     ext_user_image = "aecid-employee-bionic-amd64-2021-03-22T14-13-37Z"
     share_image = "aecid-samba-4.5.9-bionic-amd64-2021-03-22T14-35-45Z"

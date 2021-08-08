@@ -8,7 +8,7 @@ locals {
 }
 
 module "vmnets" {
-  source                 = "git@github.com:ait-cs-IaaS/terraform-openstack-vmnets.git?ref=v1.5.4"
+  source                 = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-vmnets.git?ref=v1.5.1"
   host_name              = var.host_name
   host_image             = var.host_image
   host_size              = var.host_size
@@ -30,7 +30,7 @@ module "vmnets" {
 
 module "internet_dns" {
   count              = var.extnet_create ? 1 : 0
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4.3"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4"
   hostname           = var.ext_dns_name
   tag                = var.ext_dns_tag
   host_address_index = var.ext_dns_address_index

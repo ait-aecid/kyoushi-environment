@@ -7,7 +7,7 @@ inputs = {
     host_name = "inet-firewall"
     host_image = "kyoushi-ubuntu-bionic"
     host_tag = "firewall, dnsservers, servers"
-    host_ext_address_index = 42420
+    host_ext_address_index = 4
     host_flavor = "m1.medium"
     host_size  = 40
     host_userdata = "firewallinit.yml"
@@ -16,7 +16,7 @@ inputs = {
     ext_dns_name = "inet-dns"
     ext_dns_image = "kyoushi-ubuntu-bionic"
     ext_dns_tag = "internet, dnsservers"
-    ext_dns_address_index = 13370
+    ext_dns_address_index = \var{context.host_max}
     ext_dns_size = 20
 
     ext_subnet = "internet-subnet"
@@ -24,7 +24,7 @@ inputs = {
     extnet_create = true
     ext_cidr = "\var{context.networks.internet.address}/\var{context.networks.internet.mask}"
     
-    router_name = "aecid-testbed-router"
+    router_name = "kyoushi-router"
     sshkey = "testbed-key"
     floating_ip_pool = "provider-aecid-208"
     networks = {

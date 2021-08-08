@@ -2,7 +2,7 @@
 
 module "vpn" {
   count              = var.vpn_active ? 1 : 0
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4.3"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4.2"
   hostname           = "vpn"
   tag                = "dmz, servers"
   host_address_index = var.vpn_ip_index
@@ -20,7 +20,7 @@ module "vpn" {
 
 module "mail" {
   count              = var.mail_active ? 1 : 0
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4.3"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4.2"
   hostname           = "mail"
   tag                = "dmz, proxied, mailserver, servers"
   host_address_index = var.mail_ip_index
@@ -38,7 +38,7 @@ module "mail" {
 
 module "cloud_share" {
   count              = var.cloud_active ? 1 : 0
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4.3"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4.2"
   hostname           = "cloud_share"
   tag                = "dmz, proxied, servers"
   host_address_index = var.cloud_ip_index
@@ -56,7 +56,7 @@ module "cloud_share" {
 
 module "webserver" {
   count              = var.webserver_active ? 1 : 0
-  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4.3"
+  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4.2"
   hostname           = "webserver"
   tag                = "dmz, servers"
   host_address_index = var.webserver_ip_index

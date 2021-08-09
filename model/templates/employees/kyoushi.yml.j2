@@ -12,7 +12,6 @@ mail_server_info: |
   {% endif %}
   {% endfor %}
 \{% endif }
-
 # kyoushi simulation files config
 
 kyoushi_files_owner: "\var{local_context.employee.username}"
@@ -27,10 +26,10 @@ kyoushi_user_name: "\var{local_context.employee.username}"
 kyoushi_user_group: "\var{local_context.employee.username}"
 
 # sm base config
-\{% set min_sm_start_hour = 5 }
-\{% set max_sm_start_hour = 9 }
-\{% set min_sm_end_hour = 17 }
-\{% set max_sm_end_hour = 22 }
+\{%- set min_sm_start_hour = 5 }
+\{%- set max_sm_start_hour = 9 }
+\{%- set min_sm_end_hour = 17 }
+\{%- set max_sm_end_hour = 22 }
 kyoushi_sm_schedule:
   saturday:
     start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"

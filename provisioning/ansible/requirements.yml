@@ -128,7 +128,7 @@ roles:
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/horde.git
     scm: git
-    version: v1.1.2
+    version: master
     name: horde
 
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/debiansnapshot.git

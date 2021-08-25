@@ -1,6 +1,7 @@
 _employees:
-  \var{context.employees.internal}
-  \var{context.employees.external}
+  \{%- set employees_tmp = context.employees.internal.copy() }
+  \{%- do employees_tmp.update(context.employees.external) }
+  \var{employees_tmp}
 
 # redefine employees to include the dict key as dict value
 # the key as part of the inner dict is sometimes needed

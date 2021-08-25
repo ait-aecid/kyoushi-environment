@@ -32,6 +32,31 @@
         domain_name: {{ domain_name }}
         mail_server: {{ mail_server }}
   delete: false
+
+- name: Create cert dir for external mail server
+  type: dir
+  src: model/templates/certs/sites/domain_mail
+  dest: provisioning/ansible/data/certs/sites/{{ domain_name }}_mail
+  contents:
+    - name: Create inner cert dir for external mail server
+      type: dir
+      src: record_domain
+      dest: {{ mail_server.record }}.{{ domain_name }}
+      contents:
+        - name: Copy crt for external mail server
+          type: file
+          src: cert.crt
+          dest: {{ mail_server.record }}.{{ domain_name }}.crt
+        - name: Copy csr for external mail server
+          type: file
+          src: cert.csr
+          dest: {{ mail_server.record }}.{{ domain_name }}.csr
+        - name: Copy key for external mail server
+          type: file
+          src: cert.key
+          dest: {{ mail_server.record }}.{{ domain_name }}.key
+      delete: false
+  delete: false
 {% endfor %}
 
 - name: Dnsteal configuration
@@ -64,10 +89,10 @@
   src: provisioning/ansible/group_vars/employee/kyoushi.yml.j2
   dest: provisioning/ansible/group_vars/employee/kyoushi.yml
 
-{% for employee in employees.internal.values() %}
+{% for eid, employee in employees.internal.items() %}
 - name: Internal employee
   type: dir
-  src: model/templates/employees/
+  src: model/templates/employees
   dest: provisioning/ansible/host_vars/internal_employee_{{ loop.index0 }}
   contents:
     - name: Internal employee configuration
@@ -77,9 +102,26 @@
       extra:
         employee: {{ employee }}
   delete: false
+
+{% if 'ssh_admin' in employee and employee.ssh_admin == 'yes' %}
+- name: Create dir for ssh keys for internal employees
+  type: dir
+  src: model/templates/ssh-keys
+  dest: provisioning/ansible/data/ssh-keys/{{ eid }}
+  contents:
+    - name: Copy private ssh keys for internal employees
+      type: file
+      src: id_rsa
+      dest: id_rsa
+    - name: Copy public ssh keys for internal employees
+      type: file
+      src: id_rsa.pub
+      dest: id_rsa.pub
+  delete: false
+{% endif %}
 {% endfor %}
 
-{% for employee in employees.external.values() %}
+{% for eid, employee in employees.external.items() %}
 - name: External employee
   type: dir
   src: model/templates/employees/
@@ -92,7 +134,48 @@
       extra:
         employee: {{ employee }}
   delete: false
+
+{% if 'ssh_admin' in employee and employee.ssh_admin == 'yes' %}
+- name: Create dir for ssh keys for external employees
+  type: dir
+  src: model/templates/ssh-keys
+  dest: provisioning/ansible/data/ssh-keys/{{ eid }}
+  contents:
+    - name: Copy private ssh keys for external employees
+      type: file
+      src: id_rsa
+      dest: id_rsa
+    - name: Copy public ssh keys for external employees
+      type: file
+      src: id_rsa.pub
+      dest: id_rsa.pub
+  delete: false
+{% endif %}
+
+- name: Create dir for openvpn keys for external employees
+  type: dir
+  src: model/templates/certs/remote_employee
+  dest: provisioning/ansible/data/openvpn/certs/remote_employee_{{ loop.index0 }}
+  contents:
+    - name: Copy openvpn crt for external employees
+      type: file
+      src: openvpn.crt
+      dest: openvpn.crt
+    - name: Copy openvpn csr for external employees
+      type: file
+      src: openvpn.csr
+      dest: openvpn.csr
+    - name: Copy openvpn key for external employees
+      type: file
+      src: openvpn.key
+      dest: openvpn.key
+  delete: false
 {% endfor %}
+
+- name: External mail users list
+  type: file
+  src: provisioning/ansible/group_vars/all/mail_users.yml.j2
+  dest: provisioning/ansible/group_vars/all/mail_users.yml
 
 {% for ext_mail_user in ext_mail_users %}
 - name: External mail employee

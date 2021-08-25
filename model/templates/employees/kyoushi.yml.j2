@@ -35,19 +35,19 @@ kyoushi_sm_schedule:
     start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
     end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   monday:
-start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
     end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   tuesday:
-start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
     end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   wednesday:
-start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
     end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   thursday:
-start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
     end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   friday:
-start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
     end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
 
 # idle config
@@ -270,8 +270,8 @@ kyoushi_sm_wpdiscuz_page_title: "{{ hostvars['intranet_server'].wp_title }}"
 
 
 # activities entry probabilities
-\{%- if local_context.employee in context.ext_mail_users }
 kyoushi_sm_states_activities:
+\{%- if local_context.employee in context.ext_mail_users }
 # we set idle high since ext users only do emails
   \var{({"horde": random.uniform(0.2, 0.5), "owncloud": 0, "ssh_user": 0, "web_browser": 0, "wp_editor": 0, "wpdiscuz": 0, "idle": random.uniform(0.4, 0.7)} | normalize_distribution)}
 \{%- else }

@@ -27,6 +27,7 @@ mail:
 employees:
 {% set employees_internal_count = random.randint(1, 1) %}
 {% set employees_remote_count = random.randint(1, 1) %}
+{% set ext_mail_users_count = random.randint(1, 1) %}
 {% set ns = namespace(ssh_admin_with_wp_defined = false) %}
     internal:
 {% for i in range(0, employees_internal_count + employees_remote_count) %}
@@ -87,7 +88,6 @@ employees:
           {% endif %}
 {% endfor %}
 ext_mail_users:
-{% set ext_mail_users_count = random.randint(1, 10) %}
 {% for i in range(0, ext_mail_users_count) %}
     {% set first_name = faker.first_name() %}
     - id: {{ i }}
@@ -128,7 +128,7 @@ networks:
     internet:
         {% for _ in range(1, 999999999) %}
         {% set ip = faker.ipv4(network=True, address_class=network_classes[0], private=True) %}
-        {% if (ip.split("/")[1] | int) < 25 and (network_classes[0] != 'b' or (ip.split("/")[0].split(".")[2] | int) > 66) %}
+        {% if (ip.split("/")[1] | int) < 25 and (ip.split("/")[1] | int) > 15 and (network_classes[0] != 'b' or (ip.split("/")[0].split(".")[2] | int) > 66) and (network_classes[2] != 'a' or (ip.split("/")[0].split(".")[1] | int) > 33) %}
         {% set ns.ip = ip %}
         {% break %}
         {% endif %}
@@ -139,7 +139,7 @@ networks:
     dmz:
         {% for _ in range(1, 999999999) %}
         {% set ip = faker.ipv4(network=True, address_class=network_classes[1], private=True) %}
-        {% if (ip.split("/")[1] | int) < 25 and (network_classes[1] != 'b' or (ip.split("/")[0].split(".")[2] | int) > 66) %}
+        {% if (ip.split("/")[1] | int) < 25 and (ip.split("/")[1] | int) > 15 and (network_classes[1] != 'b' or (ip.split("/")[0].split(".")[2] | int) > 66) and (network_classes[2] != 'a' or (ip.split("/")[0].split(".")[1] | int) > 33) %}
         {% set ns.ip = ip %}
         {% break %}
         {% endif %}
@@ -149,7 +149,7 @@ networks:
     local:
         {% for _ in range(1, 999999999) %}
         {% set ip = faker.ipv4(network=True, address_class=network_classes[2], private=True) %}
-        {% if (ip.split("/")[1] | int) < 25 and (network_classes[2] != 'b' or (ip.split("/")[0].split(".")[2] | int) > 66) %}
+        {% if (ip.split("/")[1] | int) < 25 and (ip.split("/")[1] | int) > 15 and (network_classes[2] != 'b' or (ip.split("/")[0].split(".")[2] | int) > 66) and (network_classes[2] != 'a' or (ip.split("/")[0].split(".")[1] | int) > 33) %}
         {% set ns.ip = ip %}
         {% break %}
         {% endif %}
@@ -180,7 +180,7 @@ kyoushi_attacker_escalate_start: +P02DT{{ (random.randint(0, 12) | string()).zfi
 {% set recon_hosts_selected = random.sample((recon_hosts_dict.keys() | list), random.randint(1, (recon_hosts_dict | length))) %}
 kyoushi_attacker_recon_hosts:
 {% for domain_name in recon_hosts_selected %}
-  - '{{ '{{' }} hostvars["{{ domain_name }}"].openstack.addresses.{{ recon_hosts_dict[domain_name] }}[0].addr {{ '}}' }}'
+  - "{{ '{{' }} hostvars['{{ domain_name }}'].openstack.addresses.{{ recon_hosts_dict[domain_name] }}[0].addr {{ '}}' }}"
 {% endfor %}
 kyoushi_attacker_web_shell_name: {{ ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=10)) }}
 kyoushi_attacker_reverse_shell_port: {{ random.randint(1100, 65000) }}
@@ -202,7 +202,7 @@ kyoushi_attacker_reverse_shell_port: {{ random.randint(1100, 65000) }}
    "cmd": ["cat", "/var/www/{{ hostvars['intranet_server'].wp_apache_hostname }}/wp-config.php"], 
    "children": [
     {"name": "dump_wp_users", 
-     "cmd": ['mysql', '-u', '{{ hostvars["intranet_server"].wp_mysqldb_user }}', '-p{{ hostvars["intranet_server"].wp_mysqldb_password }}', '{{ hostvars["intranet_server"].wp_mysqldb_dbname }}', '-e', '"select * from wp_users"']}]}]}) %}
+     "cmd": ['mysql', '-u', "{{ hostvars['intranet_server'].wp_mysqldb_user }}", "-p{{ hostvars['intranet_server'].wp_mysqldb_password }}", "{{ hostvars['intranet_server'].wp_mysqldb_dbname }}", '-e', '"select * from wp_users"']}]}]}) %}
 kyoushi_attacker_web_shell_commands: {{ web_shell_commands_selected }}
 {% set reverse_shell_commands_options = [
 {"name": "check_ssh_keys",
@@ -219,7 +219,7 @@ kyoushi_attacker_web_shell_commands: {{ web_shell_commands_selected }}
 {% set reverse_shell_commands_selected = random.sample(reverse_shell_commands_options, random.randint(2, (reverse_shell_commands_options | length))) %}
 kyoushi_attacker_reverse_shell_commands: {{ reverse_shell_commands_selected  }}
 kyoushi_sm_start: 2021-03-28T00:01
-kyoushi_sm_end: 2021-04-03T21:00
+kyoushi_sm_end: 2027-04-03T21:00
 {% set kyoushi_sm_idle_big_min = random.randint(20, 50) %}
 kyoushi_sm_idle_big_min: {{ kyoushi_sm_idle_big_min }}
 kyoushi_sm_idle_big_max: {{ random.randint(kyoushi_sm_idle_big_min + 10, 80) }}

@@ -3,28 +3,31 @@ domains:
     id: cyberrange
     server: inet-dns
     domain: cyberrange.at
-\{% for domain_name, mail_server in context.mail.internal.items() }
+\{%- for domain_name, mail_server in context.mail.internal.items() }
   \var{domain_name}:
+    id: \var{domain_name}
     server: inet-firewall
     domain: \var{domain_name}.cyberrange.at
     mx:
       - priority: 5
         record: \var{mail_server.record}.%
   \var{domain_name}_external:
+    id: \var{domain_name}
     server: inet-dns
     domain: \var{domain_name}.cyberrange.at
     mx:
       - priority: 5
         record: \var{mail_server.record}.%
-\{% endfor }
-\{% for domain_name, mail_server in context.mail.external.items() }
+\{%- endfor }
+\{%- for domain_name, mail_server in context.mail.external.items() }
   \var{domain_name}:
+    id: \var{domain_name}
     server: inet-dns
     domain: \var{domain_name}.cyberrange.at
     mx:
       - priority: 5
         record: \var{mail_server.record}.%
-\{% endfor }
+\{%- endfor }
   company_external:
     id: company_external
     server: inet-dns

@@ -128,7 +128,7 @@ networks:
     internet:
         {% for _ in range(1, 999999999) %}
         {% set ip = faker.ipv4(network=True, address_class=network_classes[0], private=True) %}
-        {% if (ip.split("/")[1] | int) < 25 and (ip.split("/")[1] | int) > 15 and (network_classes[0] != 'b' or (ip.split("/")[0].split(".")[2] | int) > 66) and (network_classes[2] != 'a' or (ip.split("/")[0].split(".")[1] | int) > 33) %}
+        {% if (ip.split("/")[1] | int) < 25 and (ip.split("/")[1] | int) > 15 and (network_classes[0] != 'b' or (ip.split("/")[0].split(".")[2] | int) > 66) and (network_classes[0] != 'a' or (ip.split("/")[0].split(".")[1] | int) > 33) %}
         {% set ns.ip = ip %}
         {% break %}
         {% endif %}
@@ -139,7 +139,7 @@ networks:
     dmz:
         {% for _ in range(1, 999999999) %}
         {% set ip = faker.ipv4(network=True, address_class=network_classes[1], private=True) %}
-        {% if (ip.split("/")[1] | int) < 25 and (ip.split("/")[1] | int) > 15 and (network_classes[1] != 'b' or (ip.split("/")[0].split(".")[2] | int) > 66) and (network_classes[2] != 'a' or (ip.split("/")[0].split(".")[1] | int) > 33) %}
+        {% if (ip.split("/")[1] | int) < 25 and (ip.split("/")[1] | int) > 15 and (network_classes[1] != 'b' or (ip.split("/")[0].split(".")[2] | int) > 66) and (network_classes[1] != 'a' or (ip.split("/")[0].split(".")[1] | int) > 33) %}
         {% set ns.ip = ip %}
         {% break %}
         {% endif %}

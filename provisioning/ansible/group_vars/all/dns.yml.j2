@@ -1,29 +1,13 @@
 domains:
-  cyberrange:
-    id: cyberrange
+  \var{context.network_name}:
+    id: \var{context.network_name}
     server: inet-dns
-    domain: cyberrange.at
-\{%- for domain_name, mail_server in context.mail.internal.items() }
-  \var{domain_name}:
-    id: \var{domain_name}
-    server: inet-firewall
-    domain: \var{domain_name}.cyberrange.at
-    mx:
-      - priority: 5
-        record: \var{mail_server.record}.%
-  \var{domain_name}_external:
-    id: \var{domain_name}
-    server: inet-dns
-    domain: \var{domain_name}.cyberrange.at
-    mx:
-      - priority: 5
-        record: \var{mail_server.record}.%
-\{%- endfor }
-\{%- for domain_name, mail_server in context.mail.external.items() }
+    domain: \var{context.network_domain}
+\{%- for domain_name, mail_server in context.external_mail.items() }
   \var{domain_name}:
     id: \var{domain_name}
     server: inet-dns
-    domain: \var{domain_name}.cyberrange.at
+    domain: \var{mail_server.domain}
     mx:
       - priority: 5
         record: \var{mail_server.record}.%
@@ -31,25 +15,25 @@ domains:
   company_external:
     id: company_external
     server: inet-dns
-    domain: company.cyberrange.at
+    domain: \var{context.company_name}.\var{context.network_domain}
     mx:
       - priority: 5
         record: mailserver.%
   company:
     id: company
     server: inet-firewall
-    domain: company.cyberrange.at
+    domain: \var{context.company_name}.\var{context.network_domain}
     mx:
       - priority: 5
         record: mailserver.%
   dmz: 
     id: dmz
     server: inet-firewall
-    domain: dmz.company.cyberrange.at
+    domain: dmz.\var{context.company_name}.\var{context.network_domain}
   intranet: 
     id: intranet
     server: inet-firewall
-    domain: intranet.company.cyberrange.at
+    domain: intranet.\var{context.company_name}.\var{context.network_domain}
 
 dns_domains: []
 dns: |

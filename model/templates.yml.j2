@@ -13,12 +13,46 @@
   src: provisioning/ansible/group_vars/all/dns.yml.j2
   dest: provisioning/ansible/group_vars/all/dns.yml
 
-- name: Internal mail server
+- name: Inet DNS configuration
+  type: file
+  src: provisioning/ansible/host_vars/inet-dns/dns.yml.j2
+  dest: provisioning/ansible/host_vars/inet-dns/dns.yml
+
+- name: VPN DNS configuration
+  type: file
+  src: provisioning/ansible/host_vars/vpn/dns.yml.j2
+  dest: provisioning/ansible/host_vars/vpn/dns.yml
+
+- name: Webserver DNS configuration
+  type: file
+  src: provisioning/ansible/host_vars/webserver/dns.yml.j2
+  dest: provisioning/ansible/host_vars/webserver/dns.yml
+
+- name: Internal mail server DNS configuration
   type: file
   src: provisioning/ansible/host_vars/mail/dns.yml.j2
   dest: provisioning/ansible/host_vars/mail/dns.yml
 
-{% for domain_name, mail_server in mail.external.items() %}
+- name: Internal mail server certs
+  type: dir
+  src: model/templates/certs/sites/domain_mail/record_domain
+  dest: provisioning/ansible/data/certs/sites/mail/mailserver.{{ company_name }}
+  contents:
+   - name: Copy crt for internal mail server
+     type: file
+     src: cert.crt
+     dest: mailserver.{{ company_name }}.crt
+   - name: Copy csr for internal mail server
+     type: file
+     src: cert.csr
+     dest: mailserver.{{ company_name }}.csr
+   - name: Copy key for internal mail server
+     type: file
+     src: cert.key
+     dest: mailserver.{{ company_name }}.key 
+  delete: false
+
+{% for domain_name, mail_server in external_mail.items() %}
 - name: External mail server
   type: dir
   src: model/templates/mail

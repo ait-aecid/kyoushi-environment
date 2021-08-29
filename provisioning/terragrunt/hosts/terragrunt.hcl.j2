@@ -42,7 +42,7 @@ inputs = {
 
 
     ext_mail = [
-        \{% for domain_name in (context.mail.external.keys() | list) }
+        \{% for domain_name in (context.external_mail.keys() | list) }
         {
             name     = "\var{domain_name}"
             ip_index = null

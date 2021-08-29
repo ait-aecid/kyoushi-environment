@@ -1,24 +1,19 @@
-{% set mail_servers_internal_count = 1 %}
+{% set network_name = (faker.domain_word() | lower | alpha) %}
+network_name: {{ network_name }}
+{% set network_domain = network_name + "." + faker.tld() %}
+network_domain: {{ network_domain }}
+company_name: {{ (faker.domain_word() | lower | alpha) }}
 {% set mail_servers_external_count = random.randint(2, 2) %}
-{% set domain_names_internal = [] %}
-{% set domain_names_external = [] %}
+{% set domain_names = [] %}
 {% set records = ['mailserver', 'mail', 'smtp'] %}
-mail:
-    internal:
-{% for i in range(0, mail_servers_internal_count + mail_servers_external_count) %}
-{% if i == mail_servers_internal_count %}
-    external:
-{% endif %}
+external_mail:
+{% for i in range(0, mail_servers_external_count) %}
         {% set domain_name = (faker.domain_word() | lower | alpha) %}
-        {% if i >= mail_servers_internal_count %}
-        {% do domain_names_external.append(domain_name) %}
-        {% else %}
-        {% do domain_names_internal.append(domain_name) %}
-        {% endif %}
+        {% do domain_names.append(domain_name) %}
         {{ domain_name }}:
           id: {{ i }}
-          domain: {{ domain_name }}.{{ faker.tld() }}
-          record: {{ records[i % (records | length)] }}
+          domain: {{ domain_name }}.{{ network_domain }}
+          record: {{ random.choice(records) }}
 {% endfor %}
 {% set network_classes = ["a", "b", "c"] %}
 {% do random.shuffle(network_classes) %}
@@ -42,7 +37,7 @@ employees:
           last_name: {{ last_name }}
           username: {{ (first_name[0] | lower | alpha) + (last_name | lower | alpha) }}
           email_user: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
-          email_domain: {{ '"{{' }} domains.{{ random.choice(domain_names_internal) }}.domain {{ '}}"' }}
+          email_domain: {{ random.choice(domain_names) + '.' + network_domain }}
           password: {{ faker.password(length=12, special_chars=False) }}
           password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
           {% set wp_role = random.choice(['editor', 'administrator', '']) %}
@@ -93,15 +88,15 @@ ext_mail_users:
     - id: {{ i }}
       first_name: {{ first_name }}
       {% set last_name = faker.last_name() %}
-      {% set domain_name = random.choice(domain_names_external) %}
+      {% set domain_name = random.choice(domain_names) %}
       last_name: {{ last_name }}
-      {% if domain_names_external.index(domain_name) % 2 == 0 %}
+      {% if domain_names.index(domain_name) % 2 == 0 %}
       username: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
       {% else %}
       username: {{ (last_name | lower | alpha) + (first_name[0] | lower | alpha) }}
       {% endif %}
       email_user: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
-      email_domain: {{ '"{{' }} domains.{{ domain_name }}.domain {{ '}}"' }}
+      email_domain: {{ random.choice(domain_names) + '.' + network_domain }}
       password: {{ faker.password(length=12, special_chars=False) }}
       password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
 {% endfor %}
@@ -171,12 +166,10 @@ attacker:
 kyoushi_attacker_start: +P02DT{{ (random.randint(0, 12) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M
 kyoushi_attacker_escalate_start: +P02DT{{ (random.randint(0, 12) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M
 {% set recon_hosts_dict = {"cloud_share": "dmz", "vpn": "dmz", "webserver": "dmz", "inet-dns": "internet", "inet-firewall": "internet", "intranet_server": "intranet", "internal_share": "intranet"} %}
-{% for domain_name in domain_names_internal %}
-{% do recon_hosts_dict.update({(domain_name + "_mail"): "dmz"}) %}
-{% endfor %}
-{% for domain_name in domain_names_external %}
+{% for domain_name in domain_names %}
 {% do recon_hosts_dict.update({(domain_name + "_mail"): "internet"}) %}
 {% endfor %}
+{% do recon_hosts_dict.update({("mail"): "dmz"}) %}
 {% set recon_hosts_selected = random.sample((recon_hosts_dict.keys() | list), random.randint(1, (recon_hosts_dict | length))) %}
 kyoushi_attacker_recon_hosts:
 {% for domain_name in recon_hosts_selected %}

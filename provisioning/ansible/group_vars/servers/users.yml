@@ -8,7 +8,7 @@ server_ssh_users: "{{ server_ssh_users_group + server_ssh_users_host }}"
 
 server_ssh_users_group: |
   [
-  {% for ssh_user in (employees.values() | selectattr('ssh_admin', 'defined') | selectattr('ssh_admin', 'equalto', True) | list)%}
+  {% for ssh_user in (employees.values() | selectattr('ssh_admin', 'defined') | selectattr('ssh_admin', 'equalto', 'yes') | list)%}
     {% set ssh_user_pubkey_path = ssh_keys_base_path+'/'+ssh_user.key_+'/id_rsa.pub' %}
     {
       "name": "{{ ssh_user.username }}",

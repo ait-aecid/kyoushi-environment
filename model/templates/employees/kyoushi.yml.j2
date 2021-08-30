@@ -282,7 +282,7 @@ kyoushi_sm_states_activities:
 # we set idle high since ext users only do emails
   \var{({"horde": random.uniform(0.2, 0.5), "owncloud": 0, "ssh_user": 0, "web_browser": 0, "wp_editor": 0, "wpdiscuz": 0, "idle": random.uniform(0.4, 0.7)} | normalize_distribution)}
 \{%- else }
-  \var{({"horde": random.uniform(0.1, 0.5), "owncloud": random.uniform(0.05, 0.2), "ssh_user": random.uniform(0.1, 0.3) if "ssh_admin" in local_context.employee and local_context.employee.ssh_admin == 'yes else 0, "web_browser": random.uniform(0.1, 0.4), "wp_editor": random.uniform(0.1, 0.3) if "wp_role" in local_context.employee and "editor" in local_context.employee.wp_role else 0, "wpdiscuz": random.uniform(0.05, 0.25), "idle": random.uniform(0.1, 0.3)} | normalize_distribution)}
+  \var{({"horde": random.uniform(0.1, 0.5), "owncloud": random.uniform(0.05, 0.2), "ssh_user": random.uniform(0.1, 0.3) if "ssh_admin" in local_context.employee and local_context.employee.ssh_admin == "yes" else 0, "web_browser": random.uniform(0.1, 0.4), "wp_editor": random.uniform(0.1, 0.3) if "wp_role" in local_context.employee and "editor" in local_context.employee.wp_role else 0, "wpdiscuz": random.uniform(0.05, 0.25), "idle": random.uniform(0.1, 0.3)} | normalize_distribution)}
 \{%- endif }
 
 # horde activity states configs

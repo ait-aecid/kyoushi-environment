@@ -140,7 +140,7 @@ kyoushi_sm_horde_contacts: \var{(contacts_dict | string)}
 \{%- for file in context.kyoushi_files }
 \{%- do kyoushi_files_dict.update({"{{ kyoushi_files_dir }}" + "/" + file: random.choice([0.0001, random.random()])}) }
 \{%- endfor }
-kyoushi_sm_horde_attachments: \var{(kyoushi_files_dict | string)}
+kyoushi_sm_horde_attachments: "\var{(kyoushi_files_dict | string)}"
 #The probability that an additional recipient is added to a mail
 kyoushi_sm_horde_extra_recipient: \var{random.uniform(0.05, 0.2)}
 # The maximum amount of recipients
@@ -164,7 +164,7 @@ kyoushi_sm_owncloud_password: "\var{local_context.employee.password}"
 \{%- for file in context.kyoushi_files }
 \{%- do kyoushi_files_dict.update({"{{ kyoushi_files_dir }}" + "/" + file: random.choice([0.0001, random.random()])}) }
 \{%- endfor }
-kyoushi_sm_owncloud_upload_files: \var{(kyoushi_files_dict | string)}
+kyoushi_sm_owncloud_upload_files: "\var{(kyoushi_files_dict | string)}"
 # List of regular expresions used to control which 
 # directories can be modified. i.e., dir create, file upload, delete
 # (default means any directory other than root)

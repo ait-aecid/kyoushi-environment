@@ -244,6 +244,7 @@ kyoushi_sm_ssh_verify: True
 # If the SSH host key should be verified or not
 # kyoushi_sm_ssh_proxy_verify: True
 
+\{%- if local_context.employee not in context.ext_mail_users }
 # web browser config
 
 # The maximum websites to visit per day
@@ -252,7 +253,7 @@ kyoushi_sm_web_browser_max_daily: \var{random.randint(7, 15)}
 kyoushi_sm_web_browser_max_depth: \var{random.randint(2, 5)}
 # The web site URLs the user can visit
 kyoushi_sm_web_browser_websites: "{{ moz_top500 }}"
-
+\{%- endif }
 
 # WP Editor Config
 

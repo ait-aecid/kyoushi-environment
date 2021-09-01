@@ -38,6 +38,14 @@ recon:
   # The hosts to target for the service sca
   hosts:
 {{ kyoushi_attacker_recon_hosts | to_nice_yaml(indent=2) | indent(4, True)}}
+  service_scan_extra_args:
+{{ kyoushi_attacker_service_scan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
+  intranet_scan_extra_args:
+{{ kyoushi_attacker_intranet_scan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
+  dns_scan_extra_args:
+{{ kyoushi_attacker_dns_scan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
+  dmz_scan_extra_args:
+{{ kyoushi_attacker_dmz_scan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
 
 wordpress:
   # The base URL for the wordpress instance
@@ -56,6 +64,12 @@ wordpress:
   # The commands to execute via the web shell
   commands:
 {{ kyoushi_attacker_web_shell_commands | to_nice_yaml(indent=2) | indent(4, True)}}
+
+  wpscan_extra_args:
+{{ kyoushi_attacker_wpscan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
+
+  dirb_extra_args:
+{{ kyoushi_attacker_dirb_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
 
 escalate:
   # The user to escalate to in the 2nd part

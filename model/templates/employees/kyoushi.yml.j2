@@ -169,7 +169,7 @@ _kyoushi_sm_owncloud_upload_files:
 \{%- for file in context.kyoushi_files }
   \var{file}: \var{random.choice([0.0001, random.random()])}
 \{%- endfor }
-kyoushi_sm_owncloud_upload_files:
+kyoushi_sm_owncloud_upload_files: |
  {
  {% for _file, _p in _kyoushi_sm_owncloud_upload_files.items() %}
   "{{ kyoushi_files_dir }}/{{ _file }}": {{ _p }}{% if not loop.last %},{% endif %}

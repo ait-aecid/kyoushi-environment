@@ -1,0 +1,5 @@
+logstash_outputs_config: |
+    file {
+      path => "/var/log/logstash/%{[host][name]}/%{+YYYY-MM-dd}-%{[event][dataset]}.log"
+    }
+install_elastic: True

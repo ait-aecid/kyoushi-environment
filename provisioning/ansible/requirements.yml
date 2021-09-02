@@ -16,6 +16,11 @@ roles:
     scm: git
     version: v1.2
     name: apache2
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/stressmachine.git
+    scm: git
+    version: v0.1
+    name: stressmachine
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/samba.git
     scm: git
@@ -171,4 +176,25 @@ roles:
     version: master
     name: kyoushi-gather
 
-  
+  - name: elastic.beats
+    version: 7.9.3
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/elastic-beats-modules.git
+    scm: git
+    version: v1.1
+    name: elastic-beats-modules
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/logstash.git
+    scm: git
+    version: v1.2
+    name: logstash
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/elasticsearch.git
+    scm: git
+    version: v1.2
+    name: elasticsearch
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kibana.git
+    scm: git
+    version: v1.4.3
+    name: kibana

@@ -1,0 +1,32 @@
+# backuppc logs
+# /var/lib/backuppc/log/LOG*
+# /var/lib/backuppc/pc/*/LOG.*
+
+# rsyncd logs for shares
+# /var/log/rsyncd/rsyncd.log
+
+# filebeat_beat_conf: "{{ filebeat_beat_conf_all | combine(filebeat_beat_conf_host, recursive=True) }}"
+filebeat_beat_conf_host: {}
+
+filebeat_beat_conf:
+  filebeat.config.modules.path: ${path.config}/modules.d/*.yml
+
+filebeat_modules_all:
+  - module: system
+  - module: auditd
+    enabled: false
+
+filebeat_modules_host: []
+filebeat_modules: "{{ filebeat_modules_all + filebeat_modules_host}}"
+
+
+filebeat_logging_conf:
+  level: info
+  to_files: true
+  to_syslog: false
+  files:
+    rotateeverybytes: 10485760
+    path: /var/log/filebeat
+    name: filebeat
+    keepfiles: 7
+    permissions: 0644

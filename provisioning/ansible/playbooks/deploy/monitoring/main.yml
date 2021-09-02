@@ -1,0 +1,21 @@
+- name: Configure logstash
+  hosts: monitoring
+  tags: [elk, logstash]
+  become: yes
+  roles:
+    - logstash
+
+- name: Configure kibana and elastichsearch
+  hosts: monitoring
+  tags: [elk, kibana, elasticsearch]
+  become: yes
+  tasks:
+    - name: import elasticsearch
+      import_role:
+        name: elasticsearch
+      when: install_elastic | default(false)
+    - name: import kibana
+      import_role:
+        name: kibana
+      when: install_elastic | default(false)
+

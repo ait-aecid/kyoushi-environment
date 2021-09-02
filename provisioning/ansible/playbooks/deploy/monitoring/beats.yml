@@ -1,0 +1,34 @@
+- name: Configure monitoring and beats on servers
+  hosts: beatservers
+  tags: [elk, beats, monitoring]
+  become: yes
+  roles:
+    # filebeats
+    - role: elastic.beats
+      vars:
+        beat: "filebeat"
+        beat_conf: "{{ filebeat_beat_conf }}"
+        output_conf: "{{ beats_output_conf }}"
+        logging_conf: "{{ filebeat_logging_conf}}"
+    - role: elastic-beats-modules
+      vars:
+        elastic_beats_modules_beat: "filebeat"
+        elastic_beats_modules: "{{ filebeat_modules }}"
+    # metricbeats
+    - role: elastic.beats
+      vars:
+        beat: "metricbeat"
+        beat_conf: "{{ metricbeat_beat_conf }}"
+        output_conf: "{{ beats_output_conf }}"
+        logging_conf: "{{ metricbeat_logging_conf}}"
+    - role: elastic-beats-modules
+      vars:
+        elastic_beats_modules_beat: "metricbeat"
+        elastic_beats_modules: "{{ metricbeat_modules }}"
+    # auditbeats
+    #- role: elastic.beats
+    #  vars:
+    #    beat: "auditbeat"
+    #    beat_conf: "{{ auditbeat_beat_conf }}"
+    #    output_conf: "{{ beats_output_conf }}"
+    #    logging_conf: "{{ auditbeat_logging_conf}}"

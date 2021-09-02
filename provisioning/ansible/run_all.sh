@@ -50,7 +50,8 @@ ansible-playbook ./playbooks/deploy/attack_server_takeover/main.yml
 if [[ $? -ne 0 ]]; then
     exit
 fi
-ansible-playbook ./playbooks/deploy/openvpn/main.yml                                                                                                                                                                                                                                                                         if [[ $? -ne 0 ]]; then
+ansible-playbook ./playbooks/deploy/openvpn/main.yml
+if [[ $? -ne 0 ]]; then
     exit
 fi
 ansible-playbook ./playbooks/deploy/attack_exfiltration/main.yml

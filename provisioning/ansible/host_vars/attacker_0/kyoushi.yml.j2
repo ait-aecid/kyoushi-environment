@@ -90,6 +90,11 @@ kyoushi_attacker_recon_hosts:
 \{%- for host_ip in context.kyoushi_attacker_recon_hosts }
   - "\var{host_ip}"
 \{%- endfor }
+# Extra args of the scans
+kyoushi_attacker_service_scan_extra_args: \var{context.kyoushi_attacker_service_scan_extra_args}
+kyoushi_attacker_intranet_scan_extra_args: \var{context.kyoushi_attacker_intranet_scan_extra_args}
+kyoushi_attacker_dns_scan_extra_args: \var{context.kyoushi_attacker_dns_scan_extra_args}
+kyoushi_attacker_dmz_scan_extra_args: \var{context.kyoushi_attacker_dmz_scan_extra_args}
 
 # The base URL for the wordpress instance
 kyoushi_attacker_wp_url: "https://{{ hostvars['intranet_server'].wp_apache_hostname }}"
@@ -99,6 +104,10 @@ kyoushi_attacker_wp_url: "https://{{ hostvars['intranet_server'].wp_apache_hostn
 # The wordlists to use. 
 # By default `/usr/share/dirb/wordlists/common.txt` is used.
 kyoushi_attacker_wp_dirb: []
+# Extra args of the wpscan
+kyoushi_attacker_wpscan_extra_args: \var{kyoushi_attacker_wpscan_extra_args}
+# Extra args of the dirb scan
+kyoushi_attacker_dirb_extra_args: \var{kyoushi_attacker_dirb_extra_args}
 
 # The JPEG image to use to for the web shell upload exploit
 kyoushi_attacker_web_shell_image: "{{ kyoushi_files_dir }}/\var{context.kyoushi_attacker_web_shell_name}.jpg"

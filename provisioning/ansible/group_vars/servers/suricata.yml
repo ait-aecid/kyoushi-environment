@@ -1,7 +1,7 @@
 suricata_use_ppa: yes
 suricata_interface: "{{ ansible_default_ipv4.interface }}"
 suricata_listenmode: af-packet
-suricata_pcap_log: no
+suricata_pcap_log: yes
 
 # List of networks considered as the local network zones
 #suricata_home_nets: [192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]

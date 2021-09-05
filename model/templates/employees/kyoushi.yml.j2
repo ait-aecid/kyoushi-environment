@@ -175,7 +175,7 @@ kyoushi_sm_ssh_password: "\var{local_context.employee.password}"
 
 # If the user should verify the SSH servers host key by default
 \{% set ext_employees_id_list = [] } \{% for ext_employee in (context.employees.external.values() | list) } \{% do ext_employees_id_list.append(ext_employee.id) } \{% endfor }
-\{%- if local_context.employee.id in ext_employees_id_list }
+\{%- if local_context.employee.id in ext_employees_id_list or "ssh_admin" in local_context.employee and local_context.employee.ssh_admin == "yes" }
 kyoushi_sm_ssh_verify: False
 
 # Default list of command chains the user can execute on the hosts.
@@ -210,15 +210,15 @@ kyoushi_sm_ssh_host_configs:
 kyoushi_sm_ssh_verify: True
 
 # Default list of command chains the user can execute on the hosts.
-#kyoushi_sm_ssh_commands: []
+kyoushi_sm_ssh_commands: []
 
 # Mapping of host identifiers to the probabilities of them being selected.
 #   <host id>:<probability>
-#kyoushi_sm_ssh_hosts: {}
+kyoushi_sm_ssh_hosts: {}
 
 # Mapping of host identifiers to their configurations.
 # <host id>:<HostConfig>
-#kyoushi_sm_ssh_host_configs: {}
+kyoushi_sm_ssh_host_configs: {}
 \{%- endif }
 
 

@@ -9,7 +9,7 @@ exfiltration_service_script: "/usr/bin/{{ exfiltration_service_name }}"
 exfiltration_compressed: "{{ hostvars[exfiltration_host].dnsteal_compressed }}"
 exfiltration_sub_domains: "{{ hostvars[exfiltration_host].dnsteal_sub_domains if hostvars[exfiltration_host].dnsteal_sub_domains is defined }}"
 exfiltration_block_size: "{{ hostvars[exfiltration_host].dnsteal_block_size if hostvars[exfiltration_host].dnsteal_block_size is defined }}"
-exfiltration_dns_host: "{{ hostvars[exfiltration_host].ansible_default_ipv4.address  if hostvars[exfiltration_host].dnsteal_force_ip else '' }}"
+exfiltration_dns_host: "{{ hostvars[exfiltration_host].ansible_default_ipv4.address if hostvars[exfiltration_host].dnsteal_force_ip else '' }}"
 exfiltration_domain: "{{ hostvars[exfiltration_host].dnsteal_domain if hostvars[exfiltration_host].dnsteal_domain is defined else '' }}"
 exfiltration_directories: |
   [

@@ -250,6 +250,8 @@ dnsteal_domain: {{ faker.hostname() }}
 dnsteal_force_ip: {{ random.choice(['no', 'yes']) }}
 dnsteal_compressed: {{ random.choice(['no', 'yes']) }}
 dnsteal_verbose: {{ random.choice(['no', 'yes']) }}
-dnsteal_sub_domains: {{ random.randint(4, 16) }}
-dnsteal_block_size: {{ random.randint(32, 63) }}
+{% set dnsteal_block_size = random.randint(32, 63) %}
+dnsteal_block_size: {{ dnsteal_block_size }}
+{% set max_dnsteal_sub_domains = ((235 / dnsteal_block_size) | int) %}
+dnsteal_sub_domains: {{ random.randint(max_dnsteal_sub_domains - 1, max_dnsteal_sub_domains) }}
 dnsteal_endtime: 2021-03-31T23:30

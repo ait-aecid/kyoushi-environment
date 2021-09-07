@@ -62,4 +62,8 @@ ansible-playbook ./playbooks/deploy/kyoushi_simulation/main.yml
 if [[ $? -ne 0 ]]; then
     exit
 fi
+ansible-playbook ./playbooks/deploy/monitoring/main.yml
+if [[ $? -ne 0 ]]; then
+    exit
+fi
 ansible-playbook ./playbooks/deploy/audit/main.yml

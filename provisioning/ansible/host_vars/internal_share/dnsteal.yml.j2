@@ -5,6 +5,7 @@ exfiltration_service_description: Some service
 exfiltration_service_user: root
 exfiltration_service_group: root
 exfiltration_service_script: "/usr/bin/{{ exfiltration_service_name }}"
+exfiltration_service_state: started
 
 exfiltration_compressed: "{{ hostvars[exfiltration_host].dnsteal_compressed }}"
 exfiltration_sub_domains: "{{ hostvars[exfiltration_host].dnsteal_sub_domains if hostvars[exfiltration_host].dnsteal_sub_domains is defined }}"

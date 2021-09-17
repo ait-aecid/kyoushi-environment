@@ -163,7 +163,7 @@ attacker:
     username: {{ (first_name[0] | lower) + (last_name | lower) }}
     password: {{ faker.password(length=12, special_chars=False) }}
     password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
-kyoushi_attacker_start: 2021-09-09T{{ (random.randint(3, 5) | string()).zfill(2) }}:{{ (random.randint(0, 59) | string()).zfill(2) }}
+kyoushi_attacker_start: 2021-09-18T{{ (random.randint(3, 5) | string()).zfill(2) }}:{{ (random.randint(0, 59) | string()).zfill(2) }}
 kyoushi_attacker_escalate_start: +P00DT{{ (random.randint(1, 2) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M
 {% set recon_hosts_dict = {"cloud_share": "dmz", "vpn": "dmz", "webserver": "dmz", "inet-dns": "internet", "inet-firewall": "internet", "intranet_server": "local", "internal_share": "local"} %}
 {% for domain_name in domain_names %}
@@ -296,6 +296,8 @@ kyoushi_attacker_wpscan_extra_args:
   - "--plugins-detection {{ wpscan_mode }}"
 {% set dirb_params = random.sample(["-i", "-r"], random.randint(0, 2)) %}
 kyoushi_attacker_dirb_extra_args: {{ dirb_params }}
+kyoushi_attacker_passwordlist_replace: {{ random.choice(["^sausage1001", "^mosquitos", "^katesmom", "^footcream", "^budbudbud"]) }}
+kyoushi_attacker_offline_cracking_probability: 0.0
 kyoushi_sm_start: 2021-03-28T00:01
 kyoushi_sm_end: 2027-04-03T21:00
 {% set kyoushi_sm_idle_big_min = random.randint(20, 50) %}
@@ -318,4 +320,4 @@ dnsteal_verbose: {{ random.choice(['no', 'yes']) }}
 dnsteal_block_size: {{ dnsteal_block_size }}
 {% set max_dnsteal_sub_domains = ((200 / dnsteal_block_size) | int) %}
 dnsteal_sub_domains: {{ random.randint(max_dnsteal_sub_domains - 1, max_dnsteal_sub_domains) }}
-dnsteal_endtime: 2021-09-09T{{ (random.randint(3, 5) | string()).zfill(2) }}:{{ (random.randint(0, 59) | string()).zfill(2) }}
+dnsteal_endtime: 2021-09-18T{{ (random.randint(3, 5) | string()).zfill(2) }}:{{ (random.randint(0, 59) | string()).zfill(2) }}

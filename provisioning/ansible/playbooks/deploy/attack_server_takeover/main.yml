@@ -31,6 +31,10 @@
         # the extra lists to empty
         sudo_host: []
         sudo_group: []
+    - role: apache2
+      become: yes
+    - role: passwordlist
+      tags: [wordlist]
     - role: kyoushi-simulation
       tags: [install, simulation]
   tasks:

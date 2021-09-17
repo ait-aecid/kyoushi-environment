@@ -35,15 +35,19 @@ recon:
   dns: "{{ kyoushi_attacker_recon_dns }}"
   # The domain to brute force
   domain: "{{ kyoushi_attacker_recon_domain }}"
-  # The hosts to target for the service sca
+  # The hosts to target for the service scan
   hosts:
 {{ kyoushi_attacker_recon_hosts | to_nice_yaml(indent=2) | indent(4, True)}}
+  # The extra args of the service scan
   service_scan_extra_args:
 {{ kyoushi_attacker_service_scan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
+  # The extra args of the intranet scan
   intranet_scan_extra_args:
 {{ kyoushi_attacker_intranet_scan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
+  # The extra args of the dns scan
   dns_scan_extra_args:
 {{ kyoushi_attacker_dns_scan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
+  # The extra args of the dmz scan
   dmz_scan_extra_args:
 {{ kyoushi_attacker_dmz_scan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
 
@@ -65,11 +69,31 @@ wordpress:
   commands:
 {{ kyoushi_attacker_web_shell_commands | to_nice_yaml(indent=2) | indent(4, True)}}
 
+  # The extra args of the wpscan
   wpscan_extra_args:
 {{ kyoushi_attacker_wpscan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
 
+  # The extra args of the dirb scan
   dirb_extra_args:
 {{ kyoushi_attacker_dirb_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
+
+  # The url to the hashcrack tar
+  hashcrack_url: "{{ kyoushi_attacker_hashcrack_url }}"
+
+  # The name of the hashcrack tar
+  file_name: "{{ kyoushi_attacker_hashcrack_file_name }}"
+
+  # The url to the wordlist used for password cracking
+  wl_url: "{{ kyoushi_attacker_wl_url }}"
+
+  # The name of the wordlist
+  wl_name: "{{ kyoushi_attacker_wl_name }}"
+
+  # The username of the attacked user
+  attacked_user: "{{ kyoushi_attacker_hashcrack_user }}"
+
+  # The probability that cracking takes place offline
+  offline_cracking_probability: "{{ kyoushi_attacker_offline_cracking_probability }}"
 
 escalate:
   # The user to escalate to in the 2nd part

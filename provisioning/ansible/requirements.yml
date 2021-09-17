@@ -198,3 +198,8 @@ roles:
     scm: git
     version: v1.4.3
     name: kibana
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/ansible-passwordlist.git
+    scm: git
+    version: main
+    name: passwordlist

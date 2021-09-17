@@ -103,6 +103,11 @@
   src: provisioning/ansible/host_vars/internal_share/dnsteal.yml.j2
   dest: provisioning/ansible/host_vars/internal_share/dnsteal.yml
 
+- name: Passwordlist
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/passwordlist.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/passwordlist.yml
+
 - name: Attacker configuration
   type: file
   src: provisioning/ansible/host_vars/attacker_0/attack.yml.j2

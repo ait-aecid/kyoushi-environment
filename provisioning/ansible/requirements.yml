@@ -156,9 +156,9 @@ roles:
     version: v2.0.1
     name: whotwagner.shorewall
   
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kyoushi-simulation.git
+  - src: git@github.com:ait-cs-IaaS/ansible-kyoushi-simulation.git
     scm: git
-    version: master
+    version: v1.1
     name: kyoushi-simulation
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/auditd.git

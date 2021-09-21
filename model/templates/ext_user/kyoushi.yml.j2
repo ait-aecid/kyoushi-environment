@@ -28,6 +28,9 @@ kyoushi_sm_schedule:
   saturday:
     start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
     end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+  sunday:
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
   monday:
     start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
     end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"

@@ -33,6 +33,14 @@ inputs = {
     attacker_capacity = 1
     attacker_flavor = "m1.medium"
     ext_user_capacity = \var{(context.ext_mail_users | length)}
+
+    vpn_flavor = "aecid.d1.small"
+    mail_flavor = "aecid.d1.small"
+    cloud_flavor = "aecid.d1.small"
+    webserver_flavor = "aecid.d1.small"
+    intranet_flavor = "aecid.d1.small"
+    share_flavor = "aecid.d1.small"
+    ext_mail_flavor = "aecid.d1.small"
     
     shares = [
         {

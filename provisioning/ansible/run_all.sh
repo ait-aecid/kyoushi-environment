@@ -66,4 +66,8 @@ ansible-playbook ./playbooks/deploy/monitoring/main.yml
 if [[ $? -ne 0 ]]; then
     exit
 fi
+ansible-playbook ./playbooks/deploy/monitoring/beats.yml
+if [[ $? -ne 0 ]]; then
+    exit
+fi
 ansible-playbook ./playbooks/deploy/audit/main.yml

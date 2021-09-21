@@ -236,3 +236,13 @@
   delete: false
 {% endfor %}
 
+- name: Logstash config of scenario 1
+  type: file
+  src: datasets/scenario1/processing/config/logs.yaml.j2
+  dest: datasets/scenario1/processing/config/logs.yaml
+
+- name: Logstash config of scenario 2
+  type: file
+  src: datasets/scenario2/processing/config/logs.yaml.j2
+  dest: datasets/scenario2/processing/config/logs.yaml
+

@@ -1,9 +1,0 @@
-# activities entry probabilities
-kyoushi_sm_states_activities:
-  horde: 0.3
-  owncloud: 0.15
-  ssh_user: 0
-  web_browser: 0.2
-  wp_editor: 0.15
-  wpdiscuz: 0
-  idle: 0.2

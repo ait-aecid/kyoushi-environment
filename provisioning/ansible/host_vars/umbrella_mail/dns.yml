@@ -1,9 +1,0 @@
-dns_certificate_info:
-  country: DE
-  state: Bavaria
-  locality: Munich
-  organization: Umbrella Corporation
-  subject_alt_name: "{{ dns_certificate_subject_alt_names | default([]) }}"
-
-dns_domain: umbrella
-dns_hostname: mailserver

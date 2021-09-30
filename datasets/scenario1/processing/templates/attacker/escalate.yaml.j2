@@ -1,23 +1,39 @@
 {%- set index = "kyoushi-attacker_0" %}
 {%- set vpn_connect = Search(index=index).query(queries.escalate.vpn_connect.start)
                             .source(["@timestamp"]).extra(size=1)
-                            .execute().hits.hits[0]._source["@timestamp"] 
+                            .execute().hits.hits
 -%}
 {%- set vpn_connected = Search(index=index).query(queries.escalate.vpn_connect.stop)
                             .source(["@timestamp"]).extra(size=1)
-                            .execute().hits.hits[0]._source["@timestamp"] 
+                            .execute().hits.hits
+-%}
+{%- set no_pause = Search(index=index).query(queries.escalate.no_pause)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+{%- set wp_cracked = Search(index=index).query(queries.escalate.wp_cracked)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
 -%}
 {%- set vpn_disconnect = EQL(index=index, body=queries.escalate.vpn_disconnect)["hits"]["sequences"][0]["events"] -%}
 {%- set reverse_shell = EQL(index=index, body=queries.escalate.reverse_shell)["hits"]["sequences"][0]["events"] -%}
 {%- set open_pty = EQL(index=index, body=queries.escalate.open_pty)["hits"]["sequences"][0]["events"] -%}
 {%- set change_user = EQL(index=index, body=queries.escalate.change_user)["hits"]["sequences"][0]["events"] -%}
 {%- set escalated_cmds = EQL(index=index, body=queries.escalate.escalated_cmds)["hits"]["sequences"] -%}
-start: "{{ vpn_connect }}"
+{%- if (no_pause | length) > 0 %}
+start: "{{ no_pause[0]._source["@timestamp"]  }}"
+{%- elif (wp_cracked | length) > 0 %}
+start: "{{ wp_cracked[0]._source["@timestamp"]  }}"
+{%- else %}
+start: "{{ vpn_connect[0]._source["@timestamp"]  }}"
+{%- endif %}
 stop: "{{ vpn_disconnect[2]["_source"]["@timestamp"] }}"
 
+{%- if (vpn_connect | length) > 0 %}
 vpn_connect: 
-    start: "{{ vpn_connect }}"
-    stop: "{{ vpn_connected }}"
+    start: "{{ vpn_connect[0]._source["@timestamp"]  }}"
+    stop: "{{ vpn_connected[0]._source["@timestamp"]  }}"
+{%- endif %}
 
 vpn_disconnect: 
     start: "{{ vpn_disconnect[1]["_source"]["@timestamp"] }}"

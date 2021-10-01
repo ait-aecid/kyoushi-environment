@@ -1,0 +1,153 @@
+{
+    "index_patterns": "*-openvpn-*",
+    "order": 100,
+    "mappings": {
+        "dynamic": true,
+        "properties": {
+            "timestamp": {
+                "type": "date"
+            },
+            "log": {
+                "properties": {
+                    "file": {
+                        "properties": {
+                            "line": {
+                                "type": "long"
+                            },
+                            "path": {
+                                "type": "keyword",
+                                "ignore_above": 1024
+                            }
+                        }
+                    }
+                }
+            },
+            "openvpn": {
+                "properties": {
+                    "verify": {
+                        "properties": {
+                            "eku": {
+                                "properties": {
+                                    "status": {
+                                        "type": "keyword",
+                                        "ignore_above": 1024
+                                    }
+                                }
+                            },
+                            "ku": {
+                                "properties": {
+                                    "status": {
+                                        "type": "keyword",
+                                        "ignore_above": 1024
+                                    }
+                                }
+                            },
+                            "status": {
+                                "type": "keyword",
+                                "ignore_above": 1024
+                            },
+                            "depth": {
+                                "type": "long"
+                            }
+                        }
+                    },
+                    "peer": {
+                        "properties": {
+                            "cert": {
+                                "properties": {
+                                    "info": {
+                                        "type": "keyword",
+                                        "ignore_above": 1024
+                                    }
+                                }
+                            },
+                            "info": {
+                                "properties": {
+                                    "field": {
+                                        "type": "keyword",
+                                        "ignore_above": 1024
+                                    },
+                                    "value": {
+                                        "type": "keyword",
+                                        "ignore_above": 1024
+                                    }
+                                }
+                            },
+                            "duplicate": {
+                                "type": "keyword",
+                                "ignore_above": 1024
+                            }
+                        }
+                    },
+                    "pool": {
+                        "properties": {
+                            "return": {
+                                "properties": {
+                                    "ipv4": {
+                                        "type": "ip"
+                                    },
+                                    "ipv6": {
+                                        "type": "ip"
+                                    }
+                                }
+                            },
+                            "returned": {
+                                "type": "ip"
+                            }
+                        }
+                    },
+                    "push": {
+                        "properties": {
+                            "message": {
+                                "type": "text",
+                                "fields": {
+                                    "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 1024
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "control": {
+                        "properties": {
+                            "user": {
+                                "type": "keyword",
+                                "ignore_above": 1024
+                            },
+                            "message": {
+                                "type": "text",
+                                "fields": {
+                                    "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 1024
+                                    }
+                                }
+                            },
+                            "status": {
+                                "type": "long"
+                            }
+                        }
+                    },
+                    "data": {
+                        "properties": {
+                            "channel": {
+                                "type": "keyword",
+                                "ignore_above": 1024
+                            },
+                            "message": {
+                                "type": "text",
+                                "fields": {
+                                    "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 1024
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

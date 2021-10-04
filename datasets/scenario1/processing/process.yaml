@@ -15,7 +15,6 @@ pre_processors:
     src: processing/templates/groups.json.j2
     dest: processing/config/groups.yaml
 
-
   - name: Prepare server facts
     type: template
     context:
@@ -34,11 +33,11 @@ pre_processors:
         }
     src: processing/templates/servers.json.j2
     dest: processing/config/servers.yaml
-  
+
   - name: Ensure attacker config directory exists
     type: mkdir
     path: processing/config/attacker
-  
+
   - name: Extract attacker information
     type: template
     context:
@@ -55,7 +54,7 @@ pre_processors:
         intranet_server_facts: gather/intranet_server/facts.json
     src: processing/templates/attacker/attacker.yaml.j2
     dest: processing/config/attacker/attacker.yaml
-  
+
   - name: Decompress all GZIP logs
     type: gzip
     path: gather
@@ -134,7 +133,7 @@ pre_processors:
       http.response.code
       http.response.code.desc
       http.response.phrase
-      http.response.line    
+      http.response.line
       http.response_number
       http.prev_request_in
       http.prev_response_in
@@ -143,18 +142,23 @@ pre_processors:
       http.file_data
       data-text-lines
 
-  
   - name: Add pcap index mapping
     type: elasticsearch.template
     template: processing/logstash/pcap-index-template.json
     template_name: pcap
     index_patterns: ["pcap-*"]
-  
+
+  - name: Add openvpn index mapping
+    type: elasticsearch.template
+    template: processing/logstash/openvpn-index-template.json
+    template_name: openvpn
+    index_patterns: ["openvpn-*"]
+
   - name: Add auditd ingest pipeline to elasticsearch
     type: elasticsearch.ingest
     ingest_pipeline: processing/logstash/auditd-ingest.yml
     ingest_pipeline_id: auditd-logs
-  
+
   - name: Setup logstash pipeline
     type: logstash.setup
     context:
@@ -184,7 +188,7 @@ post_processors:
         queries: processing/config/attack_queries.yaml
     src: processing/templates/attacker/foothold.yaml.j2
     dest: processing/config/attacker/foothold.yaml
-  
+
   - name: Extract escalate phase information
     type: template
     context:

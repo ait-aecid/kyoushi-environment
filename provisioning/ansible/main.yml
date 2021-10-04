@@ -1,5 +1,68 @@
-- name: Placeholder playbook
-  hosts: all
-  tasks: 
-    - debug:
-        msg: "{{ inventory_hostname }}: {{ openstack.private_v4 }}"
+- name: Provision the internet dns server
+  import_playbook: ./playbooks/deploy/dns/main.yml
+  tags: [dns]
+
+- name: Provision the employees
+  import_playbook: ./playbooks/deploy/employees/main.yml
+  tags: [employees]
+
+- name: Provision the firewall
+  import_playbook: ./playbooks/deploy/firewall/main.yml
+  tags: [firewall]
+
+- name: Provision the external users
+  import_playbook: ./playbooks/deploy/ext_user/main.yml
+  tags: [ext_user]
+
+- name: Provision the mail servers
+  import_playbook: ./playbooks/deploy/mailservers/main.yml
+  tags: [mailservers]
+
+- name: Provision the web servers
+  import_playbook: ./playbooks/deploy/webserver/main.yml
+  tags: [webserver]
+
+- name: Provision the wordpress servers
+  import_playbook: ./playbooks/deploy/wordpress/main.yml
+  tags: [wordpress]
+
+- name: Provision the owncloud servers
+  import_playbook: ./playbooks/deploy/owncloud/main.yml
+  tags: [owncloud]
+
+- name: Provision the samba shares
+  import_playbook: ./playbooks/deploy/samba_shares/main.yml
+  tags: [samba_shares]
+
+- name: Provision the openvpn
+  import_playbook: ./playbooks/deploy/openvpn/main.yml
+  tags: [openvpn]
+
+- name: Provision the audit
+  import_playbook: ./playbooks/deploy/audit/main.yml
+  tags: [audit]
+
+- name: Provision the ssh keys
+  import_playbook: ./playbooks/deploy/ssh_keys/main.yml
+  tags: [ssh_keys]
+
+- name: Provision the certs
+  import_playbook: ./playbooks/deploy/certs/main.yml
+  tags: [certs]
+
+- name: Provision the gather
+  import_playbook: ./playbooks/deploy/gather/main.yml
+  tags: [gather]
+
+- name: Provision the exfiltration attack
+  import_playbook: ./playbooks/deploy/attack_exfiltration/main.yml
+  tags: [attack_exfiltration]
+
+- name: Provision the server takeover attack
+  import_playbook: ./playbooks/deploy/attack_server_takeover/main.yml
+  tags: [attack_server_takeover]
+
+- name: Provision the kyoushi simulation
+  import_playbook: ./playbooks/deploy/kyoushi_simulation/main.yml
+  tags: [kyoushi_simulation]
+

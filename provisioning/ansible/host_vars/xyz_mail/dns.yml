@@ -1,9 +1,0 @@
-dns_certificate_info:
-  country: UK
-  state: England
-  locality: London
-  organization: XYZ Ltd.
-  subject_alt_name: "{{ dns_certificate_subject_alt_names | default([]) }}"
-
-dns_domain: xyz
-dns_hostname: mail

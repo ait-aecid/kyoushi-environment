@@ -1,0 +1,64 @@
+
+metricbeat_beat_conf: "{{ metricbeat_beat_conf_all | combine(metricbeat_beat_conf_host, recursive=True) }}"
+metricbeat_beat_conf_host: {}
+
+metricbeat_beat_conf_all:
+  # =========================== Modules configuration ============================
+  metricbeat.config.modules:
+    # Glob pattern for configuration loading
+    path: ${path.config}/modules.d/*.yml
+    # Set to true to enable config reloading
+    reload.enabled: false
+    # Period on which files under path should be checked for changes
+    #reload.period: 10s
+
+
+metricbeat_modules_all: 
+  - module: system
+    docs: https://www.elastic.co/guide/en/beats/metricbeat/7.13/metricbeat-module-system.html
+    config:
+      - period: 45s
+        metricsets:
+          - cpu
+          - load
+          - memory
+          - network
+          - process_summary
+          - socket_summary
+          - diskio
+          - service
+          #- process
+          #- core
+          #- users
+          #- socket
+          #- entropy
+        process.include_top_n:
+          by_cpu: 10      # include top 5 processes by CPU
+          by_memory: 10   # include top 5 processes by memory
+      # file system status
+      - period: 3m
+        metricsets:
+          - filesystem
+          - fsstat
+        processors:
+          - drop_event.when.regexp:
+              system.filesystem.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
+      - period: 15m
+        metricsets:
+          - uptime
+
+metricbeat_modules_host: []
+
+metricbeat_modules: "{{ metricbeat_modules_all + metricbeat_modules_host}}"
+
+
+metricbeat_logging_conf:
+  level: info
+  to_files: true
+  to_syslog: false
+  files:
+    rotateeverybytes: 10485760
+    path: /var/log/metricbeat
+    name: metricbeat
+    keepfiles: 7
+    permissions: 0644

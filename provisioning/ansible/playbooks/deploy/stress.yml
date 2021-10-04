@@ -1,0 +1,12 @@
+---
+
+- hosts: beatservers
+  become: true
+  roles:
+          - stressmachine
+  vars:
+          cputimes:
+                  - now +48 hours
+          memtimes:
+                  - now +30 hours
+

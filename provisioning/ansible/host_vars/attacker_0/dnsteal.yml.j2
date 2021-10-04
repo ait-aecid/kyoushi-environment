@@ -1,0 +1,21 @@
+
+dnsteal_repo: https://github.com/max-frank/dnsteal.git
+dnsteal_tag: v2.1
+
+dnsteal_service_user: root
+dnsteal_service_group: root
+dnsteal_install_dir: /opt/dnsteal
+dnsteal_venv: "{{ dnsteal_install_dir }}/venv"
+dnsteal_log_file: /var/log/dnsteal.log
+dnsteal_files_dir: /var/log/dnsteal
+dnsteal_service_script: /usr/local/bin/dnsteal.sh
+
+dnsteal_domain: \var{context.dnsteal_domain}
+dnsteal_force_ip: \var{context.dnsteal_force_ip}
+dnsteal_compressed: \var{context.dnsteal_compressed}
+dnsteal_verbose: \var{context.dnsteal_verbose}
+dnsteal_sub_domains: \var{context.dnsteal_sub_domains}
+dnsteal_block_size: \var{context.dnsteal_block_size}
+dnsteal_bind_ip: "{{ ansible_default_ipv4.address }}"
+dnsteal_endtime: \var{context.dnsteal_endtime}
+dnsteal_service_state: started

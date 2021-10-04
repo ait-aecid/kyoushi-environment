@@ -1,0 +1,56 @@
+domains:
+  \var{context.network_name}:
+    id: \var{context.network_name}
+    server: inet-dns
+    domain: \var{context.network_domain}
+\{%- for domain_name, mail_server in context.external_mail.items() }
+  \var{domain_name}:
+    id: \var{domain_name}
+    server: inet-dns
+    domain: \var{mail_server.domain}
+    mx:
+      - priority: 5
+        record: \var{mail_server.record}.%
+\{%- endfor }
+  company_external:
+    id: company_external
+    server: inet-dns
+    domain: \var{context.company_name}.\var{context.network_domain}
+    mx:
+      - priority: 5
+        record: mailserver.%
+  company:
+    id: company
+    server: inet-firewall
+    domain: \var{context.company_name}.\var{context.network_domain}
+    mx:
+      - priority: 5
+        record: mailserver.%
+  dmz: 
+    id: dmz
+    server: inet-firewall
+    domain: dmz.\var{context.company_name}.\var{context.network_domain}
+  intranet: 
+    id: intranet
+    server: inet-firewall
+    domain: intranet.\var{context.company_name}.\var{context.network_domain}
+
+dns_domains: []
+dns: |
+  {
+  {% for dns_domain in dns_domains %}
+    "{{ dns_domain.domain }}":  {
+        {% if dns_domain.hostname | default(ansible_nodename) is not none %}
+        "hostname": "{{ dns_domain.hostname | default(ansible_nodename) }}",
+        {% else %}
+        "hostname": None,
+        {% endif %}
+        "domain": "{{ dns_domain.domain }}",
+        "fqdn": "{{ (dns_domain.hostname | default(ansible_nodename))+"." if (dns_domain.hostname | default(ansible_nodename)) is not none }}{{ domains[dns_domain.domain].domain }}",
+        "ip": "{{ dns_domain.ip | default(ansible_default_ipv4['address'], True) }}",
+        "certificate": {{ dns_domain.certificate | default(False, True) | bool }},
+        "certificate_info": {{ dns_domain.certificate_info | default({}) }},
+        "aliases": {{ dns_domain.aliases | default([]) }}
+    }{% if not loop.last %},{% endif %}
+  {% endfor %}
+  }

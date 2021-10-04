@@ -16,6 +16,11 @@ roles:
     scm: git
     version: v1.2
     name: apache2
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/stressmachine.git
+    scm: git
+    version: v0.1
+    name: stressmachine
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/samba.git
     scm: git
@@ -61,6 +66,11 @@ roles:
     version: master
     name: grog.authorized-key
 
+  - src: https://github.com/GROG/ansible-role-package.git
+    scm: git
+    version: master
+    name: GROG.package
+
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/maradns.git
     scm: git
     version: master
@@ -96,14 +106,14 @@ roles:
     version: master
     name: samba
 
-  - src: https://github.com/max-frank/owncloud.git
+  - src: https://github.com/owncloud-ansible/owncloud.git
     scm: git
-    version: ab7b8daed31f0613da1acb74408901976b1f02f3
+    version: ca2d72effd4dbad1b6d556503d0400c06ed90ea3
     name: owncloud
 
-  - src: https://github.com/max-frank/php.git
+  - src: https://github.com/owncloud-ansible/php.git
     scm: git
-    version: 898d2a64608220e02b31fcf9c12ab6e5ce2fd822
+    version: 68b811d4a4f769e7fbb4763ca94e73b1b189ce44
     name: owncloud-php
 
   - src: https://github.com/owncloud-ansible/apache.git
@@ -123,7 +133,7 @@ roles:
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/horde.git
     scm: git
-    version: v1.1.2
+    version: master
     name: horde
 
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/debiansnapshot.git
@@ -146,9 +156,9 @@ roles:
     version: v2.0.1
     name: whotwagner.shorewall
   
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kyoushi-simulation.git
+  - src: git@github.com:ait-cs-IaaS/ansible-kyoushi-simulation.git
     scm: git
-    version: v1.0.2
+    version: v1.1
     name: kyoushi-simulation
   
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/auditd.git
@@ -166,4 +176,30 @@ roles:
     version: master
     name: kyoushi-gather
 
-  
+  - name: elastic.beats
+    version: 7.9.3
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/elastic-beats-modules.git
+    scm: git
+    version: v1.1
+    name: elastic-beats-modules
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/logstash.git
+    scm: git
+    version: v1.2
+    name: logstash
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/elasticsearch.git
+    scm: git
+    version: v1.2
+    name: elasticsearch
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kibana.git
+    scm: git
+    version: v1.4.3
+    name: kibana
+
+  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/ansible-passwordlist.git
+    scm: git
+    version: main
+    name: passwordlist

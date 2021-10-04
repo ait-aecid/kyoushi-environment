@@ -8,7 +8,7 @@ foothold:
           - term:
               transition: vpn_connect
           - term:
-              message_keyword: connecting_to_vpn        
+              message_keyword: connecting_to_vpn
     stop:
       bool:
         must:
@@ -18,7 +18,25 @@ foothold:
               transition: vpn_connect
           - term:
               message_keyword: connected_to_vpn
-    
+
+  skipped_cracking:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: recon_host
+          - term:
+              new_state: wait_escalate_choice
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: wait_escalate_choice
+          - term:
+              transition: reverse_shell_listen
+          - term:
+              target: reverse_shell_listening
+
   vpn_disconnect:
     start:
       bool:
@@ -28,7 +46,7 @@ foothold:
           - term:
               transition: vpn_disconnect
           - term:
-              message_keyword: disconnecting_from_vpn 
+              message_keyword: disconnecting_from_vpn
     stop:
       bool:
         must:
@@ -146,7 +164,7 @@ foothold:
               transition: wpscan
           - term:
               message_keyword: output
-  
+
   dirb_scan:
     start:
       bool:
@@ -236,6 +254,26 @@ foothold:
         [attacker_recon_host where message_keyword == "web_shell_command_response"]
     size: 1000
 
+  online_cracking:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: crack_choice
+          - term:
+              transition: crack_wphash
+          - term:
+              message_keyword: downloading_wphashcrack
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: crack_choice
+          - term:
+              transition: crack_wphash
+          - term:
+              message_keyword: finished_wphashcrack
+
 escalate:
   vpn_connect:
     start:
@@ -246,7 +284,7 @@ escalate:
           - term:
               transition: vpn_connect
           - term:
-              message_keyword: connecting_to_vpn        
+              message_keyword: connecting_to_vpn
     stop:
       bool:
         must:
@@ -256,7 +294,27 @@ escalate:
               transition: vpn_connect
           - term:
               message_keyword: connected_to_vpn
-  
+
+  no_pause:
+    bool:
+        must:
+          - term:
+              current_state: wait_escalate_choice
+          - term:
+              transition: reverse_shell_listen
+          - term:
+              target: reverse_shell_listening
+
+  wp_cracked:
+    bool:
+        must:
+          - term:
+              current_state: wphash_cracked
+          - term:
+              transition: reverse_shell_listen
+          - term:
+              target: reverse_shell_listening
+
   vpn_disconnect:
     query: >-
       sequence
@@ -264,14 +322,14 @@ escalate:
         [attacker where message_keyword == "disconnecting_from_vpn"]
         [attacker where message_keyword == "disconnected_from_vpn"]
     size: 1
-  
+
   reverse_shell:
     query: >-
       sequence
         [attacker_reverse_shell_listening where transition == "open_reverse_shell" and message_keyword == "sending_web_shell_command"]
         [attacker_opening_reverse_shell where transition == "wait_reverse_shell" and message_keyword == "reverse_shell_connected"]
     size: 1
-  
+
   open_pty:
     query: >-
       sequence
@@ -286,7 +344,7 @@ escalate:
         [attacker_pty_shell where transition == "login_user" and message_keyword == "sending_password"]
         [attacker_pty_shell where transition == "login_user" and message_keyword == "changed_user"]
     size: 1
-  
+
   escalated_cmds:
     query: >-
       sequence by event.action

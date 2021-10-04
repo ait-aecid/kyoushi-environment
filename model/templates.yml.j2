@@ -1,0 +1,248 @@
+- name: Terragrunt bootstrap configuration
+  type: file
+  src: provisioning/terragrunt/bootstrap/terragrunt.hcl.j2
+  dest: provisioning/terragrunt/bootstrap/terragrunt.hcl
+
+- name: Terragrunt bootstrap configuration
+  type: file
+  src: provisioning/terragrunt/hosts/terragrunt.hcl.j2
+  dest: provisioning/terragrunt/hosts/terragrunt.hcl
+
+- name: DNS configuration
+  type: file
+  src: provisioning/ansible/group_vars/all/dns.yml.j2
+  dest: provisioning/ansible/group_vars/all/dns.yml
+
+- name: Inet DNS configuration
+  type: file
+  src: provisioning/ansible/host_vars/inet-dns/dns.yml.j2
+  dest: provisioning/ansible/host_vars/inet-dns/dns.yml
+
+- name: VPN DNS configuration
+  type: file
+  src: provisioning/ansible/host_vars/vpn/dns.yml.j2
+  dest: provisioning/ansible/host_vars/vpn/dns.yml
+
+- name: Webserver DNS configuration
+  type: file
+  src: provisioning/ansible/host_vars/webserver/dns.yml.j2
+  dest: provisioning/ansible/host_vars/webserver/dns.yml
+
+- name: Internal mail server DNS configuration
+  type: file
+  src: provisioning/ansible/host_vars/mail/dns.yml.j2
+  dest: provisioning/ansible/host_vars/mail/dns.yml
+
+- name: Internal mail server certs
+  type: dir
+  src: model/templates/certs/sites/domain_mail/record_domain
+  dest: provisioning/ansible/data/certs/sites/mail/mailserver.{{ context.company_name }}
+  contents:
+   - name: Copy crt for internal mail server
+     type: file
+     src: cert.crt
+     dest: mailserver.{{ context.company_name }}.crt
+   - name: Copy csr for internal mail server
+     type: file
+     src: cert.csr
+     dest: mailserver.{{ context.company_name }}.csr
+   - name: Copy key for internal mail server
+     type: file
+     src: cert.key
+     dest: mailserver.{{ context.company_name }}.key 
+  delete: false
+
+{% for domain_name, mail_server in context.external_mail.items() %}
+- name: External mail server
+  type: dir
+  src: model/templates/mail
+  dest: provisioning/ansible/host_vars/{{ domain_name }}_mail
+  contents:
+    - name: DNS configuration
+      type: file
+      src: dns.yml.j2
+      dest: dns.yml
+      extra:
+        domain_name: {{ domain_name }}
+        mail_server: {{ mail_server }}
+  delete: false
+
+- name: Create cert dir for external mail server
+  type: dir
+  src: model/templates/certs/sites/domain_mail
+  dest: provisioning/ansible/data/certs/sites/{{ domain_name }}_mail
+  contents:
+    - name: Create inner cert dir for external mail server
+      type: dir
+      src: record_domain
+      dest: {{ mail_server.record }}.{{ domain_name }}
+      contents:
+        - name: Copy crt for external mail server
+          type: file
+          src: cert.crt
+          dest: {{ mail_server.record }}.{{ domain_name }}.crt
+        - name: Copy csr for external mail server
+          type: file
+          src: cert.csr
+          dest: {{ mail_server.record }}.{{ domain_name }}.csr
+        - name: Copy key for external mail server
+          type: file
+          src: cert.key
+          dest: {{ mail_server.record }}.{{ domain_name }}.key
+      delete: false
+  delete: false
+{% endfor %}
+
+- name: Dnsteal configuration
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/dnsteal.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/dnsteal.yml
+
+- name: Dnsteal service configuration
+  type: file
+  src: provisioning/ansible/host_vars/internal_share/dnsteal.yml.j2
+  dest: provisioning/ansible/host_vars/internal_share/dnsteal.yml
+
+- name: Passwordlist
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/passwordlist.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/passwordlist.yml
+
+- name: Attacker configuration
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/attack.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/attack.yml
+
+- name: Attack configuration
+  type: file
+  src: provisioning/ansible/host_vars/attacker_0/kyoushi.yml.j2
+  dest: provisioning/ansible/host_vars/attacker_0/kyoushi.yml
+
+- name: Employee list
+  type: file
+  src: provisioning/ansible/group_vars/all/employees.yml.j2
+  dest: provisioning/ansible/group_vars/all/employees.yml
+
+- name: Employee group configuration
+  type: file
+  src: provisioning/ansible/group_vars/employee/kyoushi.yml.j2
+  dest: provisioning/ansible/group_vars/employee/kyoushi.yml
+
+{% for eid, employee in context.employees.internal.items() %}
+- name: Internal employee
+  type: dir
+  src: model/templates/employees
+  dest: provisioning/ansible/host_vars/internal_employee_{{ loop.index0 }}
+  contents:
+    - name: Internal employee configuration
+      type: file
+      src: kyoushi.yml.j2
+      dest: kyoushi.yml
+      extra:
+        employee: {{ employee }}
+  delete: false
+
+{% if 'ssh_admin' in employee and employee.ssh_admin == 'yes' %}
+- name: Create dir for ssh keys for internal employees
+  type: dir
+  src: model/templates/ssh-keys
+  dest: provisioning/ansible/data/ssh-keys/{{ eid }}
+  contents:
+    - name: Copy private ssh keys for internal employees
+      type: file
+      src: id_rsa
+      dest: id_rsa
+    - name: Copy public ssh keys for internal employees
+      type: file
+      src: id_rsa.pub
+      dest: id_rsa.pub
+  delete: false
+{% endif %}
+{% endfor %}
+
+{% for eid, employee in context.employees.external.items() %}
+- name: External employee
+  type: dir
+  src: model/templates/employees/
+  dest: provisioning/ansible/host_vars/remote_employee_{{ loop.index0 }}
+  contents:
+    - name: External employee configuration
+      type: file
+      src: kyoushi.yml.j2
+      dest: kyoushi.yml
+      extra:
+        employee: {{ employee }}
+  delete: false
+
+{% if 'ssh_admin' in employee and employee.ssh_admin == 'yes' %}
+- name: Create dir for ssh keys for external employees
+  type: dir
+  src: model/templates/ssh-keys
+  dest: provisioning/ansible/data/ssh-keys/{{ eid }}
+  contents:
+    - name: Copy private ssh keys for external employees
+      type: file
+      src: id_rsa
+      dest: id_rsa
+    - name: Copy public ssh keys for external employees
+      type: file
+      src: id_rsa.pub
+      dest: id_rsa.pub
+  delete: false
+{% endif %}
+
+- name: Create dir for openvpn keys for external employees
+  type: dir
+  src: model/templates/certs/remote_employee
+  dest: provisioning/ansible/data/openvpn/certs/remote_employee_{{ loop.index0 }}
+  contents:
+    - name: Copy openvpn crt for external employees
+      type: file
+      src: openvpn.crt
+      dest: openvpn.crt
+    - name: Copy openvpn csr for external employees
+      type: file
+      src: openvpn.csr
+      dest: openvpn.csr
+    - name: Copy openvpn key for external employees
+      type: file
+      src: openvpn.key
+      dest: openvpn.key
+  delete: false
+{% endfor %}
+
+- name: External mail users list
+  type: file
+  src: provisioning/ansible/group_vars/all/mail_users.yml.j2
+  dest: provisioning/ansible/group_vars/all/mail_users.yml
+
+- name: External mail users group vars
+  type: file
+  src: provisioning/ansible/group_vars/ext_user/kyoushi.yml.j2
+  dest: provisioning/ansible/group_vars/ext_user/kyoushi.yml
+
+{% for ext_mail_user in context.ext_mail_users %}
+- name: External mail employee
+  type: dir
+  src: model/templates/ext_user/
+  dest: provisioning/ansible/host_vars/ext_user_{{ loop.index0 }}
+  contents:
+    - name: External mail user configuration
+      type: file
+      src: kyoushi.yml.j2
+      dest: kyoushi.yml
+      extra:
+        employee: {{ ext_mail_user }}
+  delete: false
+{% endfor %}
+
+- name: Logstash config of scenario 1
+  type: file
+  src: datasets/scenario1/processing/config/logs.yaml.j2
+  dest: datasets/scenario1/processing/config/logs.yaml
+
+- name: Logstash config of scenario 2
+  type: file
+  src: datasets/scenario2/processing/config/logs.yaml.j2
+  dest: datasets/scenario2/processing/config/logs.yaml
+

@@ -1,0 +1,185 @@
+mail_users: "{{ ext_mail_users | selectattr('email_domain', 'eq', domains[dns_domain].domain) | list }}"
+mail_server_info: |
+  {% for _ext_mail in (groups['ext_mail'] | map('extract', hostvars)) %}
+  {% if domains[_ext_mail.dns_domain].domain == ext_user.email_domain %}
+  {
+    "domain": "{{ domains[_ext_mail.dns_domain].domain }}",
+    "hostname": "{{ _ext_mail.dns_hostname }}",
+    "fqdn": "{{ _ext_mail.dns_hostname }}.{{ domains[_ext_mail.dns_domain].domain }}"
+  }
+  {% break %}
+  {% endif %}
+  {% endfor %}
+# kyoushi simulation files config
+
+kyoushi_files_owner: "\var{local_context.employee.username}"
+kyoushi_files_group: "\var{local_context.employee.username}"
+
+# cr cli config
+
+# use a consistent random value for seed
+kyoushi_seed: "\var{random.randint(1, 1000000000)}"
+
+kyoushi_user_name: "\var{local_context.employee.username}"
+kyoushi_user_group: "\var{local_context.employee.username}"
+
+# sm base config
+kyoushi_sm_schedule:
+  saturday:
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+  sunday:
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+  monday:
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+  tuesday:
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+  wednesday:
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+  thursday:
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+  friday:
+    start_time: "\var{(random.randint(context.min_sm_start_hour, context.max_sm_start_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+    end_time: "\var{(random.randint(context.min_sm_end_hour, context.max_sm_end_hour) | string()).zfill(2)}:\var{(random.randint(0, 59) | string()).zfill(2)}"
+
+# idle config
+\{%- set kyoushi_sm_idle_big_min = random.randint(400, 600) }
+kyoushi_sm_idle_big_min: \var{kyoushi_sm_idle_big_min} # 600 = 10*60 = 10m
+kyoushi_sm_idle_big_max: \var{random.randint(kyoushi_sm_idle_big_min + 1000, 3600) } # 3600 = 60*60 = 1h
+\{%- set kyoushi_sm_idle_medium_min = random.randint(40, 120)}
+kyoushi_sm_idle_medium_min: \var{kyoushi_sm_idle_medium_min} # 120 = 2*60 = 2m
+kyoushi_sm_idle_medium_max: \var{random.randint(kyoushi_sm_idle_medium_min + 100, 360)} # 360 = 6*60 = 6m
+\{%- set kyoushi_sm_idle_small_min = random.randint(3, 10) }
+kyoushi_sm_idle_small_min: \var{kyoushi_sm_idle_small_min} # 10s
+kyoushi_sm_idle_small_max: \var{random.randint(kyoushi_sm_idle_small_min + 5, 60)} # 1m
+\{%- set kyoushi_sm_idle_tiny_min = random.uniform(0.4, 1) }
+kyoushi_sm_idle_tiny_min: \var{kyoushi_sm_idle_tiny_min} # 1s
+kyoushi_sm_idle_tiny_max: \var{random.uniform(kyoushi_sm_idle_tiny_min + 1, 2.5)} # 2.5s
+
+# sm selenium config
+
+# browser type to use
+kyoushi_sm_browser: \var{random.choice(['firefox', 'chromium'])}
+kyoushi_sm_browser_insecure_ssl: yes
+kyoushi_sm_browser_headless: yes
+kyoushi_sm_browser_width: 1650
+kyoushi_sm_browser_height: 1200
+
+# HTTP Proxy Config
+
+#kyoushi_sm_browser_proxy_enabled: False
+#kyoushi_sm_browser_proxy_host: localhost
+#kyoushi_sm_browser_proxy_port: 8080
+# If a socks proxy should be used instead of a HTTP proxy
+#kyoushi_sm_browser_proxy_socks: False
+# The SOCKS protocol version to use
+#kyoushi_sm_browser_proxy_socks_version: 5
+# The socks username and password to use for authentication
+#kyoushi_sm_browser_proxy_username: fancy_user
+#kyoushi_sm_browser_proxy_password: secret
+
+# Additional commandline arguments for the webdriver
+#kyoushi_sm_browser_arguments: []
+# Extra list of desired browser capabilities
+#kyoushi_sm_browser_capabilities: []
+
+# VPN config
+
+kyoushi_sm_vpn_enabled: False
+#kyoushi_sm_vpn_config: "/home/{{ kyoushi_user_name }}/.openvpn/work.ovpn"
+# eager means the user will connect as soon as they start working
+# otherwise they only connect once they want to execute a VPN activity
+kyoushi_sm_vpn_eager: \var{random.choice([True, False])}
+# VPN activities config
+kyoushi_sm_vpn_horde: \var{random.choice([True, False])}
+kyoushi_sm_vpn_owncloud: \var{random.choice([True, False])}
+kyoushi_sm_vpn_ssh: \var{random.choice([True, False])}
+kyoushi_sm_vpn_web_browser: \var{random.choice([True, False])}
+kyoushi_sm_vpn_wp_editor: \var{random.choice([True, False])}
+kyoushi_sm_vpn_wpdiscuz: \var{random.choice([True, False])}
+
+# horde user config
+
+# The maximum amount of times the horde activity will be entered per day
+kyoushi_sm_horde_max_daily: \var{random.randint(7, 15)}
+# The horde servers base URL
+kyoushi_sm_horde_url: "https://{{ mail_server_info.fqdn }}"
+# The firstname of the horde user
+kyoushi_sm_horde_first_name: "\var{local_context.employee.first_name}"
+#The lastname of the horde user
+kyoushi_sm_horde_last_name: "\var{local_context.employee.last_name}"
+# The horde user
+kyoushi_sm_horde_username: "\var{local_context.employee.email_user}"
+# The horde users password
+kyoushi_sm_horde_password: "\var{local_context.employee.password}"
+# The email contacts for the horde user
+#  <email>:<probability>
+# By default a employee has all employees (other than themself) and mail users as contacts
+kyoushi_sm_horde_contacts:
+\{%- for contact in (context.employees.internal.values() | list) + (context.employees.external.values() | list) + context.ext_mail_users }
+\{%- if contact.email_user != local_context.employee.email_user }
+  "\var{contact.email_user}@\var{contact.email_domain}": \var{random.choice([0.0001, random.random()])}
+\{%- endif }
+\{%- endfor }
+
+# A dict of attachment files the user might send
+_kyoushi_sm_horde_attachments:
+\{%- for file in context.kyoushi_files }
+  \var{file}: \var{random.choice([0.0001, random.random()])} 
+\{%- endfor }
+kyoushi_sm_horde_attachments: |
+ {
+ {% for _file, _p in _kyoushi_sm_horde_attachments.items() %}
+  "{{ kyoushi_files_dir }}/{{ _file }}": {{ _p }}{% if not loop.last %},{% endif %}
+ {% endfor %}
+ }
+#The probability that an additional recipient is added to a mail
+kyoushi_sm_horde_extra_recipient: \var{random.uniform(0.05, 0.2)}
+# The maximum amount of recipients
+kyoushi_sm_horde_max_recipients: \var{random.randint(7, 15)}
+# The probability that an attachment is added to a new email
+kyoushi_sm_horde_attachment: \var{random.uniform(0, 0.2)}
+# The probability that an attachment is added to a reply
+kyoushi_sm_horde_attachment_reply: \var{random.uniform(0, 0.1)}
+
+# activities entry probabilities
+kyoushi_sm_states_activities:
+# we set idle high since ext users only do emails
+  \var{({"horde": random.uniform(0.2, 0.5), "owncloud": 0, "ssh_user": 0, "web_browser": 0, "wp_editor": 0, "wpdiscuz": 0, "idle": random.uniform(0.4, 0.7)} | normalize_distribution)}
+
+# horde activity states configs
+kyoushi_sm_states_horde:
+  login_page: "{{ kyoushi_sm_states_horde_login_page }}"
+  logout_choice: "{{ kyoushi_sm_states_horde_login_choice }}"
+  selecting_menu: "{{ kyoushi_sm_states_horde_selecting_menu }}"
+  mails_page: "{{ kyoushi_sm_states_horde_mails_page }}"
+  mail_view: "{{ kyoushi_sm_states_horde_mail_view }}"
+  mail_info: "{{ kyoushi_sm_states_horde_mail_info }}"
+
+kyoushi_sm_states_horde_login_page:
+  # The chance the user will use an incorrect password
+  fail_chance: \var{random.uniform(0, 0.1)}
+  # Fail chance decrease factor
+  fail_decrease: \var{random.uniform(0.7, 0.95)}
+
+kyoushi_sm_states_horde_login_choice:
+  # The chance the user will logout when stopping the horde activity
+  logout_chance: 1
+
+kyoushi_sm_states_horde_selecting_menu:
+  \var{({"nav_mail": random.uniform(0.6, 0.95), "nav_preferences": 0, "nav_admin": 0, "nav_notes": 0, "nav_tasks": 0, "nav_address_book": 0, "nav_calendar": 0, "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.2, 1.8)}} | normalize_distribution)}
+
+kyoushi_sm_states_horde_mails_page:
+  \var{({"view_mail": random.uniform(0.3, 0.5), "new_mail": random.uniform(0.2, 0.4), "refresh_mail": random.uniform(0.05, 0.15), "return": random.uniform(0.05, 0.15), "extra": {"return_increase": random.uniform(1.1, 1.5)}} | normalize_distribution)}
+
+kyoushi_sm_states_horde_mail_view:
+  \var{({"delete_mail": random.uniform(0.1, 0.4), "open_mail": random.uniform(0.2, 0.6), "do_nothing": random.uniform(0.1, 0.5)} | normalize_distribution)}
+
+kyoushi_sm_states_horde_mail_info:
+  \var{({"delete_mail": random.uniform(0.1, 0.5), "reply_mail": random.uniform(0.4, 0.9)} | normalize_distribution)}
+

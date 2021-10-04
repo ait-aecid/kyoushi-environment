@@ -2,12 +2,12 @@
 ca_info:
     country: AT
     state: Vienna
-    locality: Vienna 
+    locality: Vienna
     organization: Cyberrange Certificate Authority GmbH
     email: control@cyberrange.at
     common_name: Cyberrange CA
     # valid_till: +24w # 6 months
-    # valid_from: +1m # 1 minute 
+    # valid_from: +1m # 1 minute
 
 ca_cert: "{{ ca_base_path}}/ca.crt"
 ca_csr: "{{ ca_base_path }}/ca.csr"
@@ -26,7 +26,7 @@ cert_configs: |
     "{{ host_entry.inventory_hostname }}": [
       {% for dns_entry in (host_entry.dns.values() | selectattr('certificate', 'defined') | selectattr('certificate', 'truthy')) %}
       {% set alias_certs = (dns_entry.aliases | selectattr('certificate', 'defined') | selectattr('certificate', 'truthy')) %}
-      { 
+      {
         {% if dns_entry.certificate_info is defined and dns_entry.certificate_info is mapping %}
         {% if dns_entry.certificate_info.country is defined %}
         "country": "{{ dns_entry.certificate_info.country }}",
@@ -50,7 +50,7 @@ cert_configs: |
 
         {% if dns_entry.certificate_info.email is defined %}
         "email": "{{ dns_entry.certificate_info.email }}",
-        {% endif %}   
+        {% endif %}
         {% endif %}
 
         "subject_alt_name": [
@@ -60,9 +60,9 @@ cert_configs: |
           {% endfor %}
           {% endif %}
           {% for alias in (dns_entry.aliases | selectattr('certificate_alt_name', 'defined')) %}
-            {% if alias.hostname is defined and alias.hostname|length %}
+            {% if alias.hostname is defined and alias.hostname is not none and alias.hostname|length %}
             "{{alias.certificate_alt_name}}: {{ alias.hostname }}.{{ domains[dns_entry.domain].domain }}"
-            {% elif alias.proxy_host is defined and hostvars[alias.proxy_host].proxied_name|length %}
+            {% elif alias.proxy_host is defined and hostvars[alias.proxy_host].proxied_name is not none and hostvars[alias.proxy_host].proxied_name|length %}
             "{{alias.certificate_alt_name}}: {{ hostvars[alias.proxy_host].proxied_name }}.{{ domains[dns_entry.domain].domain }}"
             {% else %}
             "{{alias.certificate_alt_name}}: {{ domains[dns_entry.domain].domain }}"
@@ -70,21 +70,21 @@ cert_configs: |
           {% endfor %}
         ],
 
-        {%- if dns_entry.hostname is defined and dns_entry.hostname|length %}
+        {%- if dns_entry.hostname is defined and dns_entry.hostname is not none and dns_entry.hostname | length %}
         "name": "{{ dns_entry.hostname }}.{{ dns_entry.domain }}",
         "common_name": "{{ dns_entry.hostname }}.{{ domains[dns_entry.domain].domain }}"
-        {% elif dns_entry.proxy_host is defined and hostvars[dns_entry.proxy_host].proxied_name|length %}
+        {% elif dns_entry.proxy_host is defined and hostvars[dns_entry.proxy_host].proxied_name is not none and hostvars[dns_entry.proxy_host].proxied_name|length %}
         "name": "{{ hostvars[dns_entry.proxy_host].proxied_name }}.{{ dns_entry.domain }}",
         "common_name": "{{ hostvars[dns_entry.proxy_host].proxied_name }}.{{ domains[dns_entry.domain].domain }}"
         {% else %}
         "name": "{{ dns_entry.domain }}",
         "common_name": "{{ domains[dns_entry.domain].domain }}"
         {% endif %}
-      }{% if not hosts_loop.last or not loop.last or alias_certs|length %},{% endif %}
+      }{% if not loop.last or (alias_certs is not none and alias_certs|length) %},{% endif %}
 
       {# we do the same as above for all aliases #}
       {% for alias in alias_certs %}
-      { 
+      {
         {% if dns_entry.certificate_info is defined and dns_entry.certificate_info is mapping %}
         {% if dns_entry.certificate_info.country is defined %}
         "country": "{{ dns_entry.certificate_info.country }}",
@@ -108,7 +108,7 @@ cert_configs: |
 
         {% if dns_entry.certificate_info.email is defined %}
         "email": "{{ dns_entry.certificate_info.email }}",
-        {% endif %}   
+        {% endif %}
         {% endif %}
 
         "subject_alt_name": [
@@ -119,21 +119,22 @@ cert_configs: |
           {% endif %}
         ],
 
-        {%- if alias.hostname is defined and alias.hostname|length %}
+        {%- if alias.hostname is defined and alias.hostname is not none and alias.hostname|length %}
         "name": "{{ alias.hostname }}.{{ dns_entry.domain }}",
         "common_name": "{{ alias.hostname }}.{{ domains[dns_entry.domain].domain }}"
-        {% elif alias.proxy_host is defined and hostvars[alias.proxy_host].proxied_name|length %}
+        {% elif alias.proxy_host is defined and hostvars[alias.proxy_host].proxied_name is not none and hostvars[alias.proxy_host].proxied_name|length %}
         "name": "{{ hostvars[alias.proxy_host].proxied_name }}.{{ dns_entry.domain }}",
         "common_name": "{{ hostvars[alias.proxy_host].proxied_name }}.{{ domains[dns_entry.domain].domain }}"
         {% else %}
         "name": "{{ dns_entry.domain }}",
         "common_name": "{{ domains[dns_entry.domain].domain }}"
         {% endif %}
-      }{% if not hosts_loop.last or not loop.last %},{% endif %}
+      }{% if not loop.last %},{% endif %}
       {% endfor %}
 
       {% endfor %}
     ]{% if not loop.last %},{% endif %}
   {% endfor %}
   }
+
 

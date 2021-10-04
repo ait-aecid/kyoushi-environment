@@ -1,0 +1,56 @@
+terraform {
+    source = ".//module"
+}
+
+inputs = {
+    # firewall host
+    host_name = "inet-firewall"
+    host_image = "kyoushi-ubuntu-bionic"
+    host_tag = "firewall, dnsservers, servers"
+    host_ext_address_index = 4
+    host_flavor = "m1.medium"
+    host_size  = 40
+    host_userdata = "firewallinit.yml"
+
+    # external dns server
+    ext_dns_name = "inet-dns"
+    ext_dns_image = "kyoushi-ubuntu-bionic"
+    ext_dns_tag = "internet, dnsservers"
+    ext_dns_address_index = \var{context.host_max}
+    ext_dns_size = 20
+
+    ext_subnet = "internet-subnet"
+    extnet = "internet"
+    extnet_create = true
+    ext_cidr = "\var{context.networks.internet.address}/\var{context.networks.internet.mask}"
+    
+    router_name = "kyoushi-router"
+    sshkey = "testbed-key"
+    floating_ip_pool = "provider-aecid-208"
+    networks = {
+        local = {
+            network = "local",
+            host_address_index = "1",
+            subnet = "local-subnet",
+            cidr = "\var{context.networks.local.address}/\var{context.networks.local.mask}",
+            dns = [],
+            host_as_dns = true,
+            routes = null
+            fw_routes = null
+        }
+        dmz = {
+            network = "dmz",
+            host_address_index = "1",
+            subnet = "dmz-subnet"
+            cidr = "\var{context.networks.dmz.address}/\var{context.networks.dmz.mask}"
+            dns = [],
+            host_as_dns = true,
+            routes = null
+            fw_routes = null
+        }
+    }
+}
+
+include {
+  path = find_in_parent_folders()
+}

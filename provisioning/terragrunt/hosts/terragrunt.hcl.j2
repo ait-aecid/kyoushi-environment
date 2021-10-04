@@ -1,0 +1,65 @@
+terraform {
+    source = ".//module"
+}
+
+inputs = {
+    # networks
+    internet = "internet"
+    internet_subnet = "internet-subnet"
+    dmz = "dmz"
+    dmz_subnet = "dmz-subnet"
+    intranet = "local"
+    intranet_subnet = "local-subnet"
+    floating_ip_pool = "provider-aecid-208"
+
+    # image configuration
+    image = "kyoushi-ubuntu-bionic"
+    employee_image = "aecid-employee-bionic-amd64-2021-03-22T14-13-37Z"
+    ext_user_image = "aecid-employee-bionic-amd64-2021-03-22T14-13-37Z"
+    share_image = "aecid-samba-4.5.9-bionic-amd64-2021-03-22T14-35-45Z"
+    mail_image = "aecid-debian-stretch-amd64"
+    ext_mail_image = "aecid-debian-stretch-amd64"
+
+    employee_volume_size = 20
+    ext_user_volume_size = 20
+    share_volume_size = 50
+    mgmthost_flavor = "m1.medium"
+    monitoring_flavor = "m1.xlarge"
+
+    sshkey = "testbed-key"
+
+    employee_capacity        = \var{context.employees.internal | length }
+    remote_employee_capacity = \var{context.employees.external | length }
+    attacker_capacity = 1
+    attacker_flavor = "m1.medium"
+    ext_user_capacity = \var{(context.ext_mail_users | length)}
+
+    vpn_flavor = "aecid.d1.small"
+    mail_flavor = "aecid.d1.small"
+    cloud_flavor = "aecid.d1.small"
+    webserver_flavor = "aecid.d1.small"
+    intranet_flavor = "aecid.d1.small"
+    share_flavor = "aecid.d1.small"
+    ext_mail_flavor = "aecid.d1.small"
+    
+    shares = [
+        {
+            name     = "internal"
+            ip_index = null
+        }
+    ]
+
+
+    ext_mail = [
+        \{% for domain_name in (context.external_mail.keys() | list) }
+        {
+            name     = "\var{domain_name}"
+            ip_index = null
+        },
+        \{% endfor }
+    ]
+}
+
+include {
+  path = find_in_parent_folders()
+}

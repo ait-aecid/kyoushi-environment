@@ -14,7 +14,7 @@ child_pid=$(ps --ppid $child_pid -o pid=)
 echo "Started traffic capture (pid=$child_pid)"
 
 # execute state machine
-cr-kyoushi-sim -c {{ kyoushi_config_files.config.dst }} run {% if kyoushi_config_files.sm.deploy | default(false)%}-s {{ kyoushi_config_files.sm.dst }}{%endif%} -f {{ kyoushi_sm_python_plugin.dst | default(kyoushi_sm_name) }}
+kyoushi-sim -c {{ kyoushi_config_files.config.dst }} run {% if kyoushi_config_files.sm.deploy | default(false)%}-s {{ kyoushi_config_files.sm.dst }}{%endif%} -f {{ kyoushi_sm_python_plugin.dst | default(kyoushi_sm_name) }}
 
 # wait before stoping network dump to reduce chance of having incomplete streams
 # of relevant traffic in out capture timeframe

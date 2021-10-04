@@ -7,13 +7,21 @@
                             .source(["@timestamp"]).extra(size=1)
                             .execute().hits.hits[0]._source["@timestamp"] 
 -%}
-{%- set vpn_disconnect = Search(index=index).query(queries.foothold.vpn_disconnect.start)
+{%- set skipped_cracking_start = Search(index=index).query(queries.foothold.skipped_cracking.start)
                             .source(["@timestamp"]).extra(size=1)
                             .execute().hits.hits[0]._source["@timestamp"] 
 -%}
+{%- set skipped_cracking_stop = Search(index=index).query(queries.foothold.skipped_cracking.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+{%- set vpn_disconnect = Search(index=index).query(queries.foothold.vpn_disconnect.start)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
 {%- set vpn_disconnected = Search(index=index).query(queries.foothold.vpn_disconnect.stop)
                             .source(["@timestamp"]).extra(size=1)
-                            .execute().hits.hits[0]._source["@timestamp"] 
+                            .execute().hits.hits
 -%}
 {%- set host_discover_local_start = Search(index=index).query(queries.foothold.host_discover_local.start)
                             .source(["@timestamp", "networks"]).extra(size=1)
@@ -92,16 +100,32 @@
                             .execute().hits.hits[0]._source
 -%}
 {%- set host_recon_commands = EQL(index=index, body=queries.foothold.web_shell_cmds)["hits"]["sequences"] -%}
+{%- set online_cracking_start = Search(index=index).query(queries.foothold.online_cracking.start)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+{%- set online_cracking_stop = Search(index=index).query(queries.foothold.online_cracking.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
 start: "{{ vpn_connect }}"
-stop: "{{ vpn_disconnected }}"
+{%- if (skipped_cracking_stop | length) > 0 %}
+stop: "{{ skipped_cracking_start }}"
+{%- elif (online_cracking_start | length) > 0 %}
+stop: "{{ online_cracking_start[0]._source["@timestamp"] }}"
+{%- else %}
+stop: "{{ vpn_disconnected[0]._source["@timestamp"]  }}"
+{%- endif %}
 
 vpn_connect: 
     start: "{{ vpn_connect }}"
     stop: "{{ vpn_connected }}"
 
+{%- if (vpn_disconnect | length) > 0 %}
 vpn_disconnect: 
-    start: "{{ vpn_disconnect }}"
-    stop: "{{ vpn_disconnected }}"
+    start: "{{ vpn_disconnect[0]._source["@timestamp"]  }}"
+    stop: "{{ vpn_disconnected[0]._source["@timestamp"]  }}"
+{%- endif %}
 
 host_discover_local: 
     start: "{{ host_discover_local_start['@timestamp'] }}"

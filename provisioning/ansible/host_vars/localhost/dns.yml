@@ -1,0 +1,9 @@
+dns_certificate_info:
+  country: US
+  state: California
+  locality: Burbank
+  organization: ACME Corporation
+  subject_alt_name: "{{ dns_certificate_subject_alt_names | default([]) }}"
+
+dns_domain: acme
+dns_hostname: smtp666

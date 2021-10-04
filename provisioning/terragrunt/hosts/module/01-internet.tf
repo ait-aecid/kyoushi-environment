@@ -2,7 +2,7 @@
 
 ## Remote Employees 
 module "remote_employees" {
-  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.4"
+  source        = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec-count.git?ref=v1.4"
   host_capacity = var.remote_employee_capacity
   hostname      = "remote_employee"
   tag           = "internet, employee"
@@ -19,7 +19,7 @@ module "remote_employees" {
 
 ## Attacker
 module "attackers" {
-  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.4"
+  source        = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec-count.git?ref=v1.4"
   host_capacity = var.attacker_capacity
   hostname      = "attacker"
   tag           = "internet"
@@ -37,7 +37,7 @@ module "attackers" {
 ## External Mail Servers
 module "ext_mail" {
   count              = length(var.ext_mail)
-  source             = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec.git?ref=v1.4.2"
+  source             = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec.git?ref=v1.4.3"
   hostname           = "${var.ext_mail[count.index].name}_mail"
   host_address_index = var.ext_mail[count.index].ip_index
   tag                = "internet, ext_mail, mailserver"
@@ -55,7 +55,7 @@ module "ext_mail" {
 
 ## External Users 
 module "ext_users" {
-  source        = "git@git-service.ait.ac.at:sct-cyberrange/terraform-modules/openstack-srv_noportsec-count.git?ref=v1.4"
+  source        = "git@github.com:ait-cs-IaaS/terraform-openstack-srv_noportsec-count.git?ref=v1.4"
   host_capacity = var.ext_user_capacity
   hostname      = "ext_user"
   tag           = "internet"

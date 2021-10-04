@@ -36,23 +36,23 @@
 - name: Internal mail server certs
   type: dir
   src: model/templates/certs/sites/domain_mail/record_domain
-  dest: provisioning/ansible/data/certs/sites/mail/mailserver.{{ company_name }}
+  dest: provisioning/ansible/data/certs/sites/mail/mailserver.{{ context.company_name }}
   contents:
    - name: Copy crt for internal mail server
      type: file
      src: cert.crt
-     dest: mailserver.{{ company_name }}.crt
+     dest: mailserver.{{ context.company_name }}.crt
    - name: Copy csr for internal mail server
      type: file
      src: cert.csr
-     dest: mailserver.{{ company_name }}.csr
+     dest: mailserver.{{ context.company_name }}.csr
    - name: Copy key for internal mail server
      type: file
      src: cert.key
-     dest: mailserver.{{ company_name }}.key 
+     dest: mailserver.{{ context.company_name }}.key 
   delete: false
 
-{% for domain_name, mail_server in external_mail.items() %}
+{% for domain_name, mail_server in context.external_mail.items() %}
 - name: External mail server
   type: dir
   src: model/templates/mail
@@ -128,7 +128,7 @@
   src: provisioning/ansible/group_vars/employee/kyoushi.yml.j2
   dest: provisioning/ansible/group_vars/employee/kyoushi.yml
 
-{% for eid, employee in employees.internal.items() %}
+{% for eid, employee in context.employees.internal.items() %}
 - name: Internal employee
   type: dir
   src: model/templates/employees
@@ -160,7 +160,7 @@
 {% endif %}
 {% endfor %}
 
-{% for eid, employee in employees.external.items() %}
+{% for eid, employee in context.employees.external.items() %}
 - name: External employee
   type: dir
   src: model/templates/employees/
@@ -221,7 +221,7 @@
   src: provisioning/ansible/group_vars/ext_user/kyoushi.yml.j2
   dest: provisioning/ansible/group_vars/ext_user/kyoushi.yml
 
-{% for ext_mail_user in ext_mail_users %}
+{% for ext_mail_user in context.ext_mail_users %}
 - name: External mail employee
   type: dir
   src: model/templates/ext_user/

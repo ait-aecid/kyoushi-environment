@@ -21,9 +21,9 @@
     - range:
         "@timestamp":
           # foothold phase start
-          gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0) }}"
+          gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0).isoformat() }}"
           # foothold phase stop
-          lte: "{{ ( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+          lte: "{{ (( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   sequences:
     - '[ apache where event.action == "access" and source.address == "{{ attacker.vpn_ipv4_address }}" ]'
     - '[ http where source.ip == "{{ servers.intranet_server.default_ipv4_address }}" and layers.http.http_http_response == true ]'
@@ -50,9 +50,9 @@
     - range:
         "@timestamp":
           # foothold phase start
-          gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0) }}"
+          gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0).isoformat() }}"
           # foothold phase stop
-          lte: "{{ ( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+          lte: "{{ (( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
     # only look at http traffic
     - match:
         event.category: "http"
@@ -86,9 +86,9 @@
     - range:
         "@timestamp":
           # dirb phase start
-          gte: "{{ foothold.dirb_scan.start | as_datetime }}"
+          gte: "{{ (foothold.dirb_scan.start | as_datetime).isoformat() }}"
           # dirb phase stop
-          lte: "{{ foothold.dirb_scan.stop | as_datetime }}"
+          lte: "{{ (foothold.dirb_scan.stop | as_datetime).isoformat() }}"
     # we are looking for requests that have not been marked as attacker http yet
     # most likely they did not have a matching response due to some network error
     # or timeout
@@ -96,7 +96,7 @@
         must_not:
           - script:
               script:
-                id: test_dataset_kyoushi_label_filter
+                id: "{{ DATASET.name }}_kyoushi_label_filter"
                 params:
                   labels: [attacker_http]
   
@@ -116,10 +116,10 @@
             {% raw %}
             # the access log entry should be after the request, but since the access log
             # does not have microseconds we drop them here as well
-            gte: "{{ (HIT['@timestamp'] | as_datetime).replace(microsecond=0) }}"
+            gte: "{{ (HIT['@timestamp'] | as_datetime).replace(microsecond=0).isoformat() }}"
             # the type of error we are looking for should create an access log entry almost immediately
             # se we keep the time frame short
-            lte: "{{ ( HIT['@timestamp'] | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+            lte: "{{ (( HIT['@timestamp'] | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
             {% endraw %}
             
 
@@ -146,9 +146,9 @@
     - range:
         "@timestamp":
           # foothold phase start
-          gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0) }}"
+          gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0).isoformat() }}"
           # foothold phase stop
-          lte: "{{ ( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+          lte: "{{ (( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   sequences:
     - '[ apache where event.action == "error" and source.address == "{{ attacker.vpn_ipv4_address }}" ]'
     - '[ http where source.ip == "{{ servers.intranet_server.default_ipv4_address }}" and layers.http.http_http_response == true ]'
@@ -172,9 +172,9 @@
     range:
       "@timestamp":
         # foothold phase start
-        gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0) }}"
+        gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0).isoformat() }}"
         # foothold phase stop
-        lte: "{{ ( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+        lte: "{{ (( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   sequences:
     - '[ apache where event.action == "access" and source.address == "{{ attacker.vpn_ipv4_address }}" and kyoushi_labels.flat.attacker.foothold.apache.access != null ]'
     - '[ apache where event.action == "error" and source.address == "{{ attacker.vpn_ipv4_address }}" ]'
@@ -200,14 +200,14 @@
     - range:
         "@timestamp":
           # dirb phase start
-          gte: "{{ ( foothold.dirb_scan.start | as_datetime).replace(microsecond=0) }}"
+          gte: "{{ ( foothold.dirb_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
           # dirb phase stop
-          lte: "{{ foothold.dirb_scan.stop | as_datetime }}"
+          lte: "{{ (foothold.dirb_scan.stop | as_datetime).isoformat() }}"
     # use script query to match only entries that
     # are already tagged for as attacker http in the foothold phase
     - script:
         script:
-          id: test_dataset_kyoushi_label_filter
+          id: "{{ DATASET.name }}_kyoushi_label_filter"
           params:
             labels: [attacker_http]
     # reduce the search space by not including access to error matched row
@@ -230,11 +230,11 @@
       - range:
           "@timestamp":
             # error happened at most 3 seconds before access log entry
-            gte: "{{ (HIT['@timestamp'] | as_datetime) - timedelta(seconds=3) }}"
+            gte: "{{ ((HIT['@timestamp'] | as_datetime) - timedelta(seconds=3)).isoformat() }}"
             # error event must have happened before access log event
             # also we need to round the next second since error log has
             # milli precision and access log only second 
-            lte: "{{ ( HIT['@timestamp'] | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+            lte: "{{ (( HIT['@timestamp'] | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
       {% endraw %}
 
 - type: elasticsearch.parent_query
@@ -255,16 +255,16 @@
     - range:
         "@timestamp":
           # dirb phase start
-          gte: "{{ ( foothold.dirb_scan.start | as_datetime).replace(microsecond=0) }}"
+          gte: "{{ ( foothold.dirb_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
           # dirb phase stop
-          lte: "{{ foothold.dirb_scan.stop | as_datetime }}"
+          lte: "{{ (foothold.dirb_scan.stop | as_datetime).isoformat() }}"
     # use script query to match only entries that
     # are not already tagged for as attacker http in the foothold phase
     - bool:
         must_not:
           - script:
               script:
-                id: test_dataset_kyoushi_label_filter
+                id: "{{ DATASET.name }}_kyoushi_label_filter"
                 params:
                   labels: [attacker_http]
   
@@ -284,7 +284,7 @@
           must:
             - script:
                 script:
-                  id: test_dataset_kyoushi_label_filter
+                  id: "{{ DATASET.name }}_kyoushi_label_filter"
                   params:
                     labels: [attacker_http]
     filter:
@@ -292,8 +292,8 @@
       - range:
           # parent must be within +-1s of potential child 
           "@timestamp":
-            gte: "{{ (HIT['@timestamp'] | as_datetime) - timedelta(seconds=1) }}"
-            lte: "{{ ( HIT['@timestamp'] | as_datetime) + timedelta(seconds=1) }}"
+            gte: "{{ ((HIT['@timestamp'] | as_datetime) - timedelta(seconds=1)).isoformat() }}"
+            lte: "{{ (( HIT['@timestamp'] | as_datetime) + timedelta(seconds=1)).isoformat() }}"
       {% endraw %}
 
 - type: elasticsearch.parent_query
@@ -319,16 +319,16 @@
     - range:
         "@timestamp":
           # dirb phase start
-          gte: "{{ ( foothold.dirb_scan.start | as_datetime).replace(microsecond=0) }}"
+          gte: "{{ ( foothold.dirb_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
           # dirb phase stop
-          lte: "{{ foothold.dirb_scan.stop | as_datetime }}"
+          lte: "{{ (foothold.dirb_scan.stop | as_datetime).isoformat() }}"
     # use script query to match only entries that
     # are not already tagged for as attacker http in the foothold phase
     - bool:
         must_not:
           - script:
               script:
-                id: test_dataset_kyoushi_label_filter
+                id: "{{ DATASET.name }}_kyoushi_label_filter"
                 params:
                   labels: [attacker_http]
   
@@ -352,7 +352,7 @@
           must:
             - script:
                 script:
-                  id: test_dataset_kyoushi_label_filter
+                  id: "{{ DATASET.name }}_kyoushi_label_filter"
                   params:
                     labels: [attacker_http]
     filter:
@@ -362,8 +362,8 @@
           # this avoids subsequent requests with reused port and pid numbers
           # but might not catch errors of long requests
           "@timestamp":
-            gte: "{{ (HIT['@timestamp'] | as_datetime) - timedelta(seconds=5) }}"
-            lte: "{{ ( HIT['@timestamp'] | as_datetime) + timedelta(seconds=5) }}"
+            gte: "{{ ((HIT['@timestamp'] | as_datetime) - timedelta(seconds=5)).isoformat() }}"
+            lte: "{{ (( HIT['@timestamp'] | as_datetime) + timedelta(seconds=5)).isoformat() }}"
       {% endraw %}
 
 - type: elasticsearch.query
@@ -382,14 +382,14 @@
     - range:
         "@timestamp":
           # dirb phase start
-          gte: "{{ ( foothold.dirb_scan.start | as_datetime).replace(microsecond=0) }}"
+          gte: "{{ ( foothold.dirb_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
           # dirb phase stop
-          lte: "{{ foothold.dirb_scan.stop | as_datetime }}"
+          lte: "{{ (foothold.dirb_scan.stop | as_datetime).isoformat() }}"
     # use script query to match only entries that
     # are already tagged for as attacker http in the foothold phase
     - script:
         script:
-          id: test_dataset_kyoushi_label_filter
+          id: "{{ DATASET.name }}_kyoushi_label_filter"
           params:
             labels: [attacker_http]
 
@@ -410,9 +410,9 @@
     range:
       "@timestamp":
         # foothold phase start
-        gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0) }}"
+        gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0).isoformat() }}"
         # foothold phase stop
-        lte: "{{ ( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+        lte: "{{ (( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   sequences:
     - '[ apache where event.action == "access" and url.original == "/" ]'
     - '[ apache where event.action == "access" and url.original == "/?p={{ foothold.upload_rce_shell.post_id }}" ]'

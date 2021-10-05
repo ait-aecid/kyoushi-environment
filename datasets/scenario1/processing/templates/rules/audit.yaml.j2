@@ -14,9 +14,9 @@
     range:
       "@timestamp":
         # escalation phase start
-        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0) }}"
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
         # escalation phase stop
-        lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   # the following sequence contains the evaluation step taken by /bin/su and systemd to change
   # from a user to another and create a new session
   sequences:
@@ -54,9 +54,9 @@
     - range:
         "@timestamp":
           # escalation phase start
-          gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0) }}"
+          gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
           # escalation phase stop
-          lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+          lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
     # we further filter to only consider commands the user actually executed
     - bool:
         should:
@@ -94,9 +94,9 @@
     - range:
         "@timestamp":
           # escalation phase start
-          gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0) }}"
+          gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
           # escalation phase stop
-          lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+          lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   # we match by pid
   by: process.pid
   # the sequence from the user cmd event to the cred dispose event

@@ -19,9 +19,9 @@
       {# round start time down and stop time up #}
       "@timestamp":
         # escalation phase start
-        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0) }}"
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
         # escalation phase stop
-        lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   sequences:
     # we only need to specify the target user once since we are joining the events with it
     - '[ auth where system.auth.session.status == "new" and system.auth.user == "{{ attacker.escalate_user.username }}" ] by system.auth.user'
@@ -52,9 +52,9 @@
     range:
       "@timestamp":
         # escalation phase start
-        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0) }}"
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
         # escalation phase stop
-        lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   # global by since all events use the same key for the user
   by: system.auth.user
   sequences:
@@ -89,9 +89,9 @@
     range:
       "@timestamp":
         # escalation phase start
-        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0) }}"
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
         # escalation phase stop
-        lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1) }}"
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   # ToDO possible improvements:
   # - add one rule per command invoked since not all commands open a session
   # - in addition to -^ add hard time range match checks to the opened and closed events

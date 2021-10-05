@@ -62,9 +62,9 @@ pre_processors:
 
   - name: Convert attacker pcap to elasticsearch json
     type: pcap.elasticsearch
-    pcap: gather/attacker_0/logs/traffic.pcap
-    dest: gather/attacker_0/logs/traffic.json
-    tls_keylog: gather/attacker_0/logs/premaster.txt
+    pcap: gather/attacker_0/logs/ait.aecid.attacker.wpdiscuz/traffic.pcap
+    dest: gather/attacker_0/logs/ait.aecid.attacker.wpdiscuz/traffic.json
+    tls_keylog: gather/attacker_0/logs/ait.aecid.attacker.wpdiscuz/premaster.txt
     read_filter: "tcp or udp or icmp"
     protocol_match_filter_parent: >-
       tcp

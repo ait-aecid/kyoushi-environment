@@ -32,14 +32,14 @@ hosts:
     # - path: owncloud.log*
     #   type: owncloud.log
   attacker_0:
-    - path: sm.log*
+    - path: ait.aecid.attacker.wpdiscuz/sm.log*
       type: kyoushi
       codec: json
       # attack output lines can be **very** long
       file_chunk_size: 66000000
       add_field:
         "[@metadata][kyoushi][sm]": "attacker"
-    - path: traffic.json
+    - path: ait.aecid.attacker.wpdiscuz/traffic.json
       type: pcap
       file_chunk_size: 20000000
       codec: json

@@ -41,8 +41,8 @@ pre_processors:
 
   - name: Convert attacker pcap to elasticsearch json
     type: pcap.elasticsearch
-    pcap: gather/attacker_0/logs/traffic.pcap
-    dest: gather/attacker_0/logs/traffic.json
+    pcap: gather/attacker_0/logs/dnsteal/traffic.pcap
+    dest: gather/attacker_0/logs/dnsteal/traffic.json
     # we are only interested in DNS traffic for this scenario
     read_filter: "dns"
     protocol_match_filter_parent: >-

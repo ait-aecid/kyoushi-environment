@@ -1,0 +1,3 @@
+kyoushi_gather_logs:
+  - /var/log/logstash
+

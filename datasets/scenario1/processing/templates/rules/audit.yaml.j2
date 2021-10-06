@@ -1,11 +1,11 @@
 - type: elasticsearch.sequence
   id: attacker.escalate.audit.su.login
-  labels: 
+  labels:
     - attacker_change_user
     - escalate
   description: >-
     This rule labels the user escalation events created by the attacker
-    calling /bin/su and changing to the hijacked user. We map this events as a single 
+    calling /bin/su and changing to the hijacked user.
   index:
     - audit-intranet_server
   # we use the auditd sequence as tiebreaker for identical timestamps
@@ -20,29 +20,56 @@
   # the following sequence contains the evaluation step taken by /bin/su and systemd to change
   # from a user to another and create a new session
   sequences:
-    # /bin/su 
+    # /bin/su
     - '[ authentication where event.action == "authenticated" and auditd.log.uid == "{{ attacker.web_service_user.uid }}" and user.name == "{{ attacker.escalate_user.username }}" and process.executable == "/bin/su" and event.outcome == "success" ]'
     - '[ authentication where event.action == "was-authorized" and auditd.log.uid == "{{ attacker.web_service_user.uid }}" and user.name == "{{ attacker.escalate_user.username }}" and process.executable == "/bin/su" and event.outcome == "success" ]'
     - '[ authentication where event.action == "acquired-credentials" and auditd.log.uid == "{{ attacker.web_service_user.uid }}" and user.name == "{{ attacker.escalate_user.username }}" and process.executable == "/bin/su" and event.outcome == "success" ]'
+    # /bin/su pam session
+    - '[ session where event.action == "started-session" and auditd.log.uid == "{{ attacker.web_service_user.uid }}" and user.name == "{{ attacker.escalate_user.username }}" and process.executable == "/bin/su" and event.outcome == "success" ]'
+
+- type: elasticsearch.sequence
+  id: attacker.escalate.audit.systemd.session
+  labels:
+    - attacker_change_user
+    - escalate
+  description: >-
+    This rule labels the user escalation events created by the attacker
+    calling /bin/su and changing to the hijacked user. This rule covers
+    the optional systemd events in comparison to rule attacker.escalate.audit.su.login.
+  index:
+    - audit-intranet_server
+  # we use the auditd sequence as tiebreaker for identical timestamps
+  tiebreaker_field: auditd.log.sequence
+  filter:
+    range:
+      "@timestamp":
+        # escalation phase start
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        # escalation phase stop
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+  # the following sequence contains the evaluation step taken by /bin/su and systemd to change
+  # from a user to another and create a new session
+  sequences:
+    # /bin/su
+    - '[ authentication where event.action == "authenticated" and auditd.log.uid == "{{ attacker.web_service_user.uid }}" and user.name == "{{ attacker.escalate_user.username }}" and process.executable == "/bin/su" and event.outcome == "success" and kyoushi_labels.rules like "attacker.escalate.audit.su.login" ]'
     # systemd session
     - '[ authentication where event.action == "was-authorized" and user.name == "{{ attacker.escalate_user.username }}" and process.executable == "/lib/systemd/systemd" and event.outcome == "success" ]'
     - '[ authentication where event.action == "acquired-credentials" and user.name == "{{ attacker.escalate_user.username }}" and process.executable == "/lib/systemd/systemd" and event.outcome == "success" ]'
     - '[ authentication where event.action == "changed-login-id-to" and user.audit.id == "{{ attacker.escalate_user.uid }}" and event.outcome == "1" ]'
     - '[ session where event.action == "started-session" and user.name == "{{ attacker.escalate_user.username }}" and user.audit.id == "{{ attacker.escalate_user.uid }}" and process.executable == "/lib/systemd/systemd" and event.outcome == "success" ]'
     - '[ process where event.action == "started-service" and auditd.log.unit == "user@{{ attacker.escalate_user.uid }}" and process.executable == "/lib/systemd/systemd" and event.outcome == "success" ]'
-    # /bin/su pam session
-    - '[ session where event.action == "started-session" and auditd.log.uid == "{{ attacker.web_service_user.uid }}" and user.name == "{{ attacker.escalate_user.username }}" and process.executable == "/bin/su" and event.outcome == "success" ]'
+
 
 - type: elasticsearch.sequence
   id: attacker.escalate.audit.sudo.command.start
-  labels: 
+  labels:
     - escalated_command
     - escalated_sudo_command
     - escalate
   description: >-
     This rule matches auditd ran-command events for sudo commands with
     their respective auth log lines which are already labeled. The rule is relatively
-    lax in terms of matching the actual commands to each other as we cannot join them 
+    lax in terms of matching the actual commands to each other as we cannot join them
     via `by` since auth log command strings use absolute binary paths and auditd logs do not.
   # ToDO in the future we might want to template this rule as a via a loop over the commands
   # so that we can fix the matching command string in each resulting sequence rule
@@ -61,7 +88,7 @@
     - bool:
         should:
           - match:
-              auditd.log.cmd: "ls -laR /root/" 
+              auditd.log.cmd: "ls -laR /root/"
           - match:
               auditd.log.cmd: "cat /etc/shadow"
           # match rule to include the auth events we are interested in
@@ -77,14 +104,14 @@
 
 - type: elasticsearch.sequence
   id: attacker.escalate.audit.sudo.command.events
-  labels: 
+  labels:
     - escalated_command
     - escalated_sudo_command
     - escalate
   description: >-
     This rule labels all expected audit events for a sudo command (e.g., CRED_REFR)
     to a attacker command that was labeled by `attacker.escalate.audit.sudo.command.start`.
-    Since we can join the events directly via the process id we can be fairly certain that 
+    Since we can join the events directly via the process id we can be fairly certain that
     resulting labels are correct as long as the parent rule is correct.
   index:
     - audit-intranet_server
@@ -103,7 +130,7 @@
   # due current limitations of EQL we sadly cannot define and arbitrary sequence that
   # matches all events with the process id until we observe the process end event.
   # A rule type with such a functionality could probably implemented by using multiple
-  # elasticsearch queries. 
+  # elasticsearch queries.
   sequences:
     - '[ process where event.action == "ran-command" and kyoushi_labels.rules like "attacker.escalate.audit.sudo.command.start" ]'
     - '[ authentication where event.action == "refreshed-credentials" ]'

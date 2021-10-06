@@ -24,12 +24,96 @@
         lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   sequences:
     # we only need to specify the target user once since we are joining the events with it
-    - '[ auth where system.auth.session.status == "new" and system.auth.user == "{{ attacker.escalate_user.username }}" ] by system.auth.user'
     - '[ auth where system.auth.su.result == "successful" and source.user.name == "{{ attacker.web_service_user.username }}" ] by system.auth.user'
     - '[ auth where system.auth.su.result == "successful" and source.user.name == "{{ attacker.web_service_user.username }}" ] by system.auth.user'
     - '[ auth where system.auth.pam.session_state == "opened" and system.auth.pam.origin == "su:session" ] by user.name'
-    - '[ auth where system.auth.pam.session_state == "opened" and system.auth.pam.origin == "systemd-user:session" ] by user.name'
 
+- type: elasticsearch.sequence
+  id: attacker.escalate.systemd.newsession.before
+  labels: 
+    - attacker_change_user
+    - escalate
+  description: >-
+    This rule labels systemd new session events in auth log resulting from the attacker escalating to
+    a different user. This rule and rule attacker.escalate.systemd.newsession.after cover both possibilities
+    of either the systemd event coming before (this rule) or after the su event.
+  index:
+    - auth-intranet_server
+  # we need the line number as tie breaker since auth logs
+  # only have second precision and all our events are
+  # expected to occur at the same time
+  tiebreaker_field: log.file.line
+  max_span: 2s
+  filter:
+    range:
+      {# round start time down and stop time up #}
+      "@timestamp":
+        # escalation phase start
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        # escalation phase stop
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+  sequences:
+    # we only need to specify the target user once since we are joining the events with it
+    - '[ auth where system.auth.session.status == "new" and system.auth.user == "{{ attacker.escalate_user.username }}" ] by system.auth.user'
+    - '[ auth where system.auth.su.result == "successful" and source.user.name == "{{ attacker.web_service_user.username }}" and kyoushi_labels.rules like "attacker.escalate.su.login" ] by system.auth.user'
+
+- type: elasticsearch.sequence
+  id: attacker.escalate.systemd.newsession.after
+  labels: 
+    - attacker_change_user
+    - escalate
+  description: >-
+    This rule labels systemd new session events in auth log resulting from the attacker escalating to
+    a different user. This rule and rule attacker.escalate.systemd.newsession.before cover both possibilities
+    of either the systemd event coming before or after (this rule) the su event.
+  index:
+    - auth-intranet_server
+  # we need the line number as tie breaker since auth logs
+  # only have second precision and all our events are
+  # expected to occur at the same time
+  tiebreaker_field: log.file.line
+  max_span: 2s
+  filter:
+    range:
+      {# round start time down and stop time up #}
+      "@timestamp":
+        # escalation phase start
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        # escalation phase stop
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+  sequences:
+    # we only need to specify the target user once since we are joining the events with it
+    - '[ auth where system.auth.su.result == "successful" and source.user.name == "{{ attacker.web_service_user.username }}" and kyoushi_labels.rules like "attacker.escalate.su.login" ] by system.auth.user'
+    - '[ auth where system.auth.session.status == "new" and system.auth.user == "{{ attacker.escalate_user.username }}" ] by system.auth.user'
+
+- type: elasticsearch.sequence
+  id: attacker.escalate.systemd.session
+  labels: 
+    - attacker_change_user
+    - escalate
+  description: >-
+    This rule labels systemd session open events in auth log resulting from the attacker escalating to
+    a different user. This type of event only occurs if no systemd user session exists yet. Sessions
+    can exist when users are already logged in on another terminal, e.g., due to an active ssh connection.
+  index:
+    - auth-intranet_server
+  # we need the line number as tie breaker since auth logs
+  # only have second precision and all our events are
+  # expected to occur at the same time
+  tiebreaker_field: log.file.line
+  max_span: 30s
+  filter:
+    range:
+      {# round start time down and stop time up #}
+      "@timestamp":
+        # escalation phase start
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        # escalation phase stop
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+  sequences:
+    # we only need to specify the target user once since we are joining the events with it
+    - '[ auth where system.auth.su.result == "successful" and source.user.name == "{{ attacker.web_service_user.username }}" and kyoushi_labels.rules like "attacker.escalate.su.login" ] by system.auth.user'
+    - '[ auth where system.auth.pam.session_state == "opened" and system.auth.pam.origin == "systemd-user:session" ] by user.name'
 
 
 - type: elasticsearch.sequence

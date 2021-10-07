@@ -36,12 +36,12 @@ hosts:
       type: kyoushi
       codec: json
       # attack output lines can be **very** long
-      file_chunk_size: 66000000
+      file_chunk_size: 200000000
       add_field:
         "[@metadata][kyoushi][sm]": "attacker"
     - path: ait.aecid.attacker.wpdiscuz/traffic.json
       type: pcap
-      file_chunk_size: 20000000
+      file_chunk_size: 200000000
       codec: json
 groups:
   employee:

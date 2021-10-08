@@ -10,8 +10,7 @@
       when: kyoushi_sm_run_clean|default(False)
 
     - name: Start attacker SM
-      shell: nohup {{ kyoushi_sm_name }} </dev/null >/dev/null 2>&1 &
-      args:
-        executable: /bin/bash
+      service:
+        name: "{{ kyoushi_sm_name }}.service"
+        state: started
       become: yes
-      become_user: "{{ kyoushi_user_name }}"

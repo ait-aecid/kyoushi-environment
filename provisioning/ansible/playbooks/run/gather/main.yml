@@ -1,4 +1,4 @@
-- hosts: all,!monitoring,!mgmthost
+- hosts: all,!mgmthost
   gather_facts: yes
   vars_prompt:
     - name: kyoushi_gather_dir

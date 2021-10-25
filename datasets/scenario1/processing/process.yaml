@@ -142,6 +142,18 @@ pre_processors:
       http.file_data
       data-text-lines
 
+  - name: Add filebeat index mapping
+    type: elasticsearch.template
+    template: processing/logstash/filebeat-index-template.json
+    template_name: filebeat
+    index_patterns: ["*"]
+
+  - name: Add auditbeat index mapping
+    type: elasticsearch.template
+    template: processing/logstash/auditd-index-template.json
+    template_name: auditd
+    index_patterns: ["audit-*"]
+
   - name: Add pcap index mapping
     type: elasticsearch.template
     template: processing/logstash/pcap-index-template.json

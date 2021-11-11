@@ -143,33 +143,38 @@ pre_processors:
       data-text-lines
 
   - name: Add filebeat index mapping
-    type: elasticsearch.legacy.template
+    type: elasticsearch.legacy_template
     template: processing/logstash/filebeat-index-template.json
     template_name: filebeat
-    index_patterns: ["apache_access-*", "apache_error-*", "openvpn-*", "pcap-*", "kyoushi-*", "syslog-*", "auth-*", "dnsmasq-*"]
+    order: 2
+    index_patterns: ["apache_access-*","apache_error-*","audit-*","auth-*","dnsmasq-*","kyoushi-*","openvpn-*","pcap-*","syslog-*"]
 
   - name: Add auditbeat index mapping
-    type: elasticsearch.legacy.template
+    type: elasticsearch.legacy_template
     template: processing/logstash/auditd-index-template.json
     template_name: auditd
+    order: 3
     index_patterns: ["audit-*"]
 
   - name: Add metricsbeat index mapping
-    type: elasticsearch.legacy.template
+    type: elasticsearch.legacy_template
     template: processing/logstash/metricsbeat-index-template.json
     template_name: metricsbeat
+    order: 3
     index_patterns: ["metricsbeat-*"]
 
   - name: Add pcap index mapping
-    type: elasticsearch.legacy.template
+    type: elasticsearch.legacy_template
     template: processing/logstash/pcap-index-template.json
     template_name: pcap
+    order: 3
     index_patterns: ["pcap-*"]
 
   - name: Add openvpn index mapping
-    type: elasticsearch.legacy.template
+    type: elasticsearch.legacy_template
     template: processing/logstash/openvpn-index-template.json
     template_name: openvpn
+    order: 3
     index_patterns: ["openvpn-*"]
 
   - name: Add auditd ingest pipeline to elasticsearch

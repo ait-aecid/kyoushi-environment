@@ -27946,6 +27946,11 @@
   "order": 2,
   "settings": {
     "index": {
+        "mapping": {
+            "total_fields": {
+                "limit": 1000000
+            }
+      },
       "query": {
         "default_field": [
           "message",

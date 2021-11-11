@@ -1,4 +1,12 @@
 hosts:
+  monitoring:
+    - path: logstash/intranet-server/*system.cpu.log
+      type: metricsbeat
+      codec: json
+      add_field:
+        # please note that only [host][name] will be
+        # replaced. [host][fqdn] will not be changed!
+        "[@metadata][host_override]": true
   webserver:
     - path: apache2/*access*.log*
       type: apache_access

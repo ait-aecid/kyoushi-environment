@@ -10,7 +10,7 @@ pre_processors:
     context:
       vars:
         exclude_groups: ["Region.*", "envvars.*", "instance-.*", "meta-.*", "nova"]
-        exclude_hosts: ["monitoring", "mgmthost"]
+        exclude_hosts: ["mgmthost"]
       var_files: gather/inet-firewall/facts.json
     src: processing/templates/groups.json.j2
     dest: processing/config/groups.yaml
@@ -146,13 +146,19 @@ pre_processors:
     type: elasticsearch.template
     template: processing/logstash/filebeat-index-template.json
     template_name: filebeat
-    index_patterns: ["*"]
+    index_patterns: ["apache_access-*", "apache_error-*", "openvpn-*", "pcap-*", "kyoushi-*", "syslog-*", "auth-*", "dnsmasq-*"]
 
   - name: Add auditbeat index mapping
     type: elasticsearch.template
     template: processing/logstash/auditd-index-template.json
     template_name: auditd
     index_patterns: ["audit-*"]
+
+  - name: Add metricsbeat index mapping
+    type: elasticsearch.template
+    template: processing/logstash/metricsbeat-index-template.json
+    template_name: metricsbeat
+    index_patterns: ["metricsbeat-*"]
 
   - name: Add pcap index mapping
     type: elasticsearch.template

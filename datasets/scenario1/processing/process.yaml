@@ -238,6 +238,8 @@ post_processors:
         dest: audit.yaml
       - src: openvpn.yaml.j2
         dest: openvpn.yaml
+      - src: monitoring.yaml.j2
+        dest: monitoring.yaml
     processor:
       type: template
       name: Rendering labeling rule {{ item.src }}

@@ -15,6 +15,17 @@
                             .source(["@timestamp"]).extra(size=1)
                             .execute().hits.hits
 -%}
+
+{%- set run_crack = Search(index=index).query(queries.foothold.online_cracking.run_crack)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+{%- set finish_crack = Search(index=index).query(queries.foothold.online_cracking.finish_crack)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+
+
 {%- set vpn_disconnect = EQL(index=index, body=queries.escalate.vpn_disconnect)["hits"]["sequences"][0]["events"] -%}
 {%- set reverse_shell = EQL(index=index, body=queries.escalate.reverse_shell)["hits"]["sequences"][0]["events"] -%}
 {%- set open_pty = EQL(index=index, body=queries.escalate.open_pty)["hits"]["sequences"][0]["events"] -%}
@@ -38,6 +49,13 @@ vpn_connect:
 vpn_disconnect: 
     start: "{{ vpn_disconnect[1]["_source"]["@timestamp"] }}"
     stop: "{{ vpn_disconnect[2]["_source"]["@timestamp"] }}"
+
+
+{%- if (wp_cracked | length) > 0 %}
+wp_crack:
+    start: "{{ run_crack[0]["_source"]["@timestamp"] }}"
+    stop: "{{ finish_crack[0]["_source"]["@timestamp"] }}"
+{%- endif %}
 
 reverse_shell:
     start: "{{ reverse_shell[0]["_source"]['@timestamp'] }}"

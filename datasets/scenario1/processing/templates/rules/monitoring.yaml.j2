@@ -1,0 +1,20 @@
+- type: elasticsearch.query
+  id: attacker.escalate.wpcrack
+  labels:
+          - attacker_change_user
+          - escalate
+  description: >-
+    This labels the metricbeat-logs during the time an attacker runs wpcrack.
+  index:
+    - metricsbeat-intranet-server
+  # obligatory match all
+  query:
+    match_all: {}
+  filter:
+    - range:
+        "@timestamp":
+          # wpcrack phase start
+          gte: "{{ ( escalate.wp_crack.start | as_datetime).isoformat() }}"
+          # wpcrack phase stop
+          lte: "{{ (escalate.wp_crack.stop | as_datetime).isoformat() }}"
+

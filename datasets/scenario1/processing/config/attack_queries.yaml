@@ -273,6 +273,25 @@ foothold:
               transition: crack_wphash
           - term:
               message_keyword: finished_wphashcrack
+    run_crack:
+      bool:
+        must:
+          - term:
+              current_state: crack_choice
+          - term:
+              transition: crack_wphash
+          - term:
+              message_keyword: running_wphashcrack
+    finish_crack:
+      bool:
+        must:
+          - term:
+              current_state: crack_choice
+          - term:
+              transition: crack_wphash
+          - term:
+              message_keyword: finished_wphashcrack
+
 
 escalate:
   vpn_connect:

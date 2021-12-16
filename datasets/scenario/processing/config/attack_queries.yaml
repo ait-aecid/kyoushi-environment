@@ -1,0 +1,400 @@
+dnsteal:
+  start:
+    bool:
+      must:
+        - match:
+            event.action: start
+        - match:
+            event.category: dnsteal
+  stop:
+    bool:
+      must:
+        - match:
+            event.action: shutdown
+        - match:
+            event.category: dnsteal
+
+# this is only partial query for detecting the stop event
+# you still need to add a match for auditd.log.unit == "{{ exfil_service_name }}" in the template logic
+partial_exfil_stop:
+  bool:
+    must:
+      - match:
+          event.action: stopped-service
+      - match:
+          event.category: process
+
+foothold:
+  vpn_connect:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: initial
+          - term:
+              transition: vpn_connect
+          - term:
+              message_keyword: connecting_to_vpn
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: initial
+          - term:
+              transition: vpn_connect
+          - term:
+              message_keyword: connected_to_vpn
+
+  skipped_cracking:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: recon_host
+          - term:
+              new_state: wait_escalate_choice
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: wait_escalate_choice
+          - term:
+              transition: reverse_shell_listen
+          - term:
+              target: reverse_shell_listening
+
+  vpn_disconnect:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: wait_escalate_choice
+          - term:
+              transition: vpn_disconnect
+          - term:
+              message_keyword: disconnecting_from_vpn
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: wait_escalate_choice
+          - term:
+              transition: vpn_disconnect
+          - term:
+              message_keyword: disconnected_from_vpn
+
+  host_discover_local:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: recon_networks
+          - term:
+              transition: host_discover_local
+          - term:
+              message_keyword: executing_nmap_host_scan
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: recon_networks
+          - term:
+              transition: host_discover_local
+          - term:
+              message_keyword: executed_nmap_host_scan
+
+  host_discover_dmz:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: recon_networks
+          - term:
+              transition: host_discover_dmz
+          - term:
+              message_keyword: executing_nmap_host_scan
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: recon_networks
+          - term:
+              transition: host_discover_dmz
+          - term:
+              message_keyword: executed_nmap_host_scan
+
+  dns_brute_force:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: recon_networks
+          - term:
+              transition: dns_brute_force
+          - term:
+              message_keyword: executing_nmap_dns-brute
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: recon_networks
+          - term:
+              transition: dns_brute_force
+          - term:
+              message_keyword: executed_nmap_dns-brute
+
+  service_scan:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: recon_networks
+          - term:
+              transition: service_scan
+          - term:
+              message_keyword: executing_nmap_service_scan
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: recon_networks
+          - term:
+              transition: service_scan
+          - term:
+              message_keyword: executed_nmap_service_scan
+  wpscan:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: recon_wordpress
+          - term:
+              transition: wpscan
+          - term:
+              message_keyword: executing_wpscan
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: recon_wordpress
+          - term:
+              transition: wpscan
+          - term:
+              message_keyword: executed_wpscan
+    output:
+      bool:
+        must:
+          - term:
+              current_state: recon_wordpress
+          - term:
+              transition: wpscan
+          - term:
+              message_keyword: output
+
+  dirb_scan:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: recon_wordpress
+          - term:
+              transition: dirb_scan
+          - term:
+              message_keyword: executing_dirb
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: recon_wordpress
+          - term:
+              transition: dirb_scan
+          - term:
+              message_keyword: executed_dirb
+
+  upload_rce_shell:
+    load_posts_page:
+      start:
+        bool:
+          must:
+            - term:
+                current_state: recon_wordpress
+            - term:
+                transition: upload_rce_shell
+            - term:
+                message_keyword: load_posts_page
+      stop:
+        bool:
+          must:
+            - term:
+                current_state: recon_wordpress
+            - term:
+                transition: upload_rce_shell
+            - term:
+                message_keyword: loaded_posts_page
+
+    load_post_info:
+      start:
+        bool:
+          must:
+            - term:
+                current_state: recon_wordpress
+            - term:
+                transition: upload_rce_shell
+            - term:
+                message_keyword: load_post_info
+      stop:
+        bool:
+          must:
+            - term:
+                current_state: recon_wordpress
+            - term:
+                transition: upload_rce_shell
+            - term:
+                message_keyword: loaded_post_info
+
+    upload:
+      start:
+        bool:
+          must:
+            - term:
+                current_state: recon_wordpress
+            - term:
+                transition: upload_rce_shell
+            - term:
+                message_keyword: uploading_web_shell
+      stop:
+        bool:
+          must:
+            - term:
+                current_state: recon_wordpress
+            - term:
+                transition: upload_rce_shell
+            - term:
+                message_keyword: uploaded_web_shell
+
+  web_shell_cmds:
+    query: >-
+      sequence by event.action
+        [attacker_recon_host where message_keyword == "sending_web_shell_command"]
+        [attacker_recon_host where message_keyword == "sent_web_shell_command"]
+        [attacker_recon_host where message_keyword == "web_shell_command_response"]
+    size: 1000
+
+  online_cracking:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: crack_choice
+          - term:
+              transition: crack_wphash
+          - term:
+              message_keyword: downloading_wphashcrack
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: crack_choice
+          - term:
+              transition: crack_wphash
+          - term:
+              message_keyword: finished_wphashcrack
+    run_crack:
+      bool:
+        must:
+          - term:
+              current_state: crack_choice
+          - term:
+              transition: crack_wphash
+          - term:
+              message_keyword: running_wphashcrack
+    finish_crack:
+      bool:
+        must:
+          - term:
+              current_state: crack_choice
+          - term:
+              transition: crack_wphash
+          - term:
+              message_keyword: finished_wphashcrack
+
+
+escalate:
+  vpn_connect:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: cracked_passwords
+          - term:
+              transition: vpn_connect
+          - term:
+              message_keyword: connecting_to_vpn
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: cracked_passwords
+          - term:
+              transition: vpn_connect
+          - term:
+              message_keyword: connected_to_vpn
+
+  no_pause:
+    bool:
+        must:
+          - term:
+              current_state: wait_escalate_choice
+          - term:
+              transition: reverse_shell_listen
+          - term:
+              target: reverse_shell_listening
+
+  wp_cracked:
+    bool:
+        must:
+          - term:
+              current_state: wphash_cracked
+          - term:
+              transition: reverse_shell_listen
+          - term:
+              target: reverse_shell_listening
+
+  vpn_disconnect:
+    query: >-
+      sequence
+        [attacker_end where current_state == "end" and transition == null]
+        [attacker where message_keyword == "disconnecting_from_vpn"]
+        [attacker where message_keyword == "disconnected_from_vpn"]
+    size: 1
+
+  reverse_shell:
+    query: >-
+      sequence
+        [attacker_reverse_shell_listening where transition == "open_reverse_shell" and message_keyword == "sending_web_shell_command"]
+        [attacker_opening_reverse_shell where transition == "wait_reverse_shell" and message_keyword == "reverse_shell_connected"]
+    size: 1
+
+  open_pty:
+    query: >-
+      sequence
+        [attacker_reverse_shell where transition == "open_pty" and message_keyword == "opening_pty_shell"]
+        [attacker_reverse_shell where transition == "open_pty" and message_keyword == "opened_pty_shell"]
+    size: 1
+
+  change_user:
+    query: >-
+      sequence
+        [attacker_pty_shell where transition == "login_user" and message_keyword == "changing_user"]
+        [attacker_pty_shell where transition == "login_user" and message_keyword == "sending_password"]
+        [attacker_pty_shell where transition == "login_user" and message_keyword == "changed_user"]
+    size: 1
+
+  escalated_cmds:
+    query: >-
+      sequence by event.action
+        [attacker_escalated where message_keyword == "executing_command"]
+        [attacker_escalated where message_keyword == "executed_command"]
+    size: 1000
+
+

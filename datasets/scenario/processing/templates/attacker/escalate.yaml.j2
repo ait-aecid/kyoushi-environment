@@ -1,0 +1,105 @@
+{%- set index = "kyoushi-attacker_0" %}
+{%- set vpn_connect = Search(index=index).query(queries.escalate.vpn_connect.start)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+{%- set vpn_connected = Search(index=index).query(queries.escalate.vpn_connect.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+{%- set no_pause = Search(index=index).query(queries.escalate.no_pause)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+{%- set wp_cracked = Search(index=index).query(queries.escalate.wp_cracked)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+
+{%- set run_crack = Search(index=index).query(queries.foothold.online_cracking.run_crack)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+{%- set finish_crack = Search(index=index).query(queries.foothold.online_cracking.finish_crack)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+
+
+{%- set vpn_disconnect = EQL(index=index, body=queries.escalate.vpn_disconnect)["hits"]["sequences"][0]["events"] -%}
+{%- set reverse_shell = EQL(index=index, body=queries.escalate.reverse_shell)["hits"]["sequences"][0]["events"] -%}
+{%- set open_pty = EQL(index=index, body=queries.escalate.open_pty)["hits"]["sequences"][0]["events"] -%}
+{%- set change_user = EQL(index=index, body=queries.escalate.change_user)["hits"]["sequences"][0]["events"] -%}
+{%- set escalated_cmds = EQL(index=index, body=queries.escalate.escalated_cmds)["hits"]["sequences"] -%}
+{%- if (no_pause | length) > 0 %}
+start: "{{ no_pause[0]._source["@timestamp"]  }}"
+{%- elif (wp_cracked | length) > 0 %}
+start: "{{ wp_cracked[0]._source["@timestamp"]  }}"
+{%- else %}
+start: "{{ vpn_connect[0]._source["@timestamp"]  }}"
+{%- endif %}
+stop: "{{ vpn_disconnect[2]["_source"]["@timestamp"] }}"
+
+{%- if (vpn_connect | length) > 0 %}
+vpn_connect: 
+    start: "{{ vpn_connect[0]._source["@timestamp"]  }}"
+    stop: "{{ vpn_connected[0]._source["@timestamp"]  }}"
+{%- endif %}
+
+vpn_disconnect: 
+    start: "{{ vpn_disconnect[1]["_source"]["@timestamp"] }}"
+    stop: "{{ vpn_disconnect[2]["_source"]["@timestamp"] }}"
+
+
+{%- if (wp_cracked | length) > 0 %}
+wp_crack:
+    start: "{{ run_crack[0]["_source"]["@timestamp"] }}"
+    stop: "{{ finish_crack[0]["_source"]["@timestamp"] }}"
+{%- endif %}
+
+reverse_shell:
+    start: "{{ reverse_shell[0]["_source"]['@timestamp'] }}"
+    stop: "{{ reverse_shell[1]["_source"]['@timestamp'] }}"
+    web_shell: "{{ reverse_shell[0]["_source"]['web_shell'] }}"
+    http_param: 
+        name: "{{ reverse_shell[0]["_source"]["cmd_param"] }}"
+        value: "{{ reverse_shell[0]["_source"]["params"][reverse_shell[0]["_source"]["cmd_param"]] }}"
+    cmd: {{ reverse_shell[0]["_source"]["cmd"] | tojson }}
+    listen_socket:
+        ip: "{{ reverse_shell[1]["_source"]['listen_socket']["host"] }}"
+        port: {{ reverse_shell[1]["_source"]['listen_socket']["port"] }}
+        scope_id: {{ reverse_shell[1]["_source"]['listen_socket']["scope_id"] }}
+        flowinfo: {{ reverse_shell[1]["_source"]['listen_socket']["flowinfo"] }}
+    remote_socket:
+        ip: "{{ reverse_shell[1]["_source"]['remote_socket']["host"] }}"
+        port: {{ reverse_shell[1]["_source"]['remote_socket']["port"] }}
+        scope_id: {{ reverse_shell[1]["_source"]['remote_socket']["scope_id"] }}
+        flowinfo: {{ reverse_shell[1]["_source"]['remote_socket']["flowinfo"] }}
+
+open_pty:
+    start: "{{ open_pty[0]["_source"]['@timestamp'] }}"
+    stop: "{{ open_pty[1]["_source"]['@timestamp'] }}"
+    pty_cmd: python -c 'import pty; pty.spawn("/bin/bash")'
+
+change_user:
+    start: "{{ change_user[0]["_source"]['@timestamp'] }}"
+    enter_password: "{{ change_user[1]["_source"]['@timestamp'] }}"
+    stop: "{{ change_user[2]["_source"]['@timestamp'] }}"
+    user: "{{ attacker_sm.escalate.user }}"
+    password: "{{ attacker_sm.escalate.password }}"
+
+{% if escalated_cmds | length > 0 %}
+escalated_cmds:
+{% for _escalated_cmd_seq in escalated_cmds %}
+{%- set _start = _escalated_cmd_seq["events"][0] %}{%- set _stop = _escalated_cmd_seq["events"][1] %}
+    - id: "{{ _start["_source"]["transition"] }}"
+      start: "{{ _start["_source"]["@timestamp"] }}"
+      stop: "{{ _stop["_source"]["@timestamp"] }}"
+      cmd: "{{ _start["_source"]["cmd"] }}"
+      sudo: {{ True if _start["_source"]["cmd"] is regex_match "^sudo.*" else False }}
+{% endfor %}
+{%- else %}
+escalated_cmds: []
+{% endif %}
+
+    

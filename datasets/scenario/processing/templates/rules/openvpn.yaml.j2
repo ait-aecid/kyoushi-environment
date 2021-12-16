@@ -1,0 +1,111 @@
+- type: elasticsearch.query
+  id: attacker.foothold.vpn.ip
+  labels:
+    - attacker_vpn
+    - foothold
+  description: >-
+    This rule applies the labels to all openvpn log rows that have 
+    the attacker server as source ip and are within the foothold phase.
+  index:
+    - openvpn-vpn
+  filter:
+    range:
+      "@timestamp":
+        # foothold phase start
+        gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        # foothold phase stop
+        lte: "{{ (( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+  query:
+    - match:
+        source.ip: '{{ attacker.default_ipv4_address }}'
+
+- type: elasticsearch.sequence
+  id: attacker.foothold.vpn.duplicate
+  labels: 
+    - attacker_vpn
+    - foothold
+  description: >-
+    This rule labels the openvpn log rows related to duplicate connections
+    with a single certificate resulting from the attacker and user connecting at
+    the same time. Some of these log lines do not contain remote IP information
+    and as such we match them by connecting defining the sequence of log actions.
+  index:
+    - openvpn-vpn
+  # we need the line number as tie breaker since openvpn logs
+  # only have second precision
+  tiebreaker_field: log.file.line
+  max_span: 1m
+  filter:
+    range:
+      "@timestamp":
+        # foothold phase start
+        gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        # foothold phase stop
+        lte: "{{ (( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+  sequences:
+    - '[ openvpn where source.ip == "{{ attacker.default_ipv4_address }}" and source.user.name == "{{ attacker.vpn_user.name }}" ]'
+    - '[ openvpn where openvpn.peer.duplicate == "{{ attacker.vpn_user.name }}" ]'
+    - '[ openvpn where source.ip == "{{ attacker.default_ipv4_address }}" and source.user.name == "{{ attacker.vpn_user.name }}" and destination.ip != null ]'
+    - '[ openvpn where source.ip == "{{ attacker.default_ipv4_address }}" and source.user.name == "{{ attacker.vpn_user.name }}" and destination.ip != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+  until: '[ openvpn where source.ip == "{{ attacker.default_ipv4_address }}" and source.user.name == "{{ attacker.vpn_user.name }}" and openvpn.push.message != null ]'
+
+
+- type: elasticsearch.query
+  id: attacker.escalate.vpn.ip
+  labels:
+    - attacker_vpn
+    - escalate
+  description: >-
+    This rule applies the labels to all openvpn log rows that have 
+    the attacker server as source ip and are within the escalation phase.
+  index:
+    - openvpn-vpn
+  filter:
+    range:
+      "@timestamp":
+        # escalation phase start
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        # escalation phase stop
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+  query:
+    - match:
+        source.ip: '{{ attacker.default_ipv4_address }}'
+
+
+- type: elasticsearch.sequence
+  id: attacker.escalate.vpn.duplicate
+  labels: 
+    - attacker_vpn
+    - escalate
+  description: >-
+    This rule labels the openvpn log rows related to duplicate connections
+    with a single certificate resulting from the attacker and user connecting at
+    the same time. Some of these log lines do not contain remote IP information
+    and as such we match them by connecting defining the sequence of log actions.
+  index:
+    - openvpn-vpn
+  # we need the line number as tie breaker since openvpn logs
+  # only have second precision
+  tiebreaker_field: log.file.line
+  max_span: 1m
+  filter:
+    range:
+      "@timestamp":
+        # escalation phase start
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        # escalation phase stop
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+  sequences:
+    - '[ openvpn where source.ip == "{{ attacker.default_ipv4_address }}" and source.user.name == "{{ attacker.vpn_user.name }}" ]'
+    - '[ openvpn where openvpn.peer.duplicate == "{{ attacker.vpn_user.name }}" ]'
+    - '[ openvpn where source.ip == "{{ attacker.default_ipv4_address }}" and source.user.name == "{{ attacker.vpn_user.name }}" and destination.ip != null ]'
+    - '[ openvpn where source.ip == "{{ attacker.default_ipv4_address }}" and source.user.name == "{{ attacker.vpn_user.name }}" and destination.ip != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+    - '[ openvpn where openvpn.data.channel != null ]'
+  until: '[ openvpn where source.ip == "{{ attacker.default_ipv4_address }}" and source.user.name == "{{ attacker.vpn_user.name }}" and openvpn.push.message != null ]'

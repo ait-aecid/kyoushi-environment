@@ -1,0 +1,46 @@
+{%- set index_dnsteal = "dnsteal-attacker_0" %}
+{%- set index_share = "audit-internal_share" %}
+{%- set dnsteal_start = Search(index=index_dnsteal).query(queries.dnsteal.start)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"] 
+-%}
+{%- set dnsteal_stop = Search(index=index_dnsteal).query(queries.dnsteal.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"]
+-%}
+
+{%- set exfil_stop_hits = Search(index=index_share).query(queries.partial_exfil_stop)
+                            .query("match",  auditd__log__unit=share_facts.exfiltration_service_name)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits
+-%}
+{%- if (exfil_stop_hits | length) > 0 %}
+{%- set exfil_stop = exfil_stop_hits.hits[0]._source["@timestamp"] -%}
+{%- else %}
+{# Just a dummy date that hopefully never matches in a testbed #}
+{%- set exfil_stop = "1997-07-16T19:20:30.45+01:00" -%}
+{%- endif %}
+hostname: "{{ servers[attacker_server].hostname }}"
+distribution: "{{ servers[attacker_server].distribution }}"
+distribution_release: "{{ servers[attacker_server].distribution_release }}"
+distribution_version: "{{ servers[attacker_server].distribution_version }}"
+timezone: "{{ servers[attacker_server].timezone }}"
+{%- if servers[attacker_server].default_ipv4_address is defined and servers[attacker_server].default_ipv4_address is not none %}
+default_ipv4_address: "{{ servers[attacker_server].default_ipv4_address }}"
+{%- else %}
+default_ipv4_address: null
+{%- endif %}
+{%- if servers[attacker_server].default_ipv6_address is defined and servers[attacker_server].default_ipv6_address is not none %}
+default_ipv6_address: "{{ servers[attacker_server].default_ipv6_address }}"
+{%- else %}
+default_ipv6_address: null
+{%- endif %}
+ipv4_addresses: {{ servers[attacker_server].ipv4_addresses | default([]) | tojson }}
+ipv6_addresses: {{ servers[attacker_server].ipv6_addresses | default([]) | tojson }}
+exfiltration_service:
+    name: "{{ share_facts.exfiltration_service_name }}"
+    stop: "{{ exfil_stop }}"
+dnsteal:
+    start: "{{ dnsteal_start }}"
+    stop: "{{ dnsteal_stop }}"
+    domain: "{{  attacker_facts.dnsteal_domain }}"

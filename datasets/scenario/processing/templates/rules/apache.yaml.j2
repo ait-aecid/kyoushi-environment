@@ -470,8 +470,6 @@
     # Also URL encode the value parts
     - bool:
         should:
-          # {{ host_cmd.id }}
-          # {{ host_cmd.cmd | join(" ") }}
           - regexp:
               url.original: ".*WyJ3Z2V0IiwgImh0dHBzOi8vZ2l0aHViLmNvbS9haXQtYWVjaWQvd3BoYXNoY3JhY2svYXJjaGl2ZS9yZWZzL3RhZ3MvdjAuMS50YXIuZ3oiXQ.*"
           - regexp:

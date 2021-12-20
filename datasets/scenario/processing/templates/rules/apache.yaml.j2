@@ -448,6 +448,40 @@
 {% endfor %}
 
 - type: elasticsearch.query
+  id: attacker.escalate.webshell.cmd.http.prepare_crack
+  labels: 
+    - webshell_cmd
+    - escalate
+  description: >-
+    This rule matches the web shell web requests via the recorded
+    web shell URI and commands 
+  index:
+    - apache_access-intranet_server
+  # we cannot use a time range filter for this one as
+  # the log line does not have a timestamp
+  query:
+    # match the VPN server as source
+    - match:
+        source.address: '{{ attacker.vpn_ipv4_address }}'
+    # match web shell URI without protocol
+    - regexp:
+        url.full: '{{ foothold.upload_rce_shell.web_shell | replace("https://", "") }}.*'
+    # match any of the sent command params in the URI
+    # Also URL encode the value parts
+    - bool:
+        should:
+          # {{ host_cmd.id }}
+          # {{ host_cmd.cmd | join(" ") }}
+          - regexp:
+              url.original: ".*WyJ3Z2V0IiwgImh0dHBzOi8vZ2l0aHViLmNvbS9haXQtYWVjaWQvd3BoYXNoY3JhY2svYXJjaGl2ZS9yZWZzL3RhZ3MvdjAuMS50YXIuZ3oiXQ.*"
+          - regexp:
+              url.original: ".*WyJ0YXIiLCAieHZmeiIsICJ2MC4xLnRhci5neiJd.*"
+          - regexp:
+              url.original: ".*WyJ3Z2V0IiwgImh0dHA6Ly8xOTIuMTY4LjIyNC4yMjUvcm9ja3lvdS50eHQiXQ.*"
+          - regexp:
+              url.original: ".*WyIuL3dwaGFzaGNyYWNrLTAuMS93cGhhc2hjcmFjay5zaCIsICItdyIsICIkUFdEL3JvY2t5b3UudHh0IiwgIi1qIiwgIi4vd3BoYXNoY3JhY2stMC4xL2pvaG4tMS43LjYtanVtYm8tMTItTGludXg2NC9ydW4iLCAiLXUiLCAiandpbGtpbnNvbiJd.*"
+
+- type: elasticsearch.query
   id: attacker.escalate.shell.descriptor
   labels:
     - reverse_shell

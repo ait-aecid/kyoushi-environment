@@ -191,7 +191,7 @@ kyoushi_sm_ssh_commands:
   - date
   - ip addr
   - ps aux
-  - - cmd: tail -F /var/log/syslog
+  - - cmd: tail /var/log/syslog
       sudo: yes
       expect: '.*' # we just wait for something to show
       idle_after: medium

@@ -283,7 +283,6 @@ kyoushi_attacker_reverse_shell_commands: {{ reverse_shell_commands_selected  }}
 {% set wpscan_mode = random.choice(["passive", "mixed"]) %}
 kyoushi_attacker_wpscan_extra_args:
   - "--disable-tls-checks"
-  - "--no-update"
   - "-e {{ wpscan_enum }}"
   - "--plugins-detection {{ wpscan_mode }}"
 {% set dirb_params = random.sample(["-i", "-r"], random.randint(0, 2)) %}

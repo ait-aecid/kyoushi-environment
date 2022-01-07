@@ -6,7 +6,8 @@
 network_name: {{ network_name }}
 {% set network_domain = network_name + "." + faker.tld() %}
 network_domain: {{ network_domain }}
-company_name: {{ (faker.domain_word() | lower | alpha) }}
+{% set company_name = (faker.domain_word() | lower | alpha) %}
+company_name: {{ company_name }}
 {% set domain_names = [] %}
 {% set records = ['mailserver', 'mail', 'smtp'] %}
 external_mail:
@@ -37,7 +38,7 @@ employees:
           last_name: {{ last_name }}
           username: {{ (first_name[0] | lower | alpha) + (last_name | lower | alpha) }}
           email_user: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
-          email_domain: {{ random.choice(domain_names) + '.' + network_domain }}
+          email_domain: {{ company_name + '.' + network_domain }}
           password: {{ faker.password(length=12, special_chars=False) }}
           password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
           {% set wp_role = random.choice(['editor', 'administrator', '']) %}

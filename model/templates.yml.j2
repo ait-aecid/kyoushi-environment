@@ -236,6 +236,11 @@
   delete: false
 {% endfor %}
 
+- name: Logstash config of scenario
+  type: file
+  src: datasets/scenario/processing/config/logs.yaml.j2
+  dest: datasets/scenario/processing/config/logs.yaml
+
 - name: Logstash config of scenario 1
   type: file
   src: datasets/scenario1/processing/config/logs.yaml.j2
@@ -245,4 +250,9 @@
   type: file
   src: datasets/scenario2/processing/config/logs.yaml.j2
   dest: datasets/scenario2/processing/config/logs.yaml
+
+- name: Script to run all ansible playbooks in correct order
+  type: file
+  src: provisioning/ansible/run_all.sh.j2
+  dest: provisioning/ansible/run_all.sh
 

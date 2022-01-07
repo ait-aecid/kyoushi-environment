@@ -39,8 +39,8 @@ employees:
           username: {{ (first_name[0] | lower | alpha) + (last_name | lower | alpha) }}
           email_user: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
           email_domain: {{ company_name + '.' + network_domain }}
-          password: {{ faker.password(length=12, special_chars=False) }}
-          password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+          password: {{ faker.password(length=11, special_chars=False) + 'a' }}
+          password_salt: {{ ''.join(random.choices('abcdef0123456789', k=15)) + 'a' }}
           {% set wp_role = random.choice(['editor', 'administrator', '']) %}
           {% set ssh_admin = numpy.choice([false, true], p=[0.75, 0.25]) %}
           {% if ns.ssh_admin_with_wp_defined == false and i == employees_internal_count + employees_remote_count - 1 %}
@@ -94,28 +94,28 @@ ext_mail_users:
       {% endif %}
       email_user: {{ (first_name | lower | alpha) + '.' + (last_name | lower | alpha) }}
       email_domain: {{ random.choice(domain_names) + '.' + network_domain }}
-      password: {{ faker.password(length=12, special_chars=False) }}
-      password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+      password: {{ faker.password(length=11, special_chars=False) + 'a' }}
+      password_salt: {{ ''.join(random.choices('abcdef0123456789', k=15)) + 'a' }}
 {% endfor %}
 service_users:
     owncloud_samba:
         username: owncloud
-        password: {{ faker.password(length=12, special_chars=False) }}
-        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+        password: {{ faker.password(length=11, special_chars=False) + 'a' }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=15)) + 'a' }}
         samba_groups:
           - management
     owncloud:
         username: owncloud
-        password: {{ faker.password(length=12, special_chars=False) }}
-        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+        password: {{ faker.password(length=11, special_chars=False) + 'a' }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=15)) + 'a' }}
     ext_mail:
         username: horde
-        password: {{ faker.password(length=12, special_chars=False) }}
-        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+        password: {{ faker.password(length=11, special_chars=False) + 'a' }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=15)) + 'a' }}
     mail:
         username: horde
-        password: {{ faker.password(length=12, special_chars=False) }}
-        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+        password: {{ faker.password(length=11, special_chars=False) + 'a' }}
+        password_salt: {{ ''.join(random.choices('abcdef0123456789', k=15)) + 'a' }}
 networks:
     internet:
         {% for _ in range(1, 999999999) %}
@@ -158,8 +158,8 @@ attacker:
     {% set first_name = faker.first_name() %}
     {% set last_name = faker.last_name() %}
     username: {{ (first_name[0] | lower) + (last_name | lower) }}
-    password: {{ faker.password(length=12, special_chars=False) }}
-    password_salt: {{ ''.join(random.choices('abcdef0123456789', k=16)) }}
+    password: {{ faker.password(length=11, special_chars=False) + 'a' }}
+    password_salt: {{ ''.join(random.choices('abcdef0123456789', k=15)) + 'a' }}
 kyoushi_attacker_start: 2021-10-04T{{ (random.randint(9, 14) | string()).zfill(2) }}:{{ (random.randint(0, 59) | string()).zfill(2) }}
 kyoushi_attacker_escalate_start: +P00DT{{ (random.randint(3, 4) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M
 {% set recon_hosts_dict = {"cloud_share": "dmz", "vpn": "dmz", "webserver": "dmz", "inet-dns": "internet", "inet-firewall": "internet", "intranet_server": "local", "internal_share": "local"} %}

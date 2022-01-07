@@ -1,9 +1,12 @@
+{% set employees_internal_count = random.randint(2, 2) %}
+{% set employees_remote_count = random.randint(2, 2) %}
+{% set ext_mail_users_count = random.randint(2, 2) %}
+{% set mail_servers_external_count = random.randint(1, 1) %}
 {% set network_name = (faker.domain_word() | lower | alpha) %}
 network_name: {{ network_name }}
 {% set network_domain = network_name + "." + faker.tld() %}
 network_domain: {{ network_domain }}
 company_name: {{ (faker.domain_word() | lower | alpha) }}
-{% set mail_servers_external_count = random.randint(2, 4) %}
 {% set domain_names = [] %}
 {% set records = ['mailserver', 'mail', 'smtp'] %}
 external_mail:
@@ -20,9 +23,6 @@ external_mail:
 {% set internet_ips = [] %}
 {% set internet_ips_count = 10 %}
 employees:
-{% set employees_internal_count = random.randint(3, 9) %}
-{% set employees_remote_count = random.randint(3, 9) %}
-{% set ext_mail_users_count = random.randint(3, 9) %}
 {% set ns = namespace(ssh_admin_with_wp_defined = false) %}
     internal:
 {% for i in range(0, employees_internal_count + employees_remote_count) %}

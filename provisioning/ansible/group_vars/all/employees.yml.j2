@@ -1,16 +1,17 @@
 \{% set employees_tmp = context.employees.internal.copy() }
 \{%- do employees_tmp.update(context.employees.external) }
 _employees:
-\{% for _employee_id, _employee_info in employees_tmp.items() }
-\{% set _ns = namespace(contacts={}) }
-\{% for _contact in employees_tmp.keys() }
- \{% if _contact != _employee_id }
-   \{% do _ns.contacts.update({_contact: random.choice([0.0001, random.random()])}) } # or mit do update
- \{% endif }
-\{% endfor }
+\{%- for _employee_id, _employee_info in employees_tmp.items() }
+\{%- set _ns = namespace(contacts={}) }
+\{%- for _contact in employees_tmp.keys() }
+ \{%- if _contact != _employee_id }
+   \{%- do _ns.contacts.update({_contact: random.choice([0.0001, random.random()])}) }
+ \{%- endif }
+\{%- endfor }
  \{%- do _employee_info.update({"contacts": _ns.contacts}) }
  \var{_employee_id}: \var{ _employee_info | tojson }
-\{% endfor }
+\{%- endfor }
+
 # redefine employees to include the dict key as dict value
 # the key as part of the inner dict is sometimes needed
 # due to the limitations of the jinja2 syntax
@@ -22,11 +23,11 @@ employees: |
   {% endfor %}
   }
 internal_employees:
-\{% for _employee_id in context.employees.internal.keys() }
+\{%- for _employee_id in context.employees.internal.keys() }
  - \var{ _employee_id }
-\{% endfor }
+\{%- endfor }
 remote_employees:
-\{% for _employee_id in context.employees.external.keys() }
+\{%- for _employee_id in context.employees.external.keys() }
  - \var{ _employee_id }
-\{% endfor }
+\{%- endfor }
 

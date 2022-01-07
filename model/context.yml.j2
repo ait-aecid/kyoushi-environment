@@ -308,7 +308,7 @@ kyoushi_sm_idle_small_max: {{ random.randint(kyoushi_sm_idle_small_min + 5, 15) 
 kyoushi_sm_idle_tiny_min: {{ kyoushi_sm_idle_tiny_min }}
 kyoushi_sm_idle_tiny_max: {{ random.uniform(kyoushi_sm_idle_tiny_min + 1, 4) }}
 dnsteal_domain: {{ random.choice([faker.dga(), faker.hostname()]) }}
-dnsteal_force_ip: {{ random.choice(['no', 'yes']) }}
+dnsteal_force_ip: 'no' # needs to be 'no' in order to generate events in dnsmasq logs
 dnsteal_compressed: {{ random.choice(['no', 'yes']) }}
 dnsteal_verbose: {{ random.choice(['no', 'yes']) }}
 {% set dnsteal_block_size = random.randint(32, 63) %}

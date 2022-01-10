@@ -17,7 +17,7 @@ roles:
     version: v1.3
     name: apache2
 
-  - src: t@github.com:ait-cs-IaaS/ansible-role-samba.git
+  - src: git@github.com:ait-cs-IaaS/ansible-role-samba.git
     scm: git
     version: v2.7.1
     name: samba
@@ -83,7 +83,7 @@ roles:
 
   - src: git@github.com:ait-cs-IaaS/ansible-openvpn-server.git
     scm: git
-    version: v1.0
+    version: v1.1
     name: openvpn-server
 
   - src: git@github.com:ait-cs-IaaS/ansible-mariadb.git
@@ -179,9 +179,9 @@ roles:
     version: v1.3
     name: elastic-beats-modules
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/logstash.git
+  - src: git@github.com:ait-cs-IaaS/ansible-logstash.git
     scm: git
-    version: v1.2
+    version: master
     name: logstash
 
   - src: git@github.com:ait-cs-IaaS/ansible-elasticsearch.git

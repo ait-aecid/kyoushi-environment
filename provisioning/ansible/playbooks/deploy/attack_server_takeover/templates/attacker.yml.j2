@@ -70,7 +70,7 @@ wordpress:
 {{ kyoushi_attacker_web_shell_commands | to_nice_yaml(indent=2) | indent(4, True)}}
 
   # The extra args of the wpscan
-  wpscan_extra_args:
+  wordpress_extra_args:
 {{ kyoushi_attacker_wpscan_extra_args | to_nice_yaml(indent=2) | indent(4, True)}}
 
   # The extra args of the dirb scan

@@ -78,18 +78,24 @@ kyoushi_sm_browser_height: 1200
 
 # VPN config
 
+\{% set ext_employees_id_list = [] } \{% for ext_employee in (context.employees.external.values() | list) } \{% do ext_employees_id_list.append(ext_employee.id) } \{% endfor }
+\{%- if local_context.employee.id in ext_employees_id_list }
+kyoushi_sm_vpn_enabled: True
+kyoushi_sm_vpn_config: "/home/{{ kyoushi_user_name }}/.openvpn/work.ovpn"
+\{% else }
 kyoushi_sm_vpn_enabled: False
 #kyoushi_sm_vpn_config: "/home/{{ kyoushi_user_name }}/.openvpn/work.ovpn"
+\{% endif }
 # eager means the user will connect as soon as they start working
 # otherwise they only connect once they want to execute a VPN activity
 kyoushi_sm_vpn_eager: \var{random.choice([True, False])}
 # VPN activities config
-kyoushi_sm_vpn_horde: \var{random.choice([True, False])}
-kyoushi_sm_vpn_owncloud: \var{random.choice([True, False])}
-kyoushi_sm_vpn_ssh: \var{random.choice([True, False])}
+kyoushi_sm_vpn_horde: True
+kyoushi_sm_vpn_owncloud: True
+kyoushi_sm_vpn_ssh: True
 kyoushi_sm_vpn_web_browser: \var{random.choice([True, False])}
-kyoushi_sm_vpn_wp_editor: \var{random.choice([True, False])}
-kyoushi_sm_vpn_wpdiscuz: \var{random.choice([True, False])}
+kyoushi_sm_vpn_wp_editor: True
+kyoushi_sm_vpn_wpdiscuz: True
 
 # horde user config
 
@@ -177,7 +183,6 @@ kyoushi_sm_ssh_password: "\var{local_context.employee.password}"
 #kyoushi_sm_ssh_key: /some/path
 
 # If the user should verify the SSH servers host key by default
-\{% set ext_employees_id_list = [] } \{% for ext_employee in (context.employees.external.values() | list) } \{% do ext_employees_id_list.append(ext_employee.id) } \{% endfor }
 \{%- if local_context.employee.id in ext_employees_id_list or "ssh_admin" in local_context.employee and local_context.employee.ssh_admin == "yes" }
 kyoushi_sm_ssh_verify: False
 
@@ -186,7 +191,7 @@ kyoushi_sm_ssh_commands:
   - date
   - ip addr
   - ps aux
-  - - cmd: tail -F /var/log/syslog
+  - - cmd: tail /var/log/syslog
       sudo: yes
       expect: '.*' # we just wait for something to show
       idle_after: medium

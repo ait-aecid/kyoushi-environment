@@ -1,7 +1,14 @@
 run_playbook () {
-  ansible-playbook $1
-  if [[ $? -ne 0 ]]; then
-    exit
+  if [ "$#" == 1 ]; then
+    ansible-playbook $1
+    if [[ $? -ne 0 ]]; then
+      exit
+    fi
+  else
+    ansible-playbook $1 -l $2
+    if [[ $? -ne 0 ]]; then
+      exit
+    fi
   fi
 }
 run_playbook ./playbooks/deploy/dns/main.yml
@@ -10,7 +17,10 @@ run_playbook ./playbooks/deploy/certs/main.yml
 run_playbook ./playbooks/deploy/ssh_keys/main.yml
 run_playbook ./playbooks/deploy/employees/main.yml
 run_playbook ./playbooks/deploy/ext_user/main.yml
-run_playbook ./playbooks/deploy/mailservers/main.yml
+run_playbook ./playbooks/deploy/mailservers/main.yml mail
+\{%- for domain_name, mail_server in context.external_mail.items() }
+run_playbook ./playbooks/deploy/mailservers/main.yml \var{domain_name}_mail
+\{%- endfor }
 run_playbook ./playbooks/deploy/webserver/main.yml
 run_playbook ./playbooks/deploy/wordpress/main.yml
 run_playbook ./playbooks/deploy/samba_shares/main.yml

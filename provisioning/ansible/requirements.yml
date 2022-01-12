@@ -7,151 +7,146 @@ collections:
   # for CA and cert management
   - name: community.crypto
   # ait custom owncloud role and modules
-  - name: git@git-service.ait.ac.at:sct-cyberrange/ansible-collections/owncloud.git
+  - name: git@github.com:ait-cs-IaaS/ansible-collection-owncloud.git
     type: git
     version: v0.3.1
 # Ansible Role requirements
 roles:
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/apache2.git
+  - src: git@github.com:ait-cs-IaaS/ansible-apache2.git
     scm: git
-    version: v1.2
+    version: v1.3
     name: apache2
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/stressmachine.git
+  - src: t@github.com:ait-cs-IaaS/ansible-role-samba.git
     scm: git
-    version: v0.1
-    name: stressmachine
-  
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/samba.git
-    scm: git
-    version: master
+    version: v2.7.1
     name: samba
   
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/cifs-mounts.git
+  - src: git@github.com:ait-cs-IaaS/ansible-cifs-mounts.git
     scm: git
     version: v1.0
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/dnsmasq.git
+  - src: git@github.com:ait-cs-IaaS/ansible-dnsmasq.git
     scm: git
-    version: master
+    version: v1.0
     name: dnsmasq
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/dovecot.git
+  - src: git@github.com:ait-cs-IaaS/ansible-dovecot.git
     scm: git
-    version: master
+    version: v1.2
     name: dovecot
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/exim.git
+  - src: git@github.com:ait-cs-IaaS/ansible-exim.git
     scm: git
-    version: v1.1
+    version: v1.2
     name: exim
 
-  - src: https://github.com/GROG/ansible-role-user.git
+  - src: git@github.com:GROG/ansible-role-user.git
     scm: git
     version: master
     name: grog.user
 
-  - src: https://github.com/GROG/ansible-role-group.git
+  - src: git@github.com:GROG/ansible-role-group.git
     scm: git
     version: master
     name: grog.group
 
-  - src: https://github.com/GROG/ansible-role-sudo.git
+  - src: git@github.com:GROG/ansible-role-sudo.git
     scm: git
     version: master
     name: grog.sudo
 
-  - src: https://github.com/GROG/ansible-role-authorized-key.git
+  - src: git@github.com:GROG/ansible-role-authorized-key.git
     scm: git
     version: master
     name: grog.authorized-key
 
-  - src: https://github.com/GROG/ansible-role-package.git
+  - src: git@github.com:GROG/ansible-role-package.git
     scm: git
     version: master
     name: GROG.package
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/maradns.git
+  - src: git@github.com:ait-cs-IaaS/ansible-role-maradns.git
     scm: git
-    version: master
+    version: v1.1.0
     name: maradns
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/python.git
+  - src: git@github.com:ait-cs-IaaS/ansible-python.git
     scm: git
     version: v1.0
     name: python
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/openvpn-client.git
+  - src: git@github.com:ait-cs-IaaS/ansible-openvpn-client.git
     scm: git
     version: v1.1
     name: openvpn-client
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/openvpn-server.git
+  - src: git@github.com:ait-cs-IaaS/ansible-openvpn-server.git
     scm: git
     version: v1.0
     name: openvpn-server
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/mariadb.git
+  - src: git@github.com:ait-cs-IaaS/ansible-mariadb.git
     scm: git
-    version: master
+    version: v1.0.0
     name: mariadb
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/wordpress.git
+  - src: git@github.com:ait-cs-IaaS/ansible-wordpress.git
     scm: git
     version: v1.1.3
     name: wordpress
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/samba.git
+  - src: git@github.com:ait-cs-IaaS/ansible-role-samba.git
     scm: git
-    version: master
+    version: v2.7.1
     name: samba
 
-  - src: https://github.com/owncloud-ansible/owncloud.git
+  - src: git@github.com:owncloud-ansible/owncloud.git
     scm: git
     version: ca2d72effd4dbad1b6d556503d0400c06ed90ea3
     name: owncloud
 
-  - src: https://github.com/owncloud-ansible/php.git
+  - src: git@github.com:owncloud-ansible/php.git
     scm: git
     version: 68b811d4a4f769e7fbb4763ca94e73b1b189ce44
     name: owncloud-php
 
-  - src: https://github.com/owncloud-ansible/apache.git
+  - src: git@github.com:owncloud-ansible/apache.git
     scm: git
-    version: master
+    version: v1.0.0
     name: owncloud-apache
 
-  - src: https://github.com/owncloud-ansible/mariadb.git
+  - src: git@github.com:owncloud-ansible/mariadb.git
     scm: git
-    version: master
+    version: v1.0.0
     name: owncloud-mariadb
 
-  - src: https://github.com/owncloud-ansible/redis.git
+  - src: git@github.com:owncloud-ansible/redis.git
     scm: git
-    version: master
+    version: v1.0.0
     name: owncloud-redis
   
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/horde.git
+  - src: git@github.com:ait-cs-IaaS/ansible-horde.git
     scm: git
-    version: master
+    version: v1.2.1
     name: horde
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/debiansnapshot.git
+  - src: git@github.com:ait-cs-IaaS/ansible-debiansnapshot.git
     scm: git
     version: v1.0
     name: debiansnapshot
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/clamav.git
+  - src: git@github.com:ait-cs-IaaS/ansible-clamav.git
     scm: git
     version: v1.0
     name: clamav
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/ca-certs.git
+  - src: git@github.com:ait-cs-IaaS/ansible-ca-certs.git
     scm: git
-    version: master
+    version: v1.1.0
     name: ca-certs
     
-  - src: https://github.com/whotwagner/ansible-role-shorewall.git
+  - src: git@github.com:whotwagner/ansible-role-shorewall.git
     scm: git
     version: v2.0.1
     name: whotwagner.shorewall
@@ -161,17 +156,17 @@ roles:
     version: v1.1
     name: kyoushi-simulation
   
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/auditd.git
+  - src: git@github.com:ait-cs-IaaS/ansible-auditd.git
     scm: git
     version: v1.0
     name: auditd
   
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/suricata.git
+  - src: git@github.com:ait-cs-IaaS/ansible-suricata.git
     scm: git
     version: v1.1.3
     name: suricata
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kyoushi-gather.git
+  - src: git@github.com:ait-cs-IaaS/ansible-kyoushi-gather.git
     scm: git
     version: master
     name: kyoushi-gather
@@ -179,9 +174,9 @@ roles:
   - name: elastic.beats
     version: 7.9.3
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/elastic-beats-modules.git
+  - src: git@github.com:ait-cs-IaaS/ansible-elastic-beats-modules.git
     scm: git
-    version: v1.1
+    version: v1.3
     name: elastic-beats-modules
 
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/logstash.git
@@ -189,14 +184,14 @@ roles:
     version: v1.2
     name: logstash
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/elasticsearch.git
+  - src: git@github.com:ait-cs-IaaS/ansible-elasticsearch.git
     scm: git
     version: v1.2
     name: elasticsearch
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/kibana.git
+  - src: git@github.com:ait-cs-IaaS/ansible-kibana.git
     scm: git
-    version: v1.4.3
+    version: v1.5.0
     name: kibana
 
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/ansible-passwordlist.git

@@ -161,12 +161,12 @@
 {% endfor %}
 
 {% for eid, employee in context.employees.external.items() %}
-- name: External employee
+- name: Remote employee
   type: dir
   src: model/templates/employees/
   dest: provisioning/ansible/host_vars/remote_employee_{{ loop.index0 }}
   contents:
-    - name: External employee configuration
+    - name: Remote employee configuration
       type: file
       src: kyoushi.yml.j2
       dest: kyoushi.yml
@@ -175,36 +175,36 @@
   delete: false
 
 {% if 'ssh_admin' in employee and employee.ssh_admin == 'yes' %}
-- name: Create dir for ssh keys for external employees
+- name: Create dir for ssh keys for remote employees
   type: dir
   src: model/templates/ssh-keys
   dest: provisioning/ansible/data/ssh-keys/{{ eid }}
   contents:
-    - name: Copy private ssh keys for external employees
+    - name: Copy private ssh keys for remote employees
       type: file
       src: id_rsa
       dest: id_rsa
-    - name: Copy public ssh keys for external employees
+    - name: Copy public ssh keys for remote employees
       type: file
       src: id_rsa.pub
       dest: id_rsa.pub
   delete: false
 {% endif %}
 
-- name: Create dir for openvpn keys for external employees
+- name: Create dir for openvpn keys for remote employees
   type: dir
   src: model/templates/certs/remote_employee
   dest: provisioning/ansible/data/openvpn/certs/remote_employee_{{ loop.index0 }}
   contents:
-    - name: Copy openvpn crt for external employees
+    - name: Copy openvpn crt for remote employees
       type: file
       src: openvpn.crt
       dest: openvpn.crt
-    - name: Copy openvpn csr for external employees
+    - name: Copy openvpn csr for remote employees
       type: file
       src: openvpn.csr
       dest: openvpn.csr
-    - name: Copy openvpn key for external employees
+    - name: Copy openvpn key for remote employees
       type: file
       src: openvpn.key
       dest: openvpn.key
@@ -236,6 +236,11 @@
   delete: false
 {% endfor %}
 
+- name: Logstash config of scenario
+  type: file
+  src: datasets/scenario/processing/config/logs.yaml.j2
+  dest: datasets/scenario/processing/config/logs.yaml
+
 - name: Logstash config of scenario 1
   type: file
   src: datasets/scenario1/processing/config/logs.yaml.j2
@@ -245,4 +250,9 @@
   type: file
   src: datasets/scenario2/processing/config/logs.yaml.j2
   dest: datasets/scenario2/processing/config/logs.yaml
+
+- name: Script to run all ansible playbooks in correct order
+  type: file
+  src: provisioning/ansible/run_all.sh.j2
+  dest: provisioning/ansible/run_all.sh
 

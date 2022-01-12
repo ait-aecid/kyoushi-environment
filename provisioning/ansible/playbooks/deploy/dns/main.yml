@@ -1,5 +1,5 @@
 
-- name: Fact gathering pre dns server conifguration
+- name: Fact gathering pre dns server configuration
   hosts: all
   gather_facts: yes
 

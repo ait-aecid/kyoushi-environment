@@ -127,3 +127,56 @@
           - term:
               "{{ 'source.ip' if HIT.event.action == 'query' else 'destination.ip'}}":  "{{ HIT.source.ip if HIT.event.action == 'query' else HIT.destination.ip }}"
         {% endraw %}
+
+- type: elasticsearch.query
+  id: attacker.foothold.dnsmasq.wpscan
+  labels:
+    - wpscan
+    - foothold
+  description: >-
+    When executing the WPScan, the tool makes a connection to check for updates.
+    This rule matches all events associated with the WPScan website.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.wpscan.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (foothold.wpscan.stop | as_datetime).isoformat() }}"
+  query:
+    bool:
+      # match answer or question field
+      should:
+        - regexp:
+            dns.answers.name: 'data.wpscan.org'
+        - regexp:
+            dns.question.name: 'data.wpscan.org'
+
+- type: elasticsearch.query
+  id: attacker.foothold.dnsmasq.webshell
+  labels:
+    - webshell_cmd
+    - escalate
+  description: >-
+    The password cracking attack step downloads a repository from github that
+    contains all required files. This rule matches all events associated with this
+    request.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      # match answer or question field
+      should:
+        - regexp:
+            dns.answers.name: 'github.com'
+        - regexp:
+            dns.question.name: 'github.com'
+        - regexp:
+            dns.answers.name: 'codeload.github.com'
+        - regexp:
+            dns.question.name: 'codeload.github.com'

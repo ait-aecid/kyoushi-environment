@@ -91,6 +91,16 @@
               auditd.log.cmd: "ls -laR /root/"
           - match:
               auditd.log.cmd: "cat /etc/shadow"
+          - match:
+              auditd.log.cmd: "cat /etc/passwd"
+          - match:
+              auditd.log.cmd: "ip addr"
+          - match:
+              auditd.log.cmd: "ls -l /home"
+          - match:
+              auditd.log.cmd: "find /home -name .ssh"
+          - match:
+              auditd.log.cmd: "iptables -L"
           # match rule to include the auth events we are interested in
           - match:
               kyoushi_labels.rules: "attacker.escalate.sudo.open"

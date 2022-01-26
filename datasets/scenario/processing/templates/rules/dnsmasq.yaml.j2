@@ -147,9 +147,9 @@
     bool:
       # match answer or question field
       should:
-        - regexp:
+        - match:
             dns.answers.name: 'data.wpscan.org'
-        - regexp:
+        - match:
             dns.question.name: 'data.wpscan.org'
 
 - type: elasticsearch.query
@@ -172,11 +172,65 @@
     bool:
       # match answer or question field
       should:
-        - regexp:
+        - match:
             dns.answers.name: 'github.com'
-        - regexp:
+        - match:
             dns.question.name: 'github.com'
-        - regexp:
+        - match:
             dns.answers.name: 'codeload.github.com'
-        - regexp:
+        - match:
             dns.question.name: 'codeload.github.com'
+
+- type: elasticsearch.query
+  id: attacker.foothold.dnsmasq.dns_scan
+  labels:
+    - dns_scan
+    - foothold
+  description: >-
+    This rule matches DNS events generated during DNS brute forcing. Note that a fixed
+    list of tokens is used; to improve this, it is necessary to output the scanned
+    domains as part of the attacker state machine.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.dns_brute_force_start.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ ( foothold.dns_brute_force_start.stop | as_datetime).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      # match answer or question field
+      should:
+{% for dns_query in ['admin', 'administration', 'ads', 'adserver', 'alerts', 'alpha', 'ap', 'apache', 'app', 'apps', 'appserver', 'aptest', 'auth', 'backup', 'beta', 'blog', 'cdn', 'chat', 'citrix', 'cms', 'corp', 'crs', 'cvs', 'database', 'db', 'demo', 'dev', 'devel', 'development', 'devsql', 'devtest', 'dhcp', 'direct', 'dmz', 'dns', 'dns0', 'dns1', 'dns2', 'download', 'en', 'erp', 'eshop', 'exchange', 'f5', 'fileserver', 'firewall', 'forum', 'ftp', 'ftp0', 'git', 'gw', 'help', 'helpdesk', 'home', 'host', 'http', 'id', 'images', 'info', 'internal', 'internet', 'intra', 'intranet', 'ipv6', 'lab', 'ldap', 'linux', 'local', 'log', 'mail', 'mail2', 'mail3', 'mailgate', 'main', 'manage', 'mgmt', 'mirror', 'mobile', 'monitor', 'mssql', 'mta', 'mx', 'mx0', 'mx1', 'mysql', 'news', 'noc', 'ns', 'ns0', 'ns1', 'ns2', 'ns3', 'ntp', 'ops', 'oracle', 'owa', 'pbx', 's3', 'secure', 'server', 'shop', 'sip', 'smtp', 'sql', 'squid', 'ssh', 'ssl', 'stage', 'stats', 'svn', 'syslog', 'test', 'test1', 'test2', 'testing', 'upload', 'vm', 'vnc', 'voip', 'vpn', 'web', 'web2test', 'whois', 'wiki', 'www', 'www2', 'xml'] %}
+        - match:
+            dns.answers.name: "{{ dns_query }}.{{ common.domains.company.domain }}"
+        - match:
+            dns.question.name: "{{ dns_query }}.{{ common.domains.company.domain }}"
+{% endfor %}
+
+- type: elasticsearch.query
+  id: attacker.foothold.dnsmasq.dns_scan_probe
+  labels:
+    - dns_scan
+    - foothold
+  description: >-
+    This rule matches probe events generated at the beginning of DNS brute forcing.
+    The queried strings are random and thus cannot be simply matched. Therefore, we
+    use the fixed string lengths as a heuristic for matching. Note that with verbose
+    output of the scan, this query could be improved by matching exaclty for the
+    randomly generated string.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.dns_brute_force_start.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ ( foothold.dns_brute_force_start.stop | as_datetime).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      # match answer or question field
+      should:
+        - regexp:
+            dns.answers.name: ".{24,24}.{{ common.domains.company.domain }}"
+        - regexp:
+            dns.question.name: ".{24,24}.{{ common.domains.company.domain }}"

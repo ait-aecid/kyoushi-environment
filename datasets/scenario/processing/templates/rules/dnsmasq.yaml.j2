@@ -234,3 +234,33 @@
             dns.answers.name: ".{24,24}.{{ common.domains.company.domain }}"
         - regexp:
             dns.question.name: ".{24,24}.{{ common.domains.company.domain }}"
+
+- type: elasticsearch.query
+  id: attacker.foothold.dnsmasq.network_scan
+  labels:
+    - network_scan
+    - foothold
+  description: >-
+    This rule simply matches all PTR queries and answers that are made by the nmap network
+    scan.
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ ( foothold.stop | as_datetime).replace(microsecond=0).isoformat() }}"
+  index:
+    - dnsmasq-inet-firewall
+  query:
+    bool:
+      {% raw %}
+      # match answer or question field
+      should:
+        - regexp:
+            message: '.*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}'
+        - regexp:
+            message: '.*forwarded.*.in-addr.arpa.*'
+        - regexp:
+            message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
+        - regexp:
+            message: '.*reply.*{{ common.domains.intranet.domain }}.*'
+      {% endraw %}

@@ -252,7 +252,6 @@
     - dnsmasq-inet-firewall
   query:
     bool:
-      {% raw %}
       # match answer or question field
       should:
         - regexp:
@@ -263,4 +262,3 @@
             message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
         - regexp:
             message: '.*reply.*{{ common.domains.intranet.domain }}.*'
-      {% endraw %}

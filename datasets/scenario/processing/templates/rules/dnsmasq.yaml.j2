@@ -142,7 +142,7 @@
     range:
       "@timestamp":
         gte: "{{ ( foothold.wpscan.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        lte: "{{ (foothold.wpscan.stop | as_datetime).isoformat() }}"
+        lte: "{{ (( foothold.wpscan.stop | as_datetime) + timedelta(seconds=1)).isoformat() }}"
   query:
     bool:
       # match answer or question field
@@ -167,7 +167,7 @@
     range:
       "@timestamp":
         gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        lte: "{{ ( escalate.stop | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   query:
     bool:
       # match answer or question field
@@ -196,7 +196,7 @@
     range:
       "@timestamp":
         gte: "{{ ( foothold.dns_brute_force_start.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        lte: "{{ ( foothold.dns_brute_force_start.stop | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.dns_brute_force_start.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   query:
     bool:
       # match answer or question field
@@ -225,7 +225,7 @@
     range:
       "@timestamp":
         gte: "{{ ( foothold.dns_brute_force_start.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        lte: "{{ ( foothold.dns_brute_force_start.stop | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.dns_brute_force_start.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   query:
     bool:
       # match answer or question field
@@ -244,10 +244,20 @@
     This rule simply matches all PTR queries and answers that are made by the nmap network
     scan.
   filter:
-    range:
-      "@timestamp":
-        gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        lte: "{{ ( foothold.stop | as_datetime).replace(microsecond=0).isoformat() }}"
+    bool:
+      should:
+        - range:
+            "@timestamp":
+              gte: "{{ ( foothold.host_discover_local.start | as_datetime).replace(microsecond=0).isoformat() }}"
+              lte: "{{ (( foothold.host_discover_local.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+        #- range:
+        #    "@timestamp":
+        #      gte: "{{ ( foothold.host_discover_dmz.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        #      lte: "{{ (( foothold.host_discover_dmz.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+        #- range:
+        #    "@timestamp":
+        #      gte: "{{ ( foothold.service_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        #      lte: "{{ (( foothold.service_scan.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   index:
     - dnsmasq-inet-firewall
   query:

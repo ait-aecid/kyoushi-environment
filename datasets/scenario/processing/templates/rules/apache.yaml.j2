@@ -491,6 +491,34 @@
           params:
             labels: [attacker_http]
 
+- type: elasticsearch.query
+  id: attacker.service_scan
+  labels: 
+    - service_scan
+    - foothold
+  description: >-
+    This rule labels apache logs relating to the Nmap service scan. The logs
+    either have the Nmap user agent or no user agent at all.
+  index:
+    - apache_access-intranet_server
+  query:
+    bool:
+      should:
+        - match:
+            user_agent.original: "Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)"
+        - bool:
+            must_not:
+              exists:
+                field: "user_agent.original"
+  filter:
+    - range:
+        "@timestamp":
+          # wpscan phase start
+          gte: "{{ ( foothold.service_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
+          # wpscan phase stop
+          lte: "{{ (( foothold.service_scan.stop | as_datetime) + timedelta(seconds=1)).isoformat() }}"
+
+
 - type: elasticsearch.sequence
   id: attacker.webshell.upload.seq
   labels: [webshell_upload]

@@ -11711,7 +11711,7 @@
       },
       "message": {
         "norms": false,
-        "type": "text"
+        "type": "keyword"
       },
       "metadata": {
         "type": "flattened"

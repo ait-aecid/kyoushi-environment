@@ -166,8 +166,8 @@
   filter:
     range:
       "@timestamp":
-        gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+        gte: "{{ ( foothold.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   query:
     bool:
       # match answer or question field
@@ -181,32 +181,32 @@
         - match:
             dns.question.name: 'codeload.github.com'
 
-- type: elasticsearch.query
-  id: attacker.foothold.dnsmasq.dns_scan
-  labels:
-    - dns_scan
-    - foothold
-  description: >-
-    This rule matches DNS events generated during DNS brute forcing. Note that a fixed
-    list of tokens is used; to improve this, it is necessary to output the scanned
-    domains as part of the attacker state machine.
-  index:
-    - dnsmasq-inet-firewall
-  filter:
-    range:
-      "@timestamp":
-        gte: "{{ ( foothold.dns_brute_force_start.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        lte: "{{ (( foothold.dns_brute_force_start.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
-  query:
-    bool:
-      # match answer or question field
-      should:
-{% for dns_query in ['admin', 'administration', 'ads', 'adserver', 'alerts', 'alpha', 'ap', 'apache', 'app', 'apps', 'appserver', 'aptest', 'auth', 'backup', 'beta', 'blog', 'cdn', 'chat', 'citrix', 'cms', 'corp', 'crs', 'cvs', 'database', 'db', 'demo', 'dev', 'devel', 'development', 'devsql', 'devtest', 'dhcp', 'direct', 'dmz', 'dns', 'dns0', 'dns1', 'dns2', 'download', 'en', 'erp', 'eshop', 'exchange', 'f5', 'fileserver', 'firewall', 'forum', 'ftp', 'ftp0', 'git', 'gw', 'help', 'helpdesk', 'home', 'host', 'http', 'id', 'images', 'info', 'internal', 'internet', 'intra', 'intranet', 'ipv6', 'lab', 'ldap', 'linux', 'local', 'log', 'mail', 'mail2', 'mail3', 'mailgate', 'main', 'manage', 'mgmt', 'mirror', 'mobile', 'monitor', 'mssql', 'mta', 'mx', 'mx0', 'mx1', 'mysql', 'news', 'noc', 'ns', 'ns0', 'ns1', 'ns2', 'ns3', 'ntp', 'ops', 'oracle', 'owa', 'pbx', 's3', 'secure', 'server', 'shop', 'sip', 'smtp', 'sql', 'squid', 'ssh', 'ssl', 'stage', 'stats', 'svn', 'syslog', 'test', 'test1', 'test2', 'testing', 'upload', 'vm', 'vnc', 'voip', 'vpn', 'web', 'web2test', 'whois', 'wiki', 'www', 'www2', 'xml'] %}
-        - match:
-            dns.answers.name: "{{ dns_query }}.{{ common.domains.company.domain }}"
-        - match:
-            dns.question.name: "{{ dns_query }}.{{ common.domains.company.domain }}"
-{% endfor %}
+#- type: elasticsearch.query
+#  id: attacker.foothold.dnsmasq.dns_scan
+#  labels:
+#    - dns_scan
+#    - foothold
+#  description: >-
+#    This rule matches DNS events generated during DNS brute forcing. Note that a fixed
+#    list of tokens is used; to improve this, it is necessary to output the scanned
+#    domains as part of the attacker state machine.
+#  index:
+#    - dnsmasq-inet-firewall
+#  filter:
+#    range:
+#      "@timestamp":
+#        gte: "{{ ( foothold.dns_brute_force_start.start | as_datetime).replace(microsecond=0).isoformat() }}"
+#        lte: "{{ (( foothold.dns_brute_force_start.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+#  query:
+#    bool:
+#      # match answer or question field
+#      should:
+#{% for dns_query in ['admin', 'administration', 'ads', 'adserver', 'alerts', 'alpha', 'ap', 'apache', 'app', 'apps', 'appserver', 'aptest', 'auth', 'backup', 'beta', 'blog', 'cdn', 'chat', 'citrix', 'cms', 'corp', 'crs', 'cvs', 'database', 'db', 'demo', 'dev', 'devel', 'development', 'devsql', 'devtest', 'dhcp', 'direct', 'dmz', 'dns', 'dns0', 'dns1', 'dns2', 'download', 'en', 'erp', 'eshop', 'exchange', 'f5', 'fileserver', 'firewall', 'forum', 'ftp', 'ftp0', 'git', 'gw', 'help', 'helpdesk', 'home', 'host', 'http', 'id', 'images', 'info', 'internal', 'internet', 'intra', 'intranet', 'ipv6', 'lab', 'ldap', 'linux', 'local', 'log', 'mail', 'mail2', 'mail3', 'mailgate', 'main', 'manage', 'mgmt', 'mirror', 'mobile', 'monitor', 'mssql', 'mta', 'mx', 'mx0', 'mx1', 'mysql', 'news', 'noc', 'ns', 'ns0', 'ns1', 'ns2', 'ns3', 'ntp', 'ops', 'oracle', 'owa', 'pbx', 's3', 'secure', 'server', 'shop', 'sip', 'smtp', 'sql', 'squid', 'ssh', 'ssl', 'stage', 'stats', 'svn', 'syslog', 'test', 'test1', 'test2', 'testing', 'upload', 'vm', 'vnc', 'voip', 'vpn', 'web', 'web2test', 'whois', 'wiki', 'www', 'www2', 'xml'] %}
+#        - match:
+#            dns.answers.name: "{{ dns_query }}.{{ common.domains.company.domain }}"
+#        - match:
+#            dns.question.name: "{{ dns_query }}.{{ common.domains.company.domain }}"
+#{% endfor %}
 
 - type: elasticsearch.query
   id: attacker.foothold.dnsmasq.dns_scan_probe
@@ -250,14 +250,6 @@
             "@timestamp":
               gte: "{{ ( foothold.host_discover_local.start | as_datetime).replace(microsecond=0).isoformat() }}"
               lte: "{{ (( foothold.host_discover_local.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
-        #- range:
-        #    "@timestamp":
-        #      gte: "{{ ( foothold.host_discover_dmz.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        #      lte: "{{ (( foothold.host_discover_dmz.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
-        #- range:
-        #    "@timestamp":
-        #      gte: "{{ ( foothold.service_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        #      lte: "{{ (( foothold.service_scan.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   index:
     - dnsmasq-inet-firewall
   query:
@@ -272,3 +264,221 @@
             message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
         - regexp:
             message: '.*reply.*{{ common.domains.intranet.domain }}.*'
+
+- type: elasticsearch.query
+  id: attacker.foothold.dnsmasq.traceroute
+  labels:
+    - traceroute
+    - foothold
+  description: >-
+    This rule simply matches all PTR queries and answers that are made by the nmap network
+    scan.
+  filter:
+    bool:
+      should:
+        - range:
+            "@timestamp":
+              gte: "{{ ( foothold.traceroute.start | as_datetime).replace(microsecond=0).isoformat() }}"
+              lte: "{{ (( foothold.traceroute.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+  index:
+    - dnsmasq-inet-firewall
+  query:
+    bool:
+      # match answer or question field
+      should:
+        - regexp:
+            message: '.*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}'
+        - regexp:
+            message: '.*forwarded.*.in-addr.arpa.*'
+
+- type: elasticsearch.query
+  id: attacker_foothold_dnsmasq_nmap_scan_parent_query
+  labels:
+    - network_scan
+    - foothold
+  description: >-
+    This rule matches all PTR dns-queries from nmap-scan.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.host_discover_dmz.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.host_discover_dmz.stop | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      should:
+        - regexp:
+            message: ".*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}"
+
+- type: elasticsearch.sub_query
+  id: attacker_foothold_dnsmasq_nmap_scan_sub_query
+  labels:
+    - network_scan
+    - foothold
+  description: >-
+   This rule matches all PTR queries and answers that are made by the nmap network
+   scan. 
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.host_discover_dmz.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.host_discover_dmz.stop | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      should:
+        - regexp:
+            message: ".*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}"
+  sub_query:
+    index:
+      - dnsmasq-inet-firewall
+    filter:
+      {% raw %}
+      range:
+        "@timestamp":
+          gte: "{{ (( HIT['@timestamp'] | as_datetime) - timedelta(seconds=1)).isoformat() }}"
+          lte: "{{ (( HIT['@timestamp'] | as_datetime) + timedelta(seconds=1)).isoformat() }}"
+      {% endraw %}
+    query:
+      bool:
+        should:
+          - regexp:
+              message: '.*forwarded.*.in-addr.arpa.*'
+          - regexp:
+              message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
+          - regexp:
+              message: '.*reply.*{{ common.domains.company.domain }}.*'
+
+- type: elasticsearch.query
+  id: attacker_foothold_dnsmasq_service_scan_parent_query
+  labels:
+    - service_scan
+    - foothold
+  description: >-
+    This rule matches all PTR dns-queries from nmap-scan.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.service_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.service_scan.stop | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      should:
+        - regexp:
+            message: ".*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}"
+        - regexp:
+            message: ".*query.*from {{ servers.mail.default_ipv4_address }}"
+
+- type: elasticsearch.sub_query
+  id: attacker_foothold_dnsmasq_service_scan_sub_query
+  labels:
+    - service_scan
+    - foothold
+  description: >-
+   This rule matches all PTR queries and answers that are made by the nmap network
+   scan. 
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.service_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.service_scan.stop | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      should:
+        - regexp:
+            message: ".*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}"
+        - regexp:
+            message: ".*query.*from {{ servers.mail.default_ipv4_address }}"
+  sub_query:
+    index:
+      - dnsmasq-inet-firewall
+    filter:
+      {% raw %}
+      range:
+        "@timestamp":
+          gte: "{{ (( HIT['@timestamp'] | as_datetime) - timedelta(seconds=1)).isoformat() }}"
+          lte: "{{ (( HIT['@timestamp'] | as_datetime) + timedelta(seconds=1)).isoformat() }}"
+      {% endraw %}
+    query:
+      bool:
+        should:
+          - regexp:
+              message: '.*forwarded.*'
+          - regexp:
+              message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
+          - regexp:
+              message: '.*reply.*'
+
+- type: elasticsearch.query
+  id: attacker_foothold_dnsmasq_dns_brute_scan_parent_query
+  labels:
+    - dns_scan
+    - foothold
+  description: >-
+    This rule matches all PTR dns-queries from nmap-scan.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.dns_brute_force_start.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.dns_brute_force_start.start | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      should:
+        - regexp:
+            message: ".*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}"
+        - regexp:
+            message: ".*{{ common.domains.company.domain }} from {{ attacker.vpn_ipv4_address }}"
+
+- type: elasticsearch.sub_query
+  id: attacker_foothold_dnsmasq_dns_brute_scan_sub_query
+  labels:
+    - dns_scan
+    - foothold
+  description: >-
+   This rule matches all PTR queries and answers that are made by the nmap network
+   scan. 
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.dns_brute_force_start.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.dns_brute_force_start.stop | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      should:
+        - regexp:
+            message: ".*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}"
+        - regexp:
+            message: ".*{{ common.domains.company.domain }} from {{ attacker.vpn_ipv4_address }}"
+  sub_query:
+    index:
+      - dnsmasq-inet-firewall
+    filter:
+      {% raw %}
+      range:
+        "@timestamp":
+          gte: "{{ (( HIT['@timestamp'] | as_datetime) - timedelta(seconds=1)).isoformat() }}"
+          lte: "{{ (( HIT['@timestamp'] | as_datetime) + timedelta(seconds=1)).isoformat() }}"
+      {% endraw %}
+    query:
+      bool:
+        should:
+          - regexp:
+              message: '.*forwarded.*.in-addr.arpa.*'
+          - regexp:
+              message: '.*forwarded.*{{ common.domains.company.domain }}.*'
+          - regexp:
+              message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
+          - regexp:
+              message: '.*reply.*{{ common.domains.company.domain }}.*'
+
+

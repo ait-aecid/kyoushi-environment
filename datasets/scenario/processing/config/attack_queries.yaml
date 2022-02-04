@@ -123,6 +123,26 @@ foothold:
           - term:
               message_keyword: executed_nmap_host_scan
 
+  traceroute:
+    start:
+      bool:
+        must:
+          - term:
+              current_state: vpn_connected
+          - term:
+              transition: traceroute_internet
+          - term:
+              message_keyword: executing_traceroute
+    stop:
+      bool:
+        must:
+          - term:
+              current_state: vpn_connected
+          - term:
+              transition: traceroute_internet
+          - term:
+              message_keyword: executed_traceroute
+
   dns_brute_force:
     start:
       bool:

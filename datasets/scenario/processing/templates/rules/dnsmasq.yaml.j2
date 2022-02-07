@@ -241,8 +241,8 @@
     - network_scan
     - foothold
   description: >-
-    This rule simply matches all PTR queries and answers that are made by the nmap network
-    scan.
+    This rule simply matches all PTR queries and answers that are made by the nmap local
+    network scan.
   filter:
     bool:
       should:
@@ -254,7 +254,6 @@
     - dnsmasq-inet-firewall
   query:
     bool:
-      # match answer or question field
       should:
         - regexp:
             message: '.*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}'
@@ -271,8 +270,7 @@
     - traceroute
     - foothold
   description: >-
-    This rule simply matches all PTR queries and answers that are made by the nmap network
-    scan.
+    This rule simply matches all PTR queries and answers that are made by traceroute.
   filter:
     bool:
       should:
@@ -297,7 +295,7 @@
     - network_scan
     - foothold
   description: >-
-    This rule matches all PTR dns-queries from nmap-scan.
+    This rule matches all PTR dns-queries from nmap DMZ scan.
   index:
     - dnsmasq-inet-firewall
   filter:
@@ -317,8 +315,8 @@
     - network_scan
     - foothold
   description: >-
-   This rule matches all PTR queries and answers that are made by the nmap network
-   scan. 
+   This rule matches all answers for the already matched PTR requests that occur
+   during the nmap DMZ scan.
   index:
     - dnsmasq-inet-firewall
   filter:
@@ -357,7 +355,7 @@
     - service_scan
     - foothold
   description: >-
-    This rule matches all PTR dns-queries from nmap-scan.
+    This rule matches all PTR dns-queries from the nmap service scan.
   index:
     - dnsmasq-inet-firewall
   filter:
@@ -379,8 +377,8 @@
     - service_scan
     - foothold
   description: >-
-   This rule matches all PTR queries and answers that are made by the nmap network
-   scan. 
+   This rule matches all answers of already matched PTR queries that occur during
+   the nmap service scan.
   index:
     - dnsmasq-inet-firewall
   filter:
@@ -421,7 +419,7 @@
     - dns_scan
     - foothold
   description: >-
-    This rule matches all PTR dns-queries from nmap-scan.
+    This rule matches all PTR dns-queries of the nmap DNS scan.
   index:
     - dnsmasq-inet-firewall
   filter:
@@ -443,8 +441,8 @@
     - dns_scan
     - foothold
   description: >-
-   This rule matches all PTR queries and answers that are made by the nmap network
-   scan. 
+   This rule matches all answers to the already matched PTR queries that occur
+   during the nmap DNS scan.
   index:
     - dnsmasq-inet-firewall
   filter:

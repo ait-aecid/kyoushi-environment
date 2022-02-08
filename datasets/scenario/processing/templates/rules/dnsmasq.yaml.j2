@@ -370,6 +370,8 @@
             message: ".*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}"
         - regexp:
             message: ".*query.*from {{ servers.mail.default_ipv4_address }}"
+        - regexp:
+            message: ".*query.*from {{ servers.intranet_server.default_ipv4_address }}"
 
 - type: elasticsearch.sub_query
   id: attacker_foothold_dnsmasq_service_scan_sub_query
@@ -393,6 +395,8 @@
             message: ".*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}"
         - regexp:
             message: ".*query.*from {{ servers.mail.default_ipv4_address }}"
+        - regexp:
+            message: ".*query.*from {{ servers.intranet_server.default_ipv4_address }}"
   sub_query:
     index:
       - dnsmasq-inet-firewall
@@ -412,6 +416,8 @@
               message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
           - regexp:
               message: '.*reply.*'
+          - regexp:
+              message: '.*cached.*'
 
 - type: elasticsearch.query
   id: attacker_foothold_dnsmasq_dns_brute_scan_parent_query
@@ -426,7 +432,7 @@
     range:
       "@timestamp":
         gte: "{{ ( foothold.dns_brute_force_start.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        lte: "{{ (( foothold.dns_brute_force_start.start | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.dns_brute_force_start.stop | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
   query:
     bool:
       should:
@@ -478,5 +484,67 @@
               message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
           - regexp:
               message: '.*reply.*{{ common.domains.company.domain }}.*'
+
+- type: elasticsearch.query
+  id: attacker_foothold_dnsmasq_dirb_parent_query
+  labels:
+    - dirb
+    - foothold
+  description: >-
+    This rule matches all PTR dns-queries that occur in the beginning of the
+    dirb scan.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.dirb_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.dirb_scan.start | as_datetime) + timedelta(seconds=5)).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      should:
+        - regexp:
+            message: ".*query.*{{ servers.intranet_server.fqdns[0] }}.*"
+
+- type: elasticsearch.sub_query
+  id: attacker_foothold_dnsmasq_dirb_sub_query
+  labels:
+    - dirb
+    - foothold
+  description: >-
+   This rule matches all answers to the already matched PTR queries that occur
+   during the beginning of the dirb scan.
+  index:
+    - dnsmasq-inet-firewall
+  filter:
+    range:
+      "@timestamp":
+        gte: "{{ ( foothold.dirb_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
+        lte: "{{ (( foothold.dirb_scan.start | as_datetime) + timedelta(seconds=5)).replace(microsecond=0).isoformat() }}"
+  query:
+    bool:
+      should:
+        - regexp:
+            message: ".*query.*{{ servers.intranet_server.fqdns[0] }}.*"
+  sub_query:
+    index:
+      - dnsmasq-inet-firewall
+    filter:
+      {% raw %}
+      range:
+        "@timestamp":
+          gte: "{{ (( HIT['@timestamp'] | as_datetime) - timedelta(seconds=1)).isoformat() }}"
+          lte: "{{ (( HIT['@timestamp'] | as_datetime) + timedelta(seconds=1)).isoformat() }}"
+      {% endraw %}
+    query:
+      bool:
+        should:
+          - regexp:
+              message: '.*forwarded.*{{ servers.intranet_server.fqdns[0] }}.*'
+          - regexp:
+              message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
+          - regexp:
+              message: '.*reply.*{{ servers.intranet_server.fqdns[0] }}.*'
+
 
 

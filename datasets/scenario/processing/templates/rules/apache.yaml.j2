@@ -241,6 +241,8 @@
                   apache.error.path: "*{{ HIT.url.original }}*"
               - match_phrase:
                   message: "*{{ HIT.url.original }}*"
+              - regexp:
+                  message: ".*/themes/go/functions.*"
       - range:
           "@timestamp":
             # error happened at most 3 seconds before access log entry
@@ -513,9 +515,9 @@
   filter:
     - range:
         "@timestamp":
-          # wpscan phase start
+          # service scan phase start
           gte: "{{ ( foothold.service_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
-          # wpscan phase stop
+          # service scan phase stop
           lte: "{{ (( foothold.service_scan.stop | as_datetime) + timedelta(seconds=1)).isoformat() }}"
 
 

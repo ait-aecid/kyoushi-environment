@@ -12,7 +12,6 @@ The testbed simulates an enterprise IT network, involving mail servers, file sha
 This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 70 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. For the following instructions, we assume that the following packages are installed:
 
 ```
-Python 3.8.5
 Poetry 1.1.7
 ```
 
@@ -20,7 +19,7 @@ Poetry 1.1.7
 
 First, switch into a directory named kyoushi and check out the kyoushi-environment:
 
-```
+```bash
 landauerm@N3DSS2112:~/work/git$ mkdir kyoushi
 landauerm@N3DSS2112:~/work/git$ cd kyoushi
 landauerm@N3DSS2112:~/work/git/kyoushi$ git clone https://github.com/ait-aecid/kyoushi-environment.git
@@ -29,7 +28,7 @@ Cloning into 'kyoushi-environment'...
 
 The kyoushi-environment contains all models of the testbed infrastructure. These models allow to generate many different testbeds that vary in size and configuration. Testbed parameters that are subject to change include IP addresses of hosts, the number of simulated users, as well as their names and behavior profiles. The kyoushi-generator transforms the infrastructure models from the kyoushi-environment into setup scripts that are ready for deployment. Clone the kyoushi-generator as follows and install it using poetry:
 
-```
+```bash
 landauerm@N3DSS2112:~/work/git/kyoushi$ git clone https://github.com/ait-aecid/kyoushi-generator.git
 Cloning into 'kyoushi-generator'...
 landauerm@N3DSS2112:~/work/git/kyoushi$ cd kyoushi-generator/

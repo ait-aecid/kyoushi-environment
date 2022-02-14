@@ -178,6 +178,7 @@
     - '[ apache where event.action == "access" and source.address == "{{ attacker.vpn_ipv4_address }}" and kyoushi_labels.flat.attacker.foothold.apache.access != null ]'
     - '[ apache where event.action == "error" and source.address == "{{ attacker.vpn_ipv4_address }}" ]'
 
+
 - type: elasticsearch.sub_query
   id: attacker.foothold.apache.error_substring
   labels:
@@ -346,15 +347,26 @@
       - apache_access-intranet_server
     query:
       {% raw %}
-      - term:
-          url.full: "{{ HIT.url.full }}"
-      - term:
-          source.address: "{{ HIT.source.address }}"
+      - bool:
+          should:
+            - term:
+                url.full: "{{ HIT.url.full }}"
+            - regexp:
+                url.full: ".*{{ ( HIT.apache.error.path | replace('/var/www/', '') ) if 'apache' in HIT and 'error' in HIT.apache and 'path' in HIT.apache.error else 'NONMATCHINGSTRING' }}.*"
+            - regexp:
+                url.full: ".*{{ ( HIT.php.error.script | replace('/var/www/', '') ) if 'php' in HIT and 'error' in HIT.php and 'script' in HIT.php.error else 'NONMATCHINGSTRING' }}.*"
+            - regexp:
+                url.full: ".*{{ ( HIT.apache.error.path | replace('/var/www/', '') | replace('index.php', '') ) if 'apache' in HIT and 'error' in HIT.apache and 'path' in HIT.apache.error else 'NONMATCHINGSTRING' }}.*"
+            - regexp:
+                url.full: ".*{{ ( HIT.php.error.script | replace('/var/www/', '') | replace('index.php', '') ) if 'php' in HIT and 'error' in HIT.php and 'script' in HIT.php.error else 'NONMATCHINGSTRING' }}.*"
       {% endraw %}
-      
       # we are looking for parents that are labeled as attacker http
       - bool:
           must:
+            {% raw %}
+            - term:
+                source.address: "{{ HIT.source.address }}"
+            {% endraw %}
             - script:
                 script:
                   id: "{{ DATASET.name }}_kyoushi_label_filter"

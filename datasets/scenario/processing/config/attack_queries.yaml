@@ -76,8 +76,12 @@ foothold:
     stop:
       bool:
         must:
-          - term:
-              current_state: wait_escalate_choice
+          - bool:
+              should:
+                - term:
+                    current_state: wait_escalate_choice
+                - term:
+                    current_state: crack_choice
           - term:
               transition: vpn_disconnect
           - term:

@@ -214,6 +214,7 @@ host_recon_commands:
 host_recon_commands: []
 {% endif %}
 
+{% if online_cracking_start | length > 0 %}
 online_cracking:
     start: "{{ online_cracking_start[0]["_source"]["@timestamp"] }}"
     stop: "{{ online_cracking_stop[0]["_source"]["@timestamp"] }}"
@@ -221,3 +222,12 @@ online_cracking:
 run_cracking:
     start: "{{ run_cracking_start[0]["_source"]["@timestamp"] }}"
     stop: "{{ run_cracking_stop[0]["_source"]["@timestamp"] }}"
+{%- else %}
+online_cracking:
+    start: "0"
+    stop: "0"
+
+run_cracking:
+    start: "0"
+    stop: "0"
+{% endif %}

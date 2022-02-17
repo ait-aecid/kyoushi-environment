@@ -55,6 +55,10 @@ vpn_disconnect:
 wp_crack:
     start: "{{ run_crack[0]["_source"]["@timestamp"] }}"
     stop: "{{ finish_crack[0]["_source"]["@timestamp"] }}"
+{%- else %}
+wp_crack:
+    start: "0"
+    stop: "0"
 {%- endif %}
 
 reverse_shell:

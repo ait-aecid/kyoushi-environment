@@ -235,34 +235,34 @@
         - regexp:
             dns.question.name: ".{24,24}.{{ common.domains.company.domain }}"
 
-- type: elasticsearch.query
-  id: attacker.foothold.dnsmasq.network_scan
-  labels:
-    - network_scan
-    - foothold
-  description: >-
-    This rule simply matches all PTR queries and answers that are made by the nmap local
-    network scan.
-  filter:
-    bool:
-      should:
-        - range:
-            "@timestamp":
-              gte: "{{ ( foothold.host_discover_local.start | as_datetime).replace(microsecond=0).isoformat() }}"
-              lte: "{{ (( foothold.host_discover_local.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
-  index:
-    - dnsmasq-inet-firewall
-  query:
-    bool:
-      should:
-        - regexp:
-            message: '.*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}'
-        - regexp:
-            message: '.*forwarded.*.in-addr.arpa.*'
-        - regexp:
-            message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
-        - regexp:
-            message: '.*reply.*{{ common.domains.intranet.domain }}.*'
+#- type: elasticsearch.query
+#  id: attacker.foothold.dnsmasq.network_scan
+#  labels:
+#    - network_scan
+#    - foothold
+#  description: >-
+#    This rule simply matches all PTR queries and answers that are made by the nmap local
+#    network scan.
+#  filter:
+#    bool:
+#      should:
+#        - range:
+#            "@timestamp":
+#              gte: "{{ ( foothold.host_discover_local.start | as_datetime).replace(microsecond=0).isoformat() }}"
+#              lte: "{{ (( foothold.host_discover_local.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+#  index:
+#    - dnsmasq-inet-firewall
+#  query:
+#    bool:
+#      should:
+#        - regexp:
+#            message: '.*.in-addr.arpa from {{ attacker.vpn_ipv4_address }}'
+#        - regexp:
+#            message: '.*forwarded.*.in-addr.arpa.*'
+#        - regexp:
+#            message: '.*nameserver 127.0.0.1 refused to do a recursive query.*'
+#        - regexp:
+#            message: '.*reply.*{{ common.domains.intranet.domain }}.*'
 
 - type: elasticsearch.query
   id: attacker.foothold.dnsmasq.traceroute
@@ -295,14 +295,20 @@
     - network_scan
     - foothold
   description: >-
-    This rule matches all PTR dns-queries from nmap DMZ scan.
+    This rule matches all PTR dns-queries from nmap local and DMZ scan.
   index:
     - dnsmasq-inet-firewall
   filter:
-    range:
-      "@timestamp":
-        gte: "{{ ( foothold.host_discover_dmz.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        lte: "{{ (( foothold.host_discover_dmz.stop | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+    bool:
+      should:
+        - range:
+            "@timestamp":
+              gte: "{{ ( foothold.host_discover_dmz.start | as_datetime).replace(microsecond=0).isoformat() }}"
+              lte: "{{ (( foothold.host_discover_dmz.stop | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+        - range:
+            "@timestamp":
+              gte: "{{ ( foothold.host_discover_local.start | as_datetime).replace(microsecond=0).isoformat() }}"
+              lte: "{{ (( foothold.host_discover_local.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   query:
     bool:
       should:
@@ -320,10 +326,16 @@
   index:
     - dnsmasq-inet-firewall
   filter:
-    range:
-      "@timestamp":
-        gte: "{{ ( foothold.host_discover_dmz.start | as_datetime).replace(microsecond=0).isoformat() }}"
-        lte: "{{ (( foothold.host_discover_dmz.stop | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+    bool:
+      should:
+        - range:
+            "@timestamp":
+              gte: "{{ ( foothold.host_discover_dmz.start | as_datetime).replace(microsecond=0).isoformat() }}"
+              lte: "{{ (( foothold.host_discover_dmz.stop | as_datetime) + timedelta(seconds=1)).replace(microsecond=0).isoformat() }}"
+        - range:
+            "@timestamp":
+              gte: "{{ ( foothold.host_discover_local.start | as_datetime).replace(microsecond=0).isoformat() }}"
+              lte: "{{ (( foothold.host_discover_local.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
   query:
     bool:
       should:
@@ -418,6 +430,13 @@
               message: '.*reply.*'
           - regexp:
               message: '.*cached.*'
+        must_not:
+          - script:
+              script:
+                id: "{{ DATASET.name }}_kyoushi_label_filter"
+                params:
+                  labels: [dnsteal]
+
 
 - type: elasticsearch.query
   id: attacker_foothold_dnsmasq_dns_brute_scan_parent_query

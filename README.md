@@ -7,9 +7,22 @@ The testbed simulates an enterprise IT network, involving mail servers, file sha
  * [AIT-LDSv2](https://zenodo.org/record/5789064)
  * [Kyoushi LDS](https://zenodo.org/record/5779411)
  
- ![Network overview](https://i.ibb.co/KVwc6hk/network.png)
+# Overview
  
- ## Getting Started
+The Kyoushi Testbed generates a network with three zones: Intranet, DMZ, and Intranet. Ubuntu VMs that simulate employees are located in all zones, where remote employees access the Intranet through a VPN connection. Employees utilize the Horde Mail platform, access the WordPress platform, share files, browse the web, and access the servers via SSH, while external users only send and respond to mails. The following figure shows an overview of the network.
+ 
+![Network overview](https://i.ibb.co/KVwc6hk/network.png)
+ 
+Several attacks are launched against the network from an attacker host. Thereby, the attacker gets access to the infrastructure through stolen VPN credentials. The following attacks are implemented:
+
+ * Scans (nmap, WPScan, dirb)
+ * Webshell upload (CVE-2020-24186)
+ * Password cracking (John the Ripper)
+ * Privilege escalation
+ * Remote command execution
+ * Data exfiltration (DNSteal)
+ 
+## Getting Started
 
 This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. For the following instructions, we assume that the following packages are installed:
 

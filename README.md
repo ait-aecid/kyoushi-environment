@@ -20,20 +20,20 @@ Poetry 1.1.7
 First, switch into a directory named kyoushi and check out the kyoushi-environment:
 
 ```bash
-landauerm@N3DSS2112:~/work/git$ mkdir kyoushi
-landauerm@N3DSS2112:~/work/git$ cd kyoushi
-landauerm@N3DSS2112:~/work/git/kyoushi$ git clone https://github.com/ait-aecid/kyoushi-environment.git
+user@ubuntu:~$ mkdir kyoushi
+user@ubuntu:~$ cd kyoushi
+user@ubuntu:~/kyoushi$ git clone https://github.com/ait-aecid/kyoushi-environment.git
 Cloning into 'kyoushi-environment'...
 ```
 
 The kyoushi-environment contains all models of the testbed infrastructure. These models allow to generate many different testbeds that vary in size and configuration. Testbed parameters that are subject to change include IP addresses of hosts, the number of simulated users, as well as their names and behavior profiles. The kyoushi-generator transforms the infrastructure models from the kyoushi-environment into setup scripts that are ready for deployment. Clone the kyoushi-generator as follows and install it using poetry:
 
 ```bash
-landauerm@N3DSS2112:~/work/git/kyoushi$ git clone https://github.com/ait-aecid/kyoushi-generator.git
+user@ubuntu:~/kyoushi$ git clone https://github.com/ait-aecid/kyoushi-generator.git
 Cloning into 'kyoushi-generator'...
-landauerm@N3DSS2112:~/work/git/kyoushi$ cd kyoushi-generator/
-landauerm@N3DSS2112:~/work/git/kyoushi/kyoushi-generator$ poetry install
-Creating virtualenv cr-kyoushi-generator-PMpTKTKv-py3.8 in /home/landauerm/.cache/pypoetry/virtualenvs
+user@ubuntu:~/kyoushi$ cd kyoushi-generator/
+user@ubuntu:~/kyoushi/kyoushi-generator$ poetry install
+Creating virtualenv cr-kyoushi-generator-PMpTKTKv-py3.8 in /home/user/.cache/pypoetry/virtualenvs
 ```
 
 

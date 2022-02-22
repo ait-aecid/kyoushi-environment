@@ -25,6 +25,7 @@ roles:
   - src: git@github.com:ait-cs-IaaS/ansible-cifs-mounts.git
     scm: git
     version: v1.0
+    name: cifs-mounts
 
   - src: git@github.com:ait-cs-IaaS/ansible-dnsmasq.git
     scm: git

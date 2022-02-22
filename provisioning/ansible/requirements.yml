@@ -17,7 +17,7 @@ roles:
     version: v1.3
     name: apache2
 
-  - src: t@github.com:ait-cs-IaaS/ansible-role-samba.git
+  - src: git@github.com:ait-cs-IaaS/ansible-role-samba.git
     scm: git
     version: v2.7.1
     name: samba

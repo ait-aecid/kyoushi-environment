@@ -7,6 +7,8 @@ The testbed simulates an enterprise IT network, involving mail servers, file sha
  * [AIT-LDSv2](https://zenodo.org/record/5789064)
  * [Kyoushi LDS](https://zenodo.org/record/5779411)
  
+ [Network overview](https://ibb.co/RQyG2bm)
+ 
  ## Getting Started
 
 This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. For the following instructions, we assume that the following packages are installed:

@@ -7,7 +7,7 @@ The testbed simulates an enterprise IT network, involving mail servers, file sha
  * [AIT-LDSv2](https://zenodo.org/record/5789064)
  * [Kyoushi LDS](https://zenodo.org/record/5779411)
  
- [Network overview](https://ibb.co/RQyG2bm)
+ ![Network overview](https://ibb.co/RQyG2bm)
  
  ## Getting Started
 

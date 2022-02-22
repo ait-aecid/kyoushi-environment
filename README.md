@@ -119,11 +119,11 @@ Starting galaxy role install process
 ...
 ```
 
-After installing all requirements, you can run all playbooks that are required for the testbed. The script run_all.sh installs all playbooks one after another, so you can just run the script. In case that one of the playbooks fails, the script will be interrupted. After fixing the error, you may also comment out all playbooks that have successfully been installed to save time.
+After installing all requirements, you can run all playbooks that are required for the testbed. The script run_all.sh installs all playbooks one after another, so you can just run the script. In case that one of the playbooks fails, the script will be interrupted. After fixing the error, you may also comment out all playbooks that have successfully been installed to save time. In total, running all playbooks may take several hours.
 
 ```bash
-landauerm@N3DSS2112:~/work/git/kyoushi/env/provisioning/ansible$ chmod +x run_all.sh
-landauerm@N3DSS2112:~/work/git/kyoushi/env/provisioning/ansible$ ./run_all.sh
+user@ubuntu:~/kyoushi/env/provisioning/ansible$ chmod +x run_all.sh
+user@ubuntu:~/kyoushi/env/provisioning/ansible$ ./run_all.sh
 PLAY [Fact gathering pre dns server conifguration] 
 TASK [Gathering Facts] 
 ok: [ext_user_1]

@@ -7,6 +7,14 @@
                             .source(["@timestamp"]).extra(size=1)
                             .execute().hits.hits[0]._source["@timestamp"] 
 -%}
+{%- set traceroute_start = Search(index=index).query(queries.foothold.traceroute.start)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"]
+-%}
+{%- set traceroute_stop = Search(index=index).query(queries.foothold.traceroute.stop)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits[0]._source["@timestamp"]
+-%}
 {%- set skipped_cracking_start = Search(index=index).query(queries.foothold.skipped_cracking.start)
                             .source(["@timestamp"]).extra(size=1)
                             .execute().hits.hits[0]._source["@timestamp"] 
@@ -108,6 +116,14 @@
                             .source(["@timestamp"]).extra(size=1)
                             .execute().hits.hits
 -%}
+{%- set run_cracking_start = Search(index=index).query(queries.foothold.online_cracking.run_crack)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
+{%- set run_cracking_stop = Search(index=index).query(queries.foothold.online_cracking.finish_crack)
+                            .source(["@timestamp"]).extra(size=1)
+                            .execute().hits.hits
+-%}
 start: "{{ vpn_connect }}"
 {%- if (skipped_cracking_stop | length) > 0 %}
 stop: "{{ skipped_cracking_start }}"
@@ -126,6 +142,10 @@ vpn_disconnect:
     start: "{{ vpn_disconnect[0]._source["@timestamp"]  }}"
     stop: "{{ vpn_disconnected[0]._source["@timestamp"]  }}"
 {%- endif %}
+
+traceroute:
+    start: "{{ traceroute_start }}"
+    stop: "{{ traceroute_stop }}"
 
 host_discover_local: 
     start: "{{ host_discover_local_start['@timestamp'] }}"
@@ -193,4 +213,21 @@ host_recon_commands:
 {%- else %}
 host_recon_commands: []
 {% endif %}
-    
+
+{% if online_cracking_start | length > 0 %}
+online_cracking:
+    start: "{{ online_cracking_start[0]["_source"]["@timestamp"] }}"
+    stop: "{{ online_cracking_stop[0]["_source"]["@timestamp"] }}"
+
+run_cracking:
+    start: "{{ run_cracking_start[0]["_source"]["@timestamp"] }}"
+    stop: "{{ run_cracking_stop[0]["_source"]["@timestamp"] }}"
+{%- else %}
+online_cracking:
+    start: "0"
+    stop: "0"
+
+run_cracking:
+    start: "0"
+    stop: "0"
+{% endif %}

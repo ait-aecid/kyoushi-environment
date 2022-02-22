@@ -91,6 +91,16 @@
               auditd.log.cmd: "ls -laR /root/"
           - match:
               auditd.log.cmd: "cat /etc/shadow"
+          - match:
+              auditd.log.cmd: "cat /etc/passwd"
+          - match:
+              auditd.log.cmd: "ip addr"
+          - match:
+              auditd.log.cmd: "ls -l /home"
+          - match:
+              auditd.log.cmd: "find /home -name .ssh"
+          - match:
+              auditd.log.cmd: "iptables -L"
           # match rule to include the auth events we are interested in
           - match:
               kyoushi_labels.rules: "attacker.escalate.sudo.open"
@@ -135,6 +145,43 @@
     - '[ process where event.action == "ran-command" and kyoushi_labels.rules like "attacker.escalate.audit.sudo.command.start" ]'
     - '[ authentication where event.action == "refreshed-credentials" ]'
     - '[ session where event.action == "started-session" ]'
+    - '[ session where event.action == "ended-session" ]'
+    - '[ authentication where event.action == "disposed-credentials" ]'
+
+- type: elasticsearch.sequence
+  id: attacker.escalate.audit.sudo.command.events_iptables
+  labels:
+    - escalated_command
+    - escalated_sudo_command
+    - escalate
+  description: >-
+    This rule labels all expected audit events for a sudo command (e.g., CRED_REFR)
+    to a attacker command that was labeled by `attacker.escalate.audit.sudo.command.start`.
+    Since we can join the events directly via the process id we can be fairly certain that
+    resulting labels are correct as long as the parent rule is correct.
+  index:
+    - audit-intranet_server
+  # we use the line as tiebreaker for since not all events have a pid
+  tiebreaker_field: log.file.line
+  filter:
+    - range:
+        "@timestamp":
+          # escalation phase start
+          gte: "{{ ( escalate.start | as_datetime).replace(microsecond=0).isoformat() }}"
+          # escalation phase stop
+          lte: "{{ (( escalate.stop | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+  # the sequence from the user cmd event to the cred dispose event
+  # due current limitations of EQL we sadly cannot define and arbitrary sequence that
+  # matches all events with the process id until we observe the process end event.
+  # A rule type with such a functionality could probably implemented by using multiple
+  # elasticsearch queries.
+  sequences:
+    - '[ process where event.action == "ran-command" and kyoushi_labels.rules like "attacker.escalate.audit.sudo.command.start" ]'
+    - '[ authentication where event.action == "refreshed-credentials" ]'
+    - '[ session where event.action == "started-session" ]'
+    - '[ configuration where event.action == "loaded-firewall-rule-to" ]'
+    - '[ process where event.action == "syscall" ]'
+    - '[ any where event.action == "proctitle" ]'
     - '[ session where event.action == "ended-session" ]'
     - '[ authentication where event.action == "disposed-credentials" ]'
 

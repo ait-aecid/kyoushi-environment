@@ -348,5 +348,6 @@ post_processors:
           escalate: processing/config/attacker/escalate.yaml
           foothold: processing/config/attacker/foothold.yaml
           servers: processing/config/servers.yaml
+          common: gather/intranet_server/facts.json
       src: "processing/templates/rules/{{ item.src }}"
       dest: "rules/{{ item.dest }}"

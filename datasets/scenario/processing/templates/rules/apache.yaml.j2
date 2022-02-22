@@ -56,7 +56,6 @@
     # only look at http traffic
     - match:
         event.category: "http"
-    
   sequences:
     # source and destination is swapped for request and response pairs
     - '[ http where destination.ip == "{{ servers.intranet_server.default_ipv4_address }}" and layers.http.http_http_request == true ] by source.ip, source.port, destination.ip, destination.port'
@@ -181,6 +180,81 @@
 
 
 - type: elasticsearch.sub_query
+  id: attacker.foothold.apache.error_substring
+  labels:
+    - attacker_http
+    - foothold
+  description: >-
+    Apache error logs sometimes do not have an url.full attribute, especially events
+    related to the WPScan. Therefore they cannot be labeled by grouping access and
+    error logs with the same url.full value. This rule tries to resolve this issue
+    by checking whether the url occurs in other attributes where it could appear
+    depending on the type of the error event. Note that url.original is used since
+    only this part sometimes occurs rather than the full url. Also note that both
+    regexp and match_phrase is used as elasticsearch sometimes analyzes fields which
+    prevents simple regex matching.
+  index:
+    - apache_access-intranet_server
+  # obligatory match all
+  query:
+    regexp:
+      url.full: ".*"
+  filter:
+    - range:
+        "@timestamp":
+          # wpscan phase start
+          gte: "{{ ( foothold.wpscan.start | as_datetime).replace(microsecond=0).isoformat() }}"
+          # wpscan phase stop
+          lte: "{{ (foothold.wpscan.stop | as_datetime).isoformat() }}"
+    # use script query to match only entries that
+    # are already tagged for as attacker http in the foothold phase
+    - script:
+        script:
+          id: "{{ DATASET.name }}_kyoushi_label_filter"
+          params:
+            labels: [attacker_http]
+    # reduce the search space by not including access to error matched row
+    - bool:
+        must_not:
+          - exists:
+              field: kyoushi_labels.flat.attacker.foothold.apache.access_error
+  sub_query:
+    index:
+      - apache_error-intranet_server
+    query:
+      {% raw %}
+      - term:
+          source.address: "{{ HIT.source.address }}"
+      {% endraw %}
+    filter:
+      {% raw %}
+      - bool:
+          should:
+              - regexp:
+                  error.code: ".*{{ HIT.url.original }}.*"
+              - regexp:
+                  apache.error.path: ".*{{ HIT.url.original }}.*"
+              - regexp:
+                  message: ".*{{ HIT.url.original }}.*"
+              - match_phrase:
+                  error.code: "*{{ HIT.url.original }}*"
+              - match_phrase:
+                  apache.error.path: "*{{ HIT.url.original }}*"
+              - match_phrase:
+                  message: "*{{ HIT.url.original }}*"
+              - regexp:
+                  message: ".*/themes/go/functions.*"
+      - range:
+          "@timestamp":
+            # error happened at most 3 seconds before access log entry
+            gte: "{{ ((HIT['@timestamp'] | as_datetime) - timedelta(seconds=3)).isoformat() }}"
+            # error event must have happened before access log event
+            # also we need to round the next second since error log has
+            # milli precision and access log only second
+            lte: "{{ (( HIT['@timestamp'] | as_datetime).replace(microsecond=0) + timedelta(seconds=1)).isoformat() }}"
+      {% endraw %}
+
+- type: elasticsearch.sub_query
   id: attacker.foothold.apache.error_index
   labels:
     - attacker_http
@@ -273,15 +347,26 @@
       - apache_access-intranet_server
     query:
       {% raw %}
-      - term:
-          url.full: "{{ HIT.url.full }}"
-      - term:
-          source.address: "{{ HIT.source.address }}"
+      - bool:
+          should:
+            - term:
+                url.full: "{{ HIT.url.full }}"
+            - regexp:
+                url.full: ".*{{ ( HIT.apache.error.path | replace('/var/www/', '') ) if 'apache' in HIT and 'error' in HIT.apache and 'path' in HIT.apache.error else 'NONMATCHINGSTRING' }}.*"
+            - regexp:
+                url.full: ".*{{ ( HIT.php.error.script | replace('/var/www/', '') ) if 'php' in HIT and 'error' in HIT.php and 'script' in HIT.php.error else 'NONMATCHINGSTRING' }}.*"
+            - regexp:
+                url.full: ".*{{ ( HIT.apache.error.path | replace('/var/www/', '') | replace('index.php', '') ) if 'apache' in HIT and 'error' in HIT.apache and 'path' in HIT.apache.error else 'NONMATCHINGSTRING' }}.*"
+            - regexp:
+                url.full: ".*{{ ( HIT.php.error.script | replace('/var/www/', '') | replace('index.php', '') ) if 'php' in HIT and 'error' in HIT.php and 'script' in HIT.php.error else 'NONMATCHINGSTRING' }}.*"
       {% endraw %}
-      
       # we are looking for parents that are labeled as attacker http
       - bool:
           must:
+            {% raw %}
+            - term:
+                source.address: "{{ HIT.source.address }}"
+            {% endraw %}
             - script:
                 script:
                   id: "{{ DATASET.name }}_kyoushi_label_filter"
@@ -393,6 +478,61 @@
           params:
             labels: [attacker_http]
 
+- type: elasticsearch.query
+  id: attacker.wpscan.time
+  labels: [wpscan]
+  description: >-
+    This labels attacker http traffic within the recorded wpscan execution
+    time with wpscan.
+  index:
+    - apache_access-intranet_server
+    - apache_error-intranet_server
+  # obligatory match all
+  query:
+    match_all: {}
+  filter:
+    - range:
+        "@timestamp":
+          # wpscan phase start
+          gte: "{{ ( foothold.wpscan.start | as_datetime).replace(microsecond=0).isoformat() }}"
+          # wpscan phase stop
+          lte: "{{ (foothold.wpscan.stop | as_datetime).isoformat() }}"
+    # use script query to match only entries that
+    # are already tagged for as attacker http in the foothold phase
+    - script:
+        script:
+          id: "{{ DATASET.name }}_kyoushi_label_filter"
+          params:
+            labels: [attacker_http]
+
+- type: elasticsearch.query
+  id: attacker.service_scan
+  labels: 
+    - service_scan
+    - foothold
+  description: >-
+    This rule labels apache logs relating to the Nmap service scan. The logs
+    either have the Nmap user agent or no user agent at all.
+  index:
+    - apache_access-intranet_server
+  query:
+    bool:
+      should:
+        - match:
+            user_agent.original: "Mozilla/5.0 (compatible; Nmap Scripting Engine; https://nmap.org/book/nse.html)"
+        - bool:
+            must_not:
+              exists:
+                field: "user_agent.original"
+  filter:
+    - range:
+        "@timestamp":
+          # service scan phase start
+          gte: "{{ ( foothold.service_scan.start | as_datetime).replace(microsecond=0).isoformat() }}"
+          # service scan phase stop
+          lte: "{{ (( foothold.service_scan.stop | as_datetime) + timedelta(seconds=1)).isoformat() }}"
+
+
 - type: elasticsearch.sequence
   id: attacker.webshell.upload.seq
   labels: [webshell_upload]
@@ -479,21 +619,21 @@
           - regexp:
               url.original: ".*WyIuL3dwaGFzaGNyYWNrLTAuMS93cGhhc2hjcmFjay5zaCIsICItdyIsICIkUFdEL3JvY2t5b3UudHh0IiwgIi1qIiwgIi4vd3BoYXNoY3JhY2stMC4xL2pvaG4tMS43LjYtanVtYm8tMTItTGludXg2NC9ydW4iLCAiLXUi.*"
 
-- type: elasticsearch.query
-  id: attacker.escalate.shell.descriptor
-  labels:
-    - reverse_shell
-    - escalate
-  description: >-
-    The reverse shell command used does not do redirection
-    nicely so we get a file descriptor error.
-  index:
-    - apache_access-intranet_server
-    - apache_error-intranet_server
-  # we cannot use a time range filter for this one as
-  # the log line does not have a timestamp
-  query:
-    - match_phrase:
-        message: 'Bad file descriptor'
-    - match:
-        message: bash
+#- type: elasticsearch.query
+#  id: attacker.escalate.shell.descriptor
+#  labels:
+#    - reverse_shell
+#    - escalate
+#  description: >-
+#    The reverse shell command used does not do redirection
+#    nicely so we get a file descriptor error.
+#  index:
+#    - apache_access-intranet_server
+#    - apache_error-intranet_server
+#  # we cannot use a time range filter for this one as
+#  # the log line does not have a timestamp
+#  query:
+#    - match_phrase:
+#        message: 'Bad file descriptor'
+#    - match:
+#        message: bash

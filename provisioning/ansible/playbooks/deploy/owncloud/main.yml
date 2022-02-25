@@ -13,17 +13,42 @@
     - name: Install additional packages
       apt:
         pkg:
-          - php7.3-apcu # required for owncloud on ubuntu bionic
+          - php7.4-apcu # required for owncloud on ubuntu bionic
           - smbclient # required for smb storage backend
+
+- name: Install owncloud-php
+  hosts: cloud_share
+  become: true
+  vars:
+    php_default_version: "7.4"
+  roles:
+    - owncloud-php
+
+# owncloud-php messed up the installation so we have
+# to remove all php8.1 files
+- name: Deinstall php8.1 modules
+  hosts: cloud_share
+  become: true
+  tasks:
+      - name: remove php8.1
+        shell: 
+          cmd: apt remove -y $(dpkg --get-selections  | grep php8.1 | awk '{print $1}' | tr '\n' ' ')
+      - name: fix php modules
+        apt:
+            pkg:
+                - php7.4-apcu
+                - php7.4-redis
+                - php7.4-sqlite3
 
 - name: Install owncloud and required services
   hosts: cloud_share
   become: true
+  vars:
+    php_default_version: "7.4"
   roles:
     - owncloud-mariadb
     - owncloud-redis
     - owncloud-apache
-    - owncloud-php
     - owncloud
 
 - name: Prepare local files

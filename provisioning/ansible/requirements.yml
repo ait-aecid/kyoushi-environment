@@ -19,7 +19,7 @@ roles:
 
   - src: git@github.com:ait-cs-IaaS/ansible-role-samba.git
     scm: git
-    version: v2.7.1
+    version: v2.7.2
     name: samba
   
   - src: git@github.com:ait-cs-IaaS/ansible-cifs-mounts.git

@@ -39,7 +39,7 @@ roles:
 
   - src: git@github.com:ait-cs-IaaS/ansible-exim.git
     scm: git
-    version: v1.2
+    version: master
     name: exim
 
   - src: git@github.com:GROG/ansible-role-user.git

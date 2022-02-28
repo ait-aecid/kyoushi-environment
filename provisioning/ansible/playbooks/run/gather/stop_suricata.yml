@@ -1,0 +1,8 @@
+- name: Stop suricata logging
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Stop suricata service
+      service:
+        name: suricata
+        state: stopped

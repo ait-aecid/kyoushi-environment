@@ -209,7 +209,37 @@ root@attacker-0:~# tail /var/log/dnsteal.log
 
 ### Log Data Collection
 
-Once the simulation is completed (i.e., the attack
+Once the simulation is completed (i.e., the attacker simulation has successfully carried out all attacks and the service stopped), it is possible to collect all logs from the testbed. Since copying all logs generates a high amount of traffic and thus unnecessarily bloats the size of the resulting log data set, it is recommended to stop suricata before proceeding. This is accomplished with the following command.
+
+```bash
+user@ubuntu:~/kyoushi/env/provisioning/ansible$ ansible-playbook playbooks/run/gather/stop_suricata.yml
+```
+
+Then, use the following command to copy all logs. The playbook will additionally copy relevant facts from the servers, e.g., IP addresses and configurations. When running the playbook, it is necessary to enter the name of the output directory. In the following, the name `out` is used.
+
+```bash
+user@ubuntu:~/kyoushi/env/provisioning/ansible$ ansible-playbook playbooks/run/gather/main.yml
+[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+Enter the gather directory path: out
+
+PLAY [all,!mgmthost] ***************************************************************************************************
+
+TASK [Gathering Facts] *************************************************************************************************
+ok: [internal_employee_1]
+...
+```
+
+The `out` folder will contain directories for all hosts. Inside `out/<host_name>/logs` are the collected log data:
+
+```bash
+user@ubuntu:~/kyoushi/env/provisioning/ansible$ ls playbooks/run/gather/out/
+attacker_0/          cloud_share/         ext_user_1/          inet-firewall/       internal_employee_1/ intranet_server/     monitoring/          remote_employee_1/   webserver/
+clark_mail/          ext_user_0/          inet-dns/            internal_employee_0/ internal_share/      mail/                remote_employee_0/   vpn/
+user@ubuntu:~/kyoushi/env/provisioning/ansible$ ls playbooks/run/gather/out/intranet_server/logs/
+apache2/     auth.log     auth.log.1   journal/     syslog       syslog.1     syslog.2.gz  syslog.3.gz  syslog.4.gz  syslog.5.gz  syslog.6.gz  syslog.7.gz
+```
+
+Moreover, the script extracted server configurations and facts in `out/<host_name>/configs/` and `out/<host_name>/facts.json`. If you just want to use the log data as is and all you need are the attack times (available in `out/attacker_0/logs/ait.aecid.attacker.wpdiscuz/sm.log`), then you are already done at this point. In case that you want to apply labeling rules to mark single events according to their corresponding attack step, continue to the next section.
 
 ### Log data Labeling
 

@@ -316,5 +316,5 @@ dnsteal_compressed: {{ random.choice(['no', 'yes']) }}
 dnsteal_verbose: {{ random.choice(['no', 'yes']) }}
 {% set dnsteal_block_size = random.randint(32, 63) %}
 dnsteal_block_size: {{ dnsteal_block_size }}
-{% set max_dnsteal_sub_domains = ((200 / dnsteal_block_size) | int) %}
+{% set max_dnsteal_sub_domains = ((160 / dnsteal_block_size) | int) %}
 dnsteal_sub_domains: {{ random.randint(max_dnsteal_sub_domains - 1, max_dnsteal_sub_domains) }}

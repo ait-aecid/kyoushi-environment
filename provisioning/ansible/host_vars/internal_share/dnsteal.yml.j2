@@ -1,7 +1,7 @@
 exfiltration_host: attacker_0
 
-exfiltration_service_name: \var{(faker.word() | lower | alpha)}
-exfiltration_service_description: Some service
+exfiltration_service_name: \var{context.dnsteal_service_name}
+exfiltration_service_description: \var{context.dnsteal_service_name}
 exfiltration_service_user: root
 exfiltration_service_group: root
 exfiltration_service_script: "/usr/bin/{{ exfiltration_service_name }}"

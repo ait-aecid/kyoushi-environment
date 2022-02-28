@@ -84,7 +84,7 @@ roles:
 
   - src: git@github.com:ait-cs-IaaS/ansible-openvpn-server.git
     scm: git
-    version: v1.0
+    version: v1.1
     name: openvpn-server
 
   - src: git@github.com:ait-cs-IaaS/ansible-mariadb.git

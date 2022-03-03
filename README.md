@@ -44,7 +44,7 @@ user@ubuntu:~/kyoushi$ git clone https://github.com/ait-aecid/kyoushi-environmen
 Cloning into 'kyoushi-environment'...
 ```
 
-The kyoushi-environment contains all models of the testbed infrastructure. These models allow to generate many different testbeds that vary in size and configuration. Testbed parameters that are subject to change include IP addresses of hosts, the number of simulated users, as well as their names and behavior profiles. Most of these parameters are set in the context.yml.j2 file. Here you can specify the number of users hosts (default: 2 internal, 2 remote, and 2 external users), the number of external mail servers (default: 1), and the times when attacks are carried out. For now, set the kyoushi_attacker_start and dnsteal_endtime variables to some point in time in the near future, e.g., the following day.
+The kyoushi-environment contains all models of the testbed infrastructure. These models allow to generate many different testbeds that vary in size and configuration. Testbed parameters that are subject to change include IP addresses of hosts, the number of simulated users, as well as their names and behavior profiles. Most of these parameters are set in the `context.yml.j2` file. Here you can specify the number of users hosts (default: 2 internal, 2 remote, and 2 external users), the number of external mail servers (default: 1), and the times when attacks are carried out. For now, set the `kyoushi_attacker_start` and `dnsteal_endtime` variables to some point in time in the near future, e.g., the following day.
 
 ```bash
 user@ubuntu:~/kyoushi$ cat /home/user/kyoushi/kyoushi-environment/model/context.yml.j2
@@ -75,7 +75,7 @@ Created TSM in /home/user/kyoushi/env
 You can now change to the directory and push TSM to a new GIT repository.
 ```
 
-But what exactly happened there? Let's have a look at an example to understand the transformation from the testbed-independent models (TIM) to the testbed-specific models (TSM). Have a look at the DNS configuration of our testbed. The configuration file dns.yml.j2 in the kyoushi-environment is a jinja2 template that does not specify several properties, such as the name of the domain or the number of mail servers. On the other hand, the dns.yml in the newly generated env directory contains specific values for all these variables. For example, in the following, the network is named mccoy. Note that these variables are randomly selected and therefore change every time you run the kyoushi-generator.
+But what exactly happened there? Let's have a look at an example to understand the transformation from the testbed-independent models (TIM) to the testbed-specific models (TSM). Have a look at the DNS configuration of our testbed. The configuration file `dns.yml.j2` in the kyoushi-environment is a jinja2 template that does not specify several properties, such as the name of the domain or the number of mail servers. On the other hand, the dns.yml in the newly generated `env` directory contains specific values for all these variables. For example, in the following, the network is named mccoy. Note that these variables are randomly selected and therefore change every time you run the kyoushi-generator.
 
 ```bash
 user@ubuntu:~/kyoushi/kyoushi-generator$ cat /home/user/kyoushi/kyoushi-environment/provisioning/ansible/group_vars/all/dns.yml.j2
@@ -96,7 +96,7 @@ domains:
 
 ### Testbed Deployment
 
-You are now ready to deploy the testbed. First, go to the keys directory and adjust the settings in the terragrunt.hcl file to fit your infrastructure. Then apply the changes:
+You are now ready to deploy the testbed. First, go to the keys directory and adjust the settings in the `terragrunt.hcl` file to fit your infrastructure. Then apply the changes:
 
 ```bash
 user@ubuntu:~/kyoushi$ cd /home/user/kyoushi/env/provisioning/terragrunt/keys/
@@ -105,7 +105,7 @@ user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ terragrunt apply
 Initializing modules...
 ```
 
-Next, go to the bootstrap directory and configure the setting to fit your virtualization provider. In particular, you need to change the name of the ubuntu bionic image (default: kyoushi-ubuntu-bionic), SSH key (default: testbed-key), router (default: kyoushi-router), etc. Then use terragrunt to deploy the infrastructure as follows.
+Next, go to the bootstrap directory and configure the setting to fit your virtualization provider. In particular, you need to change the name of the ubuntu bionic image (default: `kyoushi-ubuntu-bionic`), SSH key (default: `testbed-key`), router (default: `kyoushi-router`), etc. Then use terragrunt to deploy the infrastructure as follows.
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cd ../bootstrap/
@@ -114,7 +114,7 @@ user@ubuntu:~/kyoushi/env/provisioning/terragrunt/bootstrap$ terragrunt apply
 Initializing modules...
 ```
 
-Similarly, update the terragrunt.hcl file of the hosts directory and again apply the changes:
+Similarly, update the `terragrunt.hcl` file of the hosts directory and again apply the changes:
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cd ../hosts/
@@ -139,13 +139,73 @@ After installing all requirements, you can run all playbooks that are required f
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/ansible$ chmod +x run_all.sh
 user@ubuntu:~/kyoushi/env/provisioning/ansible$ ./run_all.sh
-PLAY [Fact gathering pre dns server conifguration] 
+PLAY [Fact gathering pre dns server configuration] 
 TASK [Gathering Facts] 
 ok: [ext_user_1]
 ...
 ```
 
 ### Starting the Simulation
+
+After all virtual machines are successfully deployed and configured, the simulation is ready to be started. First, start the employee simulations that carry out normal (benign) activities such as sending mails or sharing files. Run the following playbook to start simulations for internal employees (Intranet zone), remote employees (connect through VPN), and external users (Internet zone). 
+
+```bash
+user@ubuntu:~/kyoushi/env/provisioning/ansible$ ansible-playbook playbooks/run/simulation/main.yml
+PLAY [Start employee simulations] *******************************************************************************************************************************************************************************************************************************************************************************************
+
+TASK [Clean SM log] *********************************************************************************************************************************************************************************************************************************************************************************************************
+skipping: [internal_employee_1]
+...
+```
+
+To verify that the simulations successfully launched, it is recommended to log into one of the user machines and check the status of the simulation. To access any machine in the testbed, it is necessary to use the management host (mgmthost) as a proxy, e.g., `ssh -J ait@<mgmthost_ip> ait@<employee_ip>`. Note that the user `ait` is available on all machines. The user simulation runs as a service; its current status can be retrived with the command `service ait.beta_user status`. However, it may be more interesting to actually see what the user is currently doing. For this, check out the `sm.log` as shown in the following; the simulation log file generates new lines when new states are reached or actions are executed.
+
+```bash
+ait@internal-employee-1:~$ sudo -i
+root@internal-employee-1:~# tail /var/log/kyoushi/ait.beta_user/sm.log
+{"current_state": "ssh_executing_chain", "level": "info", "message": "Moved to new state", "new_state": "ssh_sudo_check", "run": "49fb21d8-90ad-4e68-a103-b2b7278c2c80", "target": "ssh_sudo_check", "timestamp": 1646298694.014008, "transition": "ssh_exec_command", "transition_id": "77eeb645-f784-437d-90b0-d28336237480"}
+{"current_state": "ssh_sudo_check", "level": "info", "message": "Executing transition ssh_sudo_check -> name='ssh_no_sudo_password_required' -> target=ssh_executing_chain", "run": "49fb21d8-90ad-4e68-a103-b2b7278c2c80", "target": "ssh_executing_chain", "timestamp": 1646298694.0143445, "transition": "ssh_no_sudo_password_required", "transition_id": "3539ff58-8bd2-4cb5-ad22-15f599ffda78"}
+{"current_state": "ssh_sudo_check", "level": "info", "message": "Moved to new state", "new_state": "ssh_executing_chain", "run": "49fb21d8-90ad-4e68-a103-b2b7278c2c80", "target": "ssh_executing_chain", "timestamp": 1646298694.0145497, "transition": "ssh_no_sudo_password_required", "transition_id": "3539ff58-8bd2-4cb5-ad22-15f599ffda78"}
+{"current_state": "ssh_executing_chain", "level": "info", "message": "Executing transition ssh_executing_chain -> name='ssh_command_finished' -> target=ssh_connected", "run": "49fb21d8-90ad-4e68-a103-b2b7278c2c80", "target": "ssh_connected", "timestamp": 1646298694.0147715, "transition": "ssh_command_finished", "transition_id": "639ffeb4-624d-4be9-9706-eb2948d31251"}
+{"current_state": "ssh_executing_chain", "level": "info", "message": "Moved to new state", "new_state": "ssh_connected", "run": "49fb21d8-90ad-4e68-a103-b2b7278c2c80", "target": "ssh_connected", "timestamp": 1646298720.6316447, "transition": "ssh_command_finished", "transition_id": "639ffeb4-624d-4be9-9706-eb2948d31251"}
+{"current_state": "ssh_connected", "level": "info", "message": "Executing transition ssh_connected -> name='ssh_select_command_chain' -> target=ssh_executing_chain", "run": "49fb21d8-90ad-4e68-a103-b2b7278c2c80", "target": "ssh_executing_chain", "timestamp": 1646298720.6386244, "transition": "ssh_select_command_chain", "transition_id": "b4ca3d0c-161b-49a9-9c26-1b2a115bc43b"}
+{"commands": [{"chdir": null, "cmd": "top", "expect": "avail Mem", "idle_after": "medium", "sudo": false, "sudo_user": null}, {"chdir": null, "cmd": "\u0003", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}], "current_state": "ssh_connected", "level": "info", "message": "Selected command chain", "run": "49fb21d8-90ad-4e68-a103-b2b7278c2c80", "ssh_host": {"commands": [[{"chdir": null, "cmd": "date", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}], [{"chdir": null, "cmd": "ip addr", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}], [{"chdir": null, "cmd": "ps aux", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}], [{"chdir": null, "cmd": "tail /var/log/syslog", "expect": ".*", "idle_after": "medium", "sudo": true, "sudo_user": null}, {"chdir": null, "cmd": "\u0003", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}], [{"chdir": null, "cmd": "top", "expect": "avail Mem", "idle_after": "medium", "sudo": false, "sudo_user": null}, {"chdir": null, "cmd": "\u0003", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}]], "force_password": false, "host": "172.29.129.211", "max_sudo_tries": 3, "password": "X0xVbHXfwZta", "port": 22, "proxy_host": null, "proxy_port": 22, "proxy_ssh_key": null, "proxy_username": null, "proxy_verify_host": true, "shell_prompt_pattern": ".*@.*:.*\\$\\s+", "ssh_key": null, "username": "rbarnes", "verify_host": false}, "target": "ssh_executing_chain", "timestamp": 1646298720.6395535, "transition": "ssh_select_command_chain", "transition_id": "b4ca3d0c-161b-49a9-9c26-1b2a115bc43b"}
+{"current_state": "ssh_connected", "level": "info", "message": "Moved to new state", "new_state": "ssh_executing_chain", "run": "49fb21d8-90ad-4e68-a103-b2b7278c2c80", "target": "ssh_executing_chain", "timestamp": 1646298720.6407897, "transition": "ssh_select_command_chain", "transition_id": "b4ca3d0c-161b-49a9-9c26-1b2a115bc43b"}
+{"current_state": "ssh_executing_chain", "level": "info", "message": "Executing transition ssh_executing_chain -> name='ssh_exec_command' -> target=ssh_sudo_check", "run": "49fb21d8-90ad-4e68-a103-b2b7278c2c80", "target": "ssh_sudo_check", "timestamp": 1646298720.641131, "transition": "ssh_exec_command", "transition_id": "68c3a029-3759-471e-a8b4-c9020a98b694"}
+{"command": {"chdir": null, "cmd": "top", "expect": "avail Mem", "idle_after": "medium", "sudo": false, "sudo_user": null}, "current_state": "ssh_executing_chain", "level": "info", "message": "Executing command", "run": "49fb21d8-90ad-4e68-a103-b2b7278c2c80", "ssh_host": {"commands": [[{"chdir": null, "cmd": "date", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}], [{"chdir": null, "cmd": "ip addr", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}], [{"chdir": null, "cmd": "ps aux", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}], [{"chdir": null, "cmd": "tail /var/log/syslog", "expect": ".*", "idle_after": "medium", "sudo": true, "sudo_user": null}, {"chdir": null, "cmd": "\u0003", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}], [{"chdir": null, "cmd": "top", "expect": "avail Mem", "idle_after": "medium", "sudo": false, "sudo_user": null}, {"chdir": null, "cmd": "\u0003", "expect": ".*@.*:.*\\$\\s+", "idle_after": "tiny", "sudo": false, "sudo_user": null}]], "force_password": false, "host": "172.29.129.211", "max_sudo_tries": 3, "password": "X0xVbHXfwZta", "port": 22, "proxy_host": null, "proxy_port": 22, "proxy_ssh_key": null, "proxy_username": null, "proxy_verify_host": true, "shell_prompt_pattern": ".*@.*:.*\\$\\s+", "ssh_key": null, "username": "rbarnes", "verify_host": false}, "target": "ssh_sudo_check", "timestamp": 1646298720.6413722, "transition": "ssh_exec_command", "transition_id": "68c3a029-3759-471e-a8b4-c9020a98b694"}
+```
+
+Next, it is necessary to start the attacker simulation. Note that the attacker carries out a sequence of attacks, including scans, remote command execution, password cracking, etc. For more information on the attacks, please refer to the publications stated at the bottom of this page. Run the playbook that starts the simulation as follows.
+
+```bash
+user@ubuntu:~/kyoushi/env/provisioning/ansible$ ansible-playbook playbooks/run/attacker_takeover/main.yml
+PLAY [Start employee simulations] *******************************************************************************************************************************************************************************************************************************************************************************************
+
+TASK [Clean SM log] *********************************************************************************************************************************************************************************************************************************************************************************************************
+skipping: [attacker_0]
+
+TASK [Start attacker SM] ****************************************************************************************************************************************************************************************************************************************************************************************************
+changed: [attacker_0]
+
+PLAY RECAP ******************************************************************************************************************************************************************************************************************************************************************************************************************
+attacker_0                 : ok=1    changed=1    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+```
+
+As for the normal user simulations, the attacker simulation runs as a service. To retrieve its status, use the command `service ait.aecid.attacker.wpdiscuz status`. Again, it is worth checking out the statemachine logs. As seen in the following sample, the attacker state machine will be created but wait until the datetime `kyoushi_attacker_start` that was configured earlier is reached. Only then the attack chain is launched.
+
+```bash
+root@attacker-0:~# tail /var/log/kyoushi/ait.aecid.attacker.wpdiscuz/sm.log
+{"level": "info", "message": "Created state machine", "run": "e5a66416-8fbf-4773-b4f4-3173b1b6b4ff", "seed": 672088864, "timestamp": 1646296446.5048175}
+```
+
+The `run_all.sh` script that configured all servers also launched the data exfiltration attack, which is assumed to be already ongoing from the beginning of the simulation and stops at some point in time. Check out the logs of this attack case to ensure that the exfiltration script is actually transferring the data. The logs should appear similar to the following sample:
+
+```bash
+root@attacker-0:~# tail /var/log/dnsteal.log
+{"data_length": 180, "event": "Received data", "file": "b'2010_invoices.xlsx'", "level": "info", "timestamp": 1646298257.592706}
+{"data": "b'3x6-.2-.s0sYjwCEihbeKKNdbIOdYlZo6A7EeRg3GTklJq5XPo9bAlWYdiD9Dh8tkuMAj-.1vpJnNwUmtnTNZXSPAF7sPBeqN0nvmS9D4Z79cVp7mO3H*ZSxEQYAIPDASkBw-.2010_invoices.xlsx.lt-22.kelly-livingston.com.'", "event": "Received data text on server", "ip": "192.168.87.64", "level": "debug", "port": 53, "timestamp": 1646298257.5934248}
+...
+```
 
 ### Log Data Collection
 
@@ -157,4 +217,4 @@ If you use the Kyoushi Testbed Environment or any of the generated datasets, ple
 
 * Landauer M., Skopik F., Wurzenberger M., Hotwagner W., Rauber A. (2021): [Have It Your Way: Generating Customized Log Data Sets with a Model-driven Simulation Testbed.](https://ieeexplore.ieee.org/document/9262078) IEEE Transactions on Reliability, Vol.70, Issue 1, pp. 402-415. IEEE. [PDF](https://www.skopik.at/ait/2020_trel.pdf)
 * Landauer M., Skopik F., Frank M., Hotwagner W., Wurzenberger M., Rauber A. (2022): Maintainable Log Datasets for Evaluation of Intrusion Detection Systems. Under Review.
-* Landauer M., Frank M., Skopik F., Hotwagner W., Wurzenberger M., Rauber A. (2022): A Framework for Automatic Labeling of Log Datasets from Model-driven Testbeds for HIDS Evaluation. Under Review.
+* Landauer M., Frank M., Skopik F., Hotwagner W., Wurzenberger M., Rauber A. (2022): A Framework for Automatic Labeling of Log Datasets from Model-driven Testbeds for HIDS Evaluation. Proceedings of the Workshop on Secure and Trustworthy Cyber-Physical Systems, forthcoming. ACM.

@@ -24,11 +24,12 @@ Several attacks are launched against the network from an attacker host. Thereby,
  
 ## Getting Started
 
-This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. For the following instructions, we assume that the following packages are installed:
+This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in an OVH cloud platform. For the instructions stated in this getting-started, we assume that the following packages are installed:
 
 ```
 Python 3.8.5
 Poetry 1.1.7
+Terraform v1.0.3
 terragrunt version v0.31.3
 ansible [core 2.11.5]
 ```
@@ -98,16 +99,33 @@ For more information on the kyoushi-generator, check out the [documentation](htt
 
 ### Testbed Deployment
 
-You are now ready to deploy the testbed. First, go to the keys directory and adjust the settings in the `terragrunt.hcl` file to fit your infrastructure. Then apply the changes:
+From the OpenStack platform where you plan to deploy the testbed you first need to download an RC file that contains all the necessary environment variables. Note that depending on your cloud provider, this step may be different. Save the file locally and source it as follows.
+
+```bash
+user@ubuntu:~/kyoushi$ source /home/user/openrc.sh
+```
+
+The Kyoushi testbed is designed for deployment with Consul, so make sure that Consul is available in your infrastructure and that your have a Consul HTTP token with write access for the keystore. There are two main settings that need to be done. First, create an environment variable `CONSUL_HTTP_TOKEN` and point it to your Consul. Second, open the file `/home/user/kyoushi/env/provisioning/terragrunt/terragrunt.hcl` and set the `path` and `address` parameters of the Consul configuration to fit your infrastructure.
+
+Then, create a key pair and add your key in the `terragrunt.hcl` file. You may also need to update the `path` parameter. Then apply the changes:
 
 ```bash
 user@ubuntu:~/kyoushi$ cd /home/user/kyoushi/env/provisioning/terragrunt/keys/
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cat terragrunt.hcl
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ terragrunt apply
 Initializing modules...
+...
+Terraform has been successfully initialized!
 ```
 
-Next, go to the bootstrap directory and configure the setting to fit your virtualization provider. In particular, you need to change the name of the ubuntu bionic image (default: `kyoushi-ubuntu-bionic`), SSH key (default: `testbed-key`), router (default: `kyoushi-router`), etc. Then use terragrunt to deploy the infrastructure as follows.
+Once this step is completed, check in your cloud provider that the key was actually uploaded. Next, download the Ubuntu image `focal-server-cloudimg-amd64.img` from the [Ubuntu cloud images repository](https://cloud-images.ubuntu.com/) and upload it to your cloud provider with the name `kyoushi-ubuntu-focal` and the format `Raw`. Then create the following flavors:
+
+| Name | VCPUs | Disk space | RAM |
+| ---- | ----- | ---------- | --- |
+| m1.small | 1 | 20 GB      | 2 GB |
+| m1.medium | 2 | 40 GB     | 4 GB |
+
+Then go to the bootstrap directory and configure the settings to fit your virtualization provider if necessary, e.g., the router (default: `kyoushi-router`). Then use terragrunt to deploy the infrastructure as follows.
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cd ../bootstrap/

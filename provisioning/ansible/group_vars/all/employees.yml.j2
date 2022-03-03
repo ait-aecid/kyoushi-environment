@@ -5,7 +5,7 @@ _employees:
 \{%- set _ns = namespace(contacts={}) }
 \{%- for _contact in employees_tmp.keys() }
  \{%- if _contact != _employee_id }
-   \{%- do _ns.contacts.update({_contact: random.choice([0.0001, random.random()])}) }
+   \{%- do _ns.contacts.update({_contact: gen.random.choice([0.0001, gen.random.random()])}) }
  \{%- endif }
 \{%- endfor }
  \{%- do _employee_info.update({"contacts": _ns.contacts}) }

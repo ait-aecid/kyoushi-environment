@@ -48,13 +48,13 @@ The kyoushi-environment contains all models of the testbed infrastructure. These
 
 ```bash
 user@ubuntu:~/kyoushi$ cat /home/user/kyoushi/kyoushi-environment/model/context.yml.j2
-{% set employees_internal_count = random.randint(2, 2) %}
-{% set employees_remote_count = random.randint(2, 2) %}
-{% set ext_mail_users_count = random.randint(2, 2) %}
-{% set mail_servers_external_count = random.randint(1, 1) %}
-kyoushi_attacker_start: 2021-10-04T{{ (random.randint(9, 14) | string()).zfill(2) }}:{{ (random.randint(0, 59) | string()).zfill(2) }}
-kyoushi_attacker_escalate_start: +P00DT{{ (random.randint(3, 4) | string()).zfill(2) }}H{{ (random.randint(0, 59) | string()).zfill(2) }}M
-dnsteal_endtime: 2021-10-02T{{ (random.randint(9, 18) | string()).zfill(2) }}:{{ (random.randint(0, 59) | string()).zfill(2) }}
+{% set employees_internal_count = gen.random.randint(2, 2) %}
+{% set employees_remote_count = gen.random.randint(2, 2) %}
+{% set ext_mail_users_count = gen.random.randint(2, 2) %}
+{% set mail_servers_external_count = gen.random.randint(1, 1) %}
+kyoushi_attacker_start: 2021-10-04T{{ (gen.random.randint(9, 14) | string()).zfill(2) }}:{{ (gen.random.randint(0, 59) | string()).zfill(2) }}
+kyoushi_attacker_escalate_start: +P00DT{{ (gen.random.randint(3, 4) | string()).zfill(2) }}H{{ (gen.random.randint(0, 59) | string()).zfill(2) }}M
+dnsteal_endtime: 2021-10-02T{{ (gen.random.randint(9, 18) | string()).zfill(2) }}:{{ (gen.random.randint(0, 59) | string()).zfill(2) }}
 ```
 
 The [kyoushi-generator](https://github.com/ait-aecid/kyoushi-generator) transforms the infrastructure models from the kyoushi-environment into setup scripts that are ready for deployment. Clone the kyoushi-generator as follows and install it using poetry:

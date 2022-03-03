@@ -9,7 +9,7 @@ The testbed simulates an enterprise IT network, involving mail servers, file sha
  
 # Overview
  
-The Kyoushi Testbed generates a network with three zones: Intranet, DMZ, and Intranet. Ubuntu VMs that simulate employees are located in all zones, where remote employees access the Intranet through a VPN connection. Employees utilize the Horde Mail platform, access the WordPress platform, share files, browse the web, and access the servers via SSH, while external users only send and respond to mails. The following figure shows an overview of the network.
+The Kyoushi Testbed comprises a network with three zones: Intranet, DMZ, and Intranet. Ubuntu VMs that simulate employees are located in all zones, where remote employees access the Intranet through a VPN connection. Employees utilize the Horde Mail platform, access the WordPress platform, share files, browse the web, and access the servers via SSH, while external users only send and respond to mails. The following figure shows an overview of the network.
  
 ![Network overview](https://i.ibb.co/KVwc6hk/network.png)
  
@@ -35,7 +35,7 @@ ansible [core 2.11.5]
 
 ### Generating a Testbed from the Models
 
-First, switch into a directory named kyoushi and check out the kyoushi-environment:
+First, switch into a directory named kyoushi and check out the kyoushi-environment (this repository):
 
 ```bash
 user@ubuntu:~$ mkdir kyoushi
@@ -57,7 +57,7 @@ kyoushi_attacker_escalate_start: +P00DT{{ (random.randint(3, 4) | string()).zfil
 dnsteal_endtime: 2021-10-02T{{ (random.randint(9, 18) | string()).zfill(2) }}:{{ (random.randint(0, 59) | string()).zfill(2) }}
 ```
 
-The kyoushi-generator transforms the infrastructure models from the kyoushi-environment into setup scripts that are ready for deployment. Clone the kyoushi-generator as follows and install it using poetry:
+The [kyoushi-generator](https://github.com/ait-aecid/kyoushi-generator) transforms the infrastructure models from the kyoushi-environment into setup scripts that are ready for deployment. Clone the kyoushi-generator as follows and install it using poetry:
 
 ```bash
 user@ubuntu:~/kyoushi$ git clone https://github.com/ait-aecid/kyoushi-generator.git
@@ -93,6 +93,8 @@ domains:
     domain: mccoy.com
     ...
 ```
+
+For more information on the kyoushi-generator, check out the [documentation](https://ait-aecid.github.io/kyoushi-generator/).
 
 ### Testbed Deployment
 
@@ -207,6 +209,8 @@ root@attacker-0:~# tail /var/log/dnsteal.log
 ...
 ```
 
+For more information on the kyoushi-simulation, check out the [documentation](https://ait-aecid.github.io/kyoushi-simulation/).
+
 ### Log Data Collection
 
 Once the simulation is completed (i.e., the attacker simulation has successfully carried out all attacks and the service stopped), it is possible to collect all logs from the testbed. Since copying all logs generates a high amount of traffic and thus unnecessarily bloats the size of the resulting log data set, it is recommended to stop suricata before proceeding. This is accomplished with the following command.
@@ -239,9 +243,67 @@ user@ubuntu:~/kyoushi/env/provisioning/ansible$ ls playbooks/run/gather/out/intr
 apache2/     auth.log     auth.log.1   journal/     syslog       syslog.1     syslog.2.gz  syslog.3.gz  syslog.4.gz  syslog.5.gz  syslog.6.gz  syslog.7.gz
 ```
 
-Moreover, the script extracted server configurations and facts in `out/<host_name>/configs/` and `out/<host_name>/facts.json`. If you just want to use the log data as is and all you need are the attack times (available in `out/attacker_0/logs/ait.aecid.attacker.wpdiscuz/sm.log`), then you are already done at this point. In case that you want to apply labeling rules to mark single events according to their corresponding attack step, continue to the next section.
+Moreover, the script extracted server configurations and facts in `out/<host_name>/configs/` and `out/<host_name>/facts.json`. If you just want to use the log data as is and all you need are the attack times (available in `out/attacker_0/logs/ait.aecid.attacker.wpdiscuz/sm.log`), then you are done at this point. In case that you want to apply labeling rules to mark single events according to their corresponding attack step, continue to the next section.
 
 ### Log data Labeling
+
+Labeling of log data is accomplished by processing the data in a pipeline that trims the logs according to the simulation time, parses them with logstash, stores them in an elasticsearch database, and queries the log events corresponding to attacker activities with predefined rules. Accordingly, the machine where labeling takes place should have at least 16 GB of RAM and the following dependencies installed:
+
+```
+elasticsearch 7.16.2
+logstash 7.16.2
+TShark (Wireshark) 3.4.8
+```
+
+Furthermore, `http.max_content_length: 400mb` needs to be set in `/etc/elasticsearch/elasticsearch.yml`.
+
+The main repository for log data labeling is the [kyoushi-dataset](https://github.com/ait-aecid/kyoushi-dataset). Clone and install the repository as follows.
+
+```bash
+user@ubuntu:~/kyoushi$ git clone https://github.com/ait-aecid/kyoushi-dataset.git
+Cloning into 'kyoushi-dataset'...
+user@ubuntu:~/kyoushi$ cd kyoushi-dataset/
+user@ubuntu:~/kyoushi/kyoushi-dataset$ poetry install
+Creating virtualenv kyoushi-dataset-L9Pkzr_M-py3.8 in /home/user/.cache/pypoetry/virtualenvs
+(kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi/kyoushi-dataset$ cd ..
+```
+
+Now create a new directory where the log data should be processed. However, do not copy the log data directly from the `out` directory; instead, use the following `prepare` command from the kyoushi-dataset to prepare the logs for further processing. Make sure that `-g` points to the gather directory containing the logs, `-p` points to the processing directory of the kyoushi-environment containing the labeling templates, and the attack execution is within `--start` and `--end` (logs outside of this interval are trimmed).
+
+```bash
+(kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi$ mkdir processed
+(kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi$ cd processed
+(kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi/processed$ cr-kyoushi-dataset prepare -g /home/user/kyoushi/env/provisioning/ansible/playbooks/run/gather/out -p /home/user/kyoushi/kyoushi-environment/datasets/scenario/processing/ --start 2022-03-03T00:00:00 --end 2022-03-04T00:00:00 --name processed
+Creating dataset directory structure ...
+Creating dataset config file ..
+Copying gathered logs and facts into the dataset ...
+Copying the processing configuration into the dataset ...
+Dataset initialized in: /home/user/kyoushi/processed
+```
+
+Before going to the next step, make sure that the elasticsearch database is empty and no legacy files from previous runs exist (this should not apply when kyoushi-dataset is executed for the first time). If such legacy files exist, the kyoushi-generator will get stuck in the following step. Therefore, make sure to run the following commands to clear the database and delete existing sincedb files.
+
+```bash
+(kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi/processed$ curl -XDELETE localhost:9200/_all
+(kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi/processed$ sudo service elasticsearch restart
+(kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi/processed$ rm processing/logstash/data/plugins/inputs/file/.sincedb_*
+```
+
+Next, run the `process` command to parse the logs and store them in the elasticsearch database. Depending on the size of your dataset, this step may take several hours. Be aware that several warnings may occur that can be ignored.
+
+```bash
+(kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi/processed$ cr-kyoushi-dataset process
+Running pre-processors ...
+Executing - Ensure processing config directory exists ...
+Executing - Prepare server list ...
+Executing - Prepare server facts ...
+Executing - Ensure attacker config directory exists ...
+Executing - Extract attacker information ...
+Executing - Decompress all GZIP logs ...
+Executing - Convert attacker pcap to elasticsearch json ...
+```
+
+For more information on the kyoushi-dataset, check out the [documentation](https://ait-aecid.github.io/kyoushi-dataset/).
 
 ## Publications
 

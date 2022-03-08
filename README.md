@@ -29,6 +29,7 @@ This is the main repository for the Kyoushi Testbed Environment that contains al
 ```
 Python 3.8.5
 Poetry 1.1.7
+Terraform v1.0.3
 terragrunt version v0.31.3
 ansible [core 2.11.5]
 ```

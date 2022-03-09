@@ -24,7 +24,7 @@ Several attacks are launched against the network from an attacker host. Thereby,
  
 ## Getting Started
 
-This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in an OVH cloud platform. For the instructions stated in this getting-started, we assume that the following packages are installed:
+This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 30 VCPUs, 800 GB of disk space, and 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in an OVH cloud platform. For the instructions stated in this getting-started, we assume that the following packages are installed:
 
 ```
 Python 3.8.5
@@ -330,18 +330,50 @@ Executing - Setup logstash pipeline ...
 Parsing log files ...
 ```
 
-Once this step is complete, all parsed logs are in the database and can therefore be queried with the elastic query language. In addition, all rules have been rendered from the templates into the `rules` directory. Run the following command to executes the query rules and obtain the labels.
+Once this step is complete, all parsed logs are in the database and can therefore be queried with the elastic query language. In addition, all rules have been rendered from the templates into the `rules` directory. Run the following command to execute the query rules and obtain the labels.
 
 ```bash
 (kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi/processed$ cr-kyoushi-dataset label
+Applying rule attacker.escalate.sudo.command ...
+Rule attacker.escalate.sudo.command applied labels: ['escalated_command', 'escalated_sudo_command', 'escalate'] to 3 lines.
+...
+Start writing /home/user/kyoushi/processed/gather/intranet_server/logs/auth.log
 ```
 
-For more information on the kyoushi-dataset, check out the [documentation](https://ait-aecid.github.io/kyoushi-dataset/).
+Again, this step may take several hours to complete. Note that this process adds the labels to the log events in the database, i.e., you can see the labels assigned to the events if you query the database manually. Accordingly, no labels are assigned when running the `cr-kyoushi-dataset label` again without first clearing the database and running `cr-kyoushi-dataset process` to avoid that the same label is assigned multiple times to the same event. Once the process is finished, you can find the labels in the `labels` directory. For example, have a look at the labels of the `auth.log` file:
+
+```bash
+(kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi/processed$ cat labels/intranet_server/logs/auth.log 
+{"line": 145, "labels": ["attacker_change_user", "escalate"], "rules": {"attacker_change_user": ["attacker.escalate.su.login"], "escalate": ["attacker.escalate.su.login"]}}
+{"line": 146, "labels": ["attacker_change_user", "escalate", "escalated_command", "escalated_sudo_command"], "rules": {"attacker_change_user": ["attacker.escalate.su.login", "attacker.escalate.systemd.newsession.after"], "escalate": ["attacker.escalate.su.login", "attacker.escalate.systemd.newsession.after", "attacker.escalate.sudo.command"], "escalated_command": ["attacker.escalate.sudo.command"], "escalated_sudo_command": ["attacker.escalate.sudo.command"]}}
+{"line": 147, "labels": ["attacker_change_user", "escalate"], "rules": {"attacker_change_user": ["attacker.escalate.su.login"], "escalate": ["attacker.escalate.su.login"]}}
+{"line": 148, "labels": ["attacker_change_user", "escalate"], "rules": {"attacker_change_user": ["attacker.escalate.systemd.newsession.after"], "escalate": ["attacker.escalate.systemd.newsession.after"]}}
+{"line": 149, "labels": ["escalated_command", "escalated_sudo_command", "escalate"], "rules": {"escalated_command": ["attacker.escalate.sudo.command"], "escalated_sudo_command": ["attacker.escalate.sudo.command"], "escalate": ["attacker.escalate.sudo.command"]}}
+{"line": 150, "labels": ["escalated_command", "escalated_sudo_command", "escalate", "escalated_sudo_session"], "rules": {"escalated_command": ["attacker.escalate.sudo.command", "attacker.escalate.sudo.open"], "escalated_sudo_command": ["attacker.escalate.sudo.command", "attacker.escalate.sudo.open"], "escalate": ["attacker.escalate.sudo.command", "attacker.escalate.sudo.open"], "escalated_sudo_session": ["attacker.escalate.sudo.open"]}}
+{"line": 151, "labels": ["escalated_command", "escalated_sudo_command", "escalated_sudo_session", "escalate"], "rules": {"escalated_command": ["attacker.escalate.sudo.open"], "escalated_sudo_command": ["attacker.escalate.sudo.open"], "escalated_sudo_session": ["attacker.escalate.sudo.open"], "escalate": ["attacker.escalate.sudo.open"]}}
+{"line": 152, "labels": ["escalated_command", "escalated_sudo_command", "escalated_sudo_session", "escalate"], "rules": {"escalated_command": ["attacker.escalate.sudo.open"], "escalated_sudo_command": ["attacker.escalate.sudo.open"], "escalated_sudo_session": ["attacker.escalate.sudo.open"], "escalate": ["attacker.escalate.sudo.open"]}}
+```
+
+Each line in the label file corresponds to a specific line in the respective log file, which is referenced by the line number in the field `line`. The field `labels` states the list of labels assigned to the file and the field `rules` states the list of rules that matched the line and assigned the labels. For example, consider the following lines of the `auth.log` file that are marked with aforementioned labels:
+
+```bash
+(kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi/processed$ sed -n '145,152p' gather/intranet_server/logs/auth.log
+Mar  3 11:37:40 intranet-server su[27950]: Successful su for bguerrero by www-data
+Mar  3 11:37:40 intranet-server su[27950]: + /dev/pts/1 www-data:bguerrero
+Mar  3 11:37:40 intranet-server su[27950]: pam_unix(su:session): session opened for user bguerrero by (uid=33)
+Mar  3 11:37:40 intranet-server systemd-logind[957]: New session c1 of user bguerrero.
+Mar  3 11:37:58 intranet-server sudo:    bguerrero : TTY=pts/1 ; PWD=/var/www/intranet.williams.mccoy.com/wp-content/uploads/2022/03 ; USER=root ; COMMAND=list
+Mar  3 11:38:06 intranet-server sudo:    bguerrero : TTY=pts/1 ; PWD=/var/www/intranet.williams.mccoy.com/wp-content/uploads/2022/03 ; USER=root ; COMMAND=/bin/cat /etc/shadow
+Mar  3 11:38:06 intranet-server sudo: pam_unix(sudo:session): session opened for user root by (uid=0)
+Mar  3 11:38:06 intranet-server sudo: pam_unix(sudo:session): session closed for user root
+```
+
+For more information on kyoushi-dataset, check out the [documentation](https://ait-aecid.github.io/kyoushi-dataset/).
 
 ## Publications
 
 If you use the Kyoushi Testbed Environment or any of the generated datasets, please cite the following publications: 
 
-* Landauer M., Skopik F., Wurzenberger M., Hotwagner W., Rauber A. (2021): [Have It Your Way: Generating Customized Log Data Sets with a Model-driven Simulation Testbed.](https://ieeexplore.ieee.org/document/9262078) IEEE Transactions on Reliability, Vol.70, Issue 1, pp. 402-415. IEEE. [PDF](https://www.skopik.at/ait/2020_trel.pdf)
+* Landauer M., Skopik F., Wurzenberger M., Hotwagner W., Rauber A. (2021): [Have It Your Way: Generating Customized Log Data Sets with a Model-driven Simulation Testbed.](https://ieeexplore.ieee.org/document/9262078) IEEE Transactions on Reliability, Vol.70, Issue 1, pp. 402-415. IEEE. \[[PDF](https://www.skopik.at/ait/2020_trel.pdf)\]
 * Landauer M., Skopik F., Frank M., Hotwagner W., Wurzenberger M., Rauber A. (2022): Maintainable Log Datasets for Evaluation of Intrusion Detection Systems. Under Review.
 * Landauer M., Frank M., Skopik F., Hotwagner W., Wurzenberger M., Rauber A. (2022): A Framework for Automatic Labeling of Log Datasets from Model-driven Testbeds for HIDS Evaluation. Proceedings of the Workshop on Secure and Trustworthy Cyber-Physical Systems, forthcoming. ACM.

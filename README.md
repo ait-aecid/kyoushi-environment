@@ -29,9 +29,10 @@ This is the main repository for the Kyoushi Testbed Environment that contains al
 ```
 Python 3.8.5
 Poetry 1.1.7
-Terraform v1.0.3
+Terraform v1.1.7
 terragrunt version v0.31.3
 ansible [core 2.11.5]
+packer 1.8.0
 ```
 
 ### Generating a Testbed from the Models
@@ -105,7 +106,7 @@ From the OpenStack platform where you plan to deploy the testbed you first need 
 user@ubuntu:~/kyoushi$ source /home/user/openrc.sh
 ```
 
-The Kyoushi testbed is designed for deployment with Consul, so make sure that Consul is available in your infrastructure and that your have a Consul HTTP token with write access for the keystore. There are two main settings that need to be done. First, create an environment variable `CONSUL_HTTP_TOKEN` and point it to your Consul. Second, open the file `/home/user/kyoushi/env/provisioning/terragrunt/terragrunt.hcl` and set the `path` and `address` parameters of the Consul configuration to fit your infrastructure.
+The Kyoushi testbed is designed for deployment with Consul, so make sure that Consul is available in your infrastructure and that your have a Consul HTTP token with write access for the keystore. There are two main settings that need to be done. First, create an environment variable `CONSUL_HTTP_TOKEN` and point it to your Consul. Second, open the file `/home/user/kyoushi/env/provisioning/terragrunt/terragrunt.hcl` and set the `path` and `address` parameters of the Consul configuration to fit your infrastructure. If you use OVH, you will also have to set the environment variable `TF_VAR_parallelism=1`.
 
 Then, create a key pair and add your key in the `terragrunt.hcl` file. You may also need to update the `path` parameter. Then apply the changes:
 
@@ -125,7 +126,26 @@ Once this step is completed, check in your cloud provider that the key was actua
 | m1.small | 1 | 20 GB      | 2 GB |
 | m1.medium | 2 | 40 GB     | 4 GB |
 
-Then go to the bootstrap directory and configure the settings to fit your virtualization provider if necessary, e.g., the router (default: `kyoushi-router`). Then use terragrunt to deploy the infrastructure as follows.
+Then go to the bootstrap directory and configure the settings to fit your virtualization provider if necessary, e.g., the router (default: `kyoushi-router`). If you are using OVH, you have to make the following changes:
+* Comment out `host_ext_address_index` and `floating_ip_pool` in `inputs` in `bootstrap/terragrunt.hcl`
+* Add `provider_net_uuid` in `inputs` in `bootstrap/terragrunt.hcl`
+* Add `access = false` in `inputs.networks.local` in `bootstrap/terragrunt.hcl`
+* Add `access = true` in `inputs.networks.dmz` in `bootstrap/terragrunt.hcl`
+* Set the source version of module `vmnets` to `git@github.com:ait-cs-IaaS/terraform-openstack-vmnets.git?ref=v1.5.6` in `bootstrap/module/main.tf`
+* Comment out `host_ext_address_index` and `ext_dns` in module `vmnets` in `bootstrap/module/main.tf`
+* Set `router_create` to `true` in module `vmnets` in `bootstrap/module/main.tf`
+* Set `provider_net_uuid` to `var.provider_net_uuid` in module `vmnets` in `bootstrap/module/main.tf`
+* Comment out module `internet_dns` in `bootstrap/module/main.tf`
+* Add `access = bool` to the variable networks object in `bootstrap/module/variables.tf`
+* Add the following variable  in `bootstrap/module/variables.tf`
+```bash
+variable "provider_net_uuid" {
+  type        = string
+  description = "UUID of the provider net"
+}
+```
+
+These changes are not necessary when using a local OpenStack platform. Then use terragrunt to deploy the infrastructure as follows.
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cd ../bootstrap/

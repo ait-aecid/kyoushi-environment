@@ -124,17 +124,19 @@ Once this step is completed, check in your cloud provider that the key was actua
 | Name | VCPUs | Disk space | RAM |
 | ---- | ----- | ---------- | --- |
 | m1.small | 1 | 20 GB      | 2 GB |
+| aecid.d1.small | 1 | 50 GB      | 2 GB |
 | m1.medium | 2 | 40 GB     | 4 GB |
+| m1.xlarge | 8 | 160 GB     | 16 GB |
 
 Then go to the bootstrap directory and configure the settings to fit your virtualization provider if necessary, e.g., the router (default: `kyoushi-router`). If you are using OVH, you have to make the following changes:
 * Comment out `host_ext_address_index` and `floating_ip_pool` in `inputs` in `bootstrap/terragrunt.hcl`
-* Add `provider_net_uuid` in `inputs` in `bootstrap/terragrunt.hcl`
+* Add `provider_net_uuid` and set it to the Ext-Net ID from the cloud provider in `inputs` in `bootstrap/terragrunt.hcl`
 * Add `access = false` in `inputs.networks.local` in `bootstrap/terragrunt.hcl`
 * Add `access = true` in `inputs.networks.dmz` in `bootstrap/terragrunt.hcl`
 * Set the source version of module `vmnets` to `git@github.com:ait-cs-IaaS/terraform-openstack-vmnets.git?ref=v1.5.6` in `bootstrap/module/main.tf`
 * Comment out `host_ext_address_index` and `ext_dns` in module `vmnets` in `bootstrap/module/main.tf`
-* Set `router_create` to `true` in module `vmnets` in `bootstrap/module/main.tf`
-* Set `provider_net_uuid` to `var.provider_net_uuid` in module `vmnets` in `bootstrap/module/main.tf`
+* Set `router_create = true` in module `vmnets` in `bootstrap/module/main.tf`
+* Set `provider_net_uuid = var.provider_net_uuid` in module `vmnets` in `bootstrap/module/main.tf`
 * Comment out module `internet_dns` in `bootstrap/module/main.tf`
 * Add `access = bool` to the variable networks object in `bootstrap/module/variables.tf`
 * Add the following variable  in `bootstrap/module/variables.tf`
@@ -154,7 +156,12 @@ user@ubuntu:~/kyoushi/env/provisioning/terragrunt/bootstrap$ terragrunt apply
 Initializing modules...
 ```
 
-Similarly, update the `terragrunt.hcl` file of the hosts directory and again apply the changes:
+Now change to the packer directory to create the images for employee hosts and the share. Again, for local cloud instances, no changes are necessary; however, in case that public cloud infrastructures such as OVH are used, it is necessary to carry out the following changes:
+* Set `base_image` to `Ubuntu 18.04` in `employee_image/default.json` and `share_image/source.pkr.hcl` or use any image name that is available in the cloud infrastructure
+* Set `network` to the Ext-Net ID where the floating IP pool is provided in `employee_image/default.json` and `share_image/source.pkr.hcl`
+* Comment out `floating_ip_network` in `employee_image/source.pkr.hcl` and `share_image/source.pkr.hcl`
+
+Next, update the `terragrunt.hcl` file of the hosts directory and again apply the changes:
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cd ../hosts/

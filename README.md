@@ -24,7 +24,7 @@ Several attacks are launched against the network from an attacker host. Thereby,
  
 ## Getting Started
 
-This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 30 VCPUs, 800 GB of disk space, and 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in an OVH cloud platform. For the instructions stated in this getting-started, we assume that the following packages are installed:
+This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 30 VCPUs, 800 GB of disk space, and 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in a local OpenStack infrastructure as well as an OVH cloud platform. For the instructions stated in this getting-started, we assume that the following packages are installed:
 
 ```
 Python 3.8.5
@@ -106,7 +106,7 @@ From the OpenStack platform where you plan to deploy the testbed you first need 
 user@ubuntu:~/kyoushi$ source /home/user/openrc.sh
 ```
 
-The Kyoushi testbed is designed for deployment with Consul, so make sure that Consul is available in your infrastructure and that your have a Consul HTTP token with write access for the keystore. There are two main settings that need to be done. First, create an environment variable `CONSUL_HTTP_TOKEN` and point it to your Consul. Second, open the file `/home/user/kyoushi/env/provisioning/terragrunt/terragrunt.hcl` and set the `path` and `address` parameters of the Consul configuration to fit your infrastructure. If you use OVH, you will also have to set the environment variable `TF_VAR_parallelism=1`.
+The Kyoushi testbed is designed for deployment with Consul, so make sure that Consul is available in your infrastructure and that your have a Consul HTTP token with write access for the keystore. There are two main settings that need to be done. First, create an environment variable `CONSUL_HTTP_TOKEN` and point it to your Consul. Second, open the file `/home/user/kyoushi/env/provisioning/terragrunt/terragrunt.hcl` and set the `path` and `address` parameters of the Consul configuration to fit your infrastructure. If you use a public cloud infrastructure such as OVH, you will also have to set the environment variable `TF_VAR_parallelism=1`.
 
 Then, create a key pair and add your key in the `terragrunt.hcl` file. You likely also need to update the `path` parameter. Then apply the changes:
 
@@ -127,7 +127,7 @@ Once this step is completed, check in your cloud provider that the key was actua
 | m1.medium | 2 | 40 GB     | 4 GB |
 | m1.xlarge | 8 | 160 GB     | 16 GB |
 
-Then go to the bootstrap directory and configure the settings to fit your virtualization provider if necessary, e.g., the router (default: `kyoushi-router`). If you are using OVH, you have to make the following changes:
+Then go to the bootstrap directory and configure the settings to fit your virtualization provider if necessary, e.g., the router (default: `kyoushi-router`). If you are using a public cloud, you have to make the following changes:
 * Comment out `host_ext_address_index` and `floating_ip_pool` in `inputs` in `bootstrap/terragrunt.hcl`
 * Add `provider_net_uuid` and set it to the Ext-Net ID from the cloud provider in `inputs` in `bootstrap/terragrunt.hcl`
 * Add `access = false` in `inputs.networks.local` in `bootstrap/terragrunt.hcl`

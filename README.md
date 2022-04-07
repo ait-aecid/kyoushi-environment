@@ -108,11 +108,10 @@ user@ubuntu:~/kyoushi$ source /home/user/openrc.sh
 
 The Kyoushi testbed is designed for deployment with Consul, so make sure that Consul is available in your infrastructure and that your have a Consul HTTP token with write access for the keystore. There are two main settings that need to be done. First, create an environment variable `CONSUL_HTTP_TOKEN` and point it to your Consul. Second, open the file `/home/user/kyoushi/env/provisioning/terragrunt/terragrunt.hcl` and set the `path` and `address` parameters of the Consul configuration to fit your infrastructure. If you use OVH, you will also have to set the environment variable `TF_VAR_parallelism=1`.
 
-Then, create a key pair and add your key in the `terragrunt.hcl` file. You may also need to update the `path` parameter. Then apply the changes:
+Then, create a key pair and add your key in the `terragrunt.hcl` file. You likely also need to update the `path` parameter. Then apply the changes:
 
 ```bash
 user@ubuntu:~/kyoushi$ cd /home/user/kyoushi/env/provisioning/terragrunt/keys/
-user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cat terragrunt.hcl
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ terragrunt apply
 Initializing modules...
 ...
@@ -151,21 +150,49 @@ These changes are not necessary when using a local OpenStack platform. Then use 
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cd ../bootstrap/
-user@ubuntu:~/kyoushi/env/provisioning/terragrunt/bootstrap$ cat terragrunt.hcl
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/bootstrap$ terragrunt apply
 Initializing modules...
 ```
 
 Now change to the packer directory to create the images for employee hosts and the share. Again, for local cloud instances, no changes are necessary; however, in case that public cloud infrastructures such as OVH are used, it is necessary to carry out the following changes:
-* Set `base_image` to `Ubuntu 18.04` in `employee_image/default.json` and `share_image/source.pkr.hcl` or use any image name that is available in the cloud infrastructure
+* Set `base_image` to `Ubuntu 18.04` in `employee_image/default.json` and `share_image/source.pkr.hcl` or use any other appropriate image name that is available in the cloud infrastructure
 * Set `network` to the Ext-Net ID where the floating IP pool is provided in `employee_image/default.json` and `share_image/source.pkr.hcl`
 * Comment out `floating_ip_network` in `employee_image/source.pkr.hcl` and `share_image/source.pkr.hcl`
 
-Next, update the `terragrunt.hcl` file of the hosts directory and again apply the changes:
+Then you are ready to generate the image for the employee hosts. For this, install the required packages and then run packer as shown in the following.
 
 ```bash
-user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cd ../hosts/
-user@ubuntu:~/kyoushi/env/provisioning/terragrunt/hosts$ cat terragrunt.hcl
+user@ubuntu:~/kyoushi/env/provisioning/terragrunt/bootstrap$ cd ../../packer/employee_image/playbook/
+user@ubuntu:~/kyoushi/env/provisioning/packer/employee_image/playbook$ ansible-galaxy install -r requirements.yaml
+...
+user@ubuntu:~/kyoushi/env/provisioning/packer/employee_image/playbook$ cd ..
+user@ubuntu:~/kyoushi/env/provisioning/packer/employee_image$ packer build -var-file=default.json .
+...
+error writing '/tmp/whitespace': No space left on device
+...
+Build 'openstack.builder' finished after 24 minutes 39 seconds.
+```
+
+Note that some errors stating `No space left on device` may appear during image generation. These errors do not appear to cause any problems for successfully generating working images; so just wait until the process stops on its own. Now you also need to repeat these commands for creating the share image:
+
+```bash
+ser@ubuntu:~/kyoushi/env/provisioning/packer/employee_image$ cd ../share_image/playbook/
+user@ubuntu:~/kyoushi/env/provisioning/packer/share_image/playbook$ ansible-galaxy install -r requirements.yaml
+user@ubuntu:~/kyoushi/env/provisioning/packer/share_image/playbook$ cd ..
+user@ubuntu:~/kyoushi/env/provisioning/packer/share_image$ packer build -var-file=default.json .
+```
+
+Once this step is complete, make sure that the images are successfully uploaded onto the cloud infrastructure. Just as before, some changes are necessary in case that a public cloud infrastructure is used:
+* Commend out `host_address_index` in `hosts/module/01-management.tf`
+* Comment out the output `mgmthost_floating_ip` in `hosts/module/outputs.tf`
+* Set `floating_ip_pool = "Ext-Net"` in `hosts/terragrunt.hcl`
+* Set `image` to `Ubuntu 20.04` and set `mail_image` and `ext_mail_image` to `Debian 9` in `hosts/terragrunt.hcl` or use any other appropriate image names that are available in the cloud infrastructure
+* Set `employee_image` and `ext_user_image` to the name of the employee image and set `share_image` to the name of the share image that were generated using packer in the previous step, in `hosts/terragrunt.hcl`
+
+While these changes are not necessary on local cloud instances, you still need to make sure that the `terragrunt.hcl` file of the hosts directory fits your infrastructure. Then, apply the changes:
+
+```bash
+user@ubuntu:~/kyoushi/env/provisioning/packer/share_image$ cd ../../terragrunt/hosts/
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/hosts$ terragrunt apply
 Initializing modules...
 ```

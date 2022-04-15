@@ -178,7 +178,7 @@ Build 'openstack.builder' finished after 24 minutes 39 seconds.
 Note that some errors stating `No space left on device` may appear during image generation. These errors do not appear to cause any problems for successfully generating working images; so just wait until the process stops on its own. Now you also need to repeat these commands for creating the share image:
 
 ```bash
-ser@ubuntu:~/kyoushi/env/provisioning/packer/employee_image$ cd ../share_image/playbook/
+user@ubuntu:~/kyoushi/env/provisioning/packer/employee_image$ cd ../share_image/playbook/
 user@ubuntu:~/kyoushi/env/provisioning/packer/share_image/playbook$ ansible-galaxy install -r requirements.yaml
 user@ubuntu:~/kyoushi/env/provisioning/packer/share_image/playbook$ cd ..
 user@ubuntu:~/kyoushi/env/provisioning/packer/share_image$ packer build -var-file=default.json .

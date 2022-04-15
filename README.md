@@ -24,7 +24,9 @@ Several attacks are launched against the network from an attacker host. Thereby,
  
 ## Getting Started
 
-This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 30 VCPUs, 800 GB of disk space, and 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in a local OpenStack infrastructure as well as an OVH cloud platform. For the instructions stated in this getting-started, we assume that the following packages are installed:
+This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 30 VCPUs, 800 GB of disk space, and 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in a local OpenStack infrastructure as well as an OVH cloud platform. Note that for OVH deployment, it is necessary to use an account with maximum privileges, deploy the kyoushi environment on a GRA9 project (because GRA9 has some required beta features), and add the project to vracks.
+
+For the instructions stated in this getting-started, we assume that the following packages are installed in the correct versions:
 
 ```
 Python 3.8.5
@@ -155,8 +157,8 @@ Initializing modules...
 ```
 
 Now change to the packer directory to create the images for employee hosts and the share. Again, for local cloud instances, no changes are necessary; however, in case that public cloud infrastructures such as OVH are used, it is necessary to carry out the following changes:
-* Set `base_image` to `Ubuntu 18.04` in `employee_image/default.json` and `share_image/source.pkr.hcl` or use any other appropriate image name that is available in the cloud infrastructure
-* Set `network` to the Ext-Net ID where the floating IP pool is provided in `employee_image/default.json` and `share_image/source.pkr.hcl`
+* Set `base_image` to `Ubuntu 18.04` in `employee_image/default.json` and `share_image/default.json` or use any other appropriate image name that is available in the cloud infrastructure
+* Set `network` to the Ext-Net ID where the floating IP pool is provided in `employee_image/default.json` and `share_image/default.json`
 * Comment out `floating_ip_network` in `employee_image/source.pkr.hcl` and `share_image/source.pkr.hcl`
 
 Then you are ready to generate the image for the employee hosts. For this, install the required packages and then run packer as shown in the following.

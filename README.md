@@ -10,8 +10,8 @@ The testbed simulates an enterprise IT network, involving mail servers, file sha
 # Overview
  
 The Kyoushi Testbed comprises a network with three zones: Intranet, DMZ, and Intranet. Ubuntu VMs that simulate employees are located in all zones, where remote employees access the Intranet through a VPN connection. Employees utilize the Horde Mail platform, access the WordPress platform, share files, browse the web, and access the servers via SSH, while external users only send and respond to mails. The following figure shows an overview of the network.
- 
-![Network overview](https://i.ibb.co/KVwc6hk/network.png)
+
+<p align="center"><img src="https://i.ibb.co/KVwc6hk/network.png" width=50% height=50%></p>
  
 Several attacks are launched against the network from an attacker host. Thereby, the attacker gets access to the infrastructure through stolen VPN credentials. The following attacks are implemented:
 

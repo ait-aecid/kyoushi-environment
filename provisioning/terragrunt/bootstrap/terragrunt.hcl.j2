@@ -10,7 +10,7 @@ terraform {
 inputs = {
     # firewall host
     host_name = "inet-firewall"
-    host_image = "kyoushi-ubuntu-focal"
+    host_image = "kyoushi-ubuntu-bionic"
     host_tag = "firewall, dnsservers, servers"
     host_ext_address_index = 4
     host_flavor = "m1.medium"
@@ -19,7 +19,7 @@ inputs = {
 
     # external dns server
     ext_dns_name = "inet-dns"
-    ext_dns_image = "kyoushi-ubuntu-focal"
+    ext_dns_image = "kyoushi-ubuntu-bionic"
     ext_dns_tag = "internet, dnsservers"
     ext_dns_address_index = \var{context.host_max}
     ext_dns_size = 20

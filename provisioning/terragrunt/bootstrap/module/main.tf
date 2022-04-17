@@ -43,4 +43,5 @@ module "internet_dns" {
   subnet             = module.vmnets.extnet.subnet
   userdatafile       = local.ext_dns_userdata_file
   userdata_vars      = var.ext_dns_userdata_vars
+  depends_on         = [module.vmnets]
 }

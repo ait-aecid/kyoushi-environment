@@ -139,7 +139,7 @@ roles:
 
   - src: git@github.com:ait-cs-IaaS/ansible-ca-certs.git
     scm: git
-    version: v1.1.0
+    version: master
     name: ca-certs
     
   - src: git@github.com:whotwagner/ansible-role-shorewall.git
@@ -187,7 +187,7 @@ roles:
 
   - src: git@github.com:ait-cs-IaaS/ansible-kibana.git
     scm: git
-    version: v1.5.0
+    version: master
     name: kibana
 
   - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/ansible-passwordlist.git

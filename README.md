@@ -120,7 +120,7 @@ Initializing modules...
 Terraform has been successfully initialized!
 ```
 
-Once this step is completed, check in your cloud provider that the key was actually uploaded. Next, download the Ubuntu image `focal-server-cloudimg-amd64.img` from the [Ubuntu cloud images repository](https://cloud-images.ubuntu.com/) and upload it to your cloud provider with the name `kyoushi-ubuntu-focal` and the format `Raw`. Then create the following flavors:
+Once this step is completed, check in your cloud provider that the key was actually uploaded. Next, download the Ubuntu image `bionic-server-cloudimg-amd64.img` from the [Ubuntu cloud images repository](https://cloud-images.ubuntu.com/) and upload it to your cloud provider with the name `kyoushi-ubuntu-bionic` and the format `Raw`. Then create the following flavors:
 
 | Name | VCPUs | Disk space | RAM |
 | ---- | ----- | ---------- | --- |

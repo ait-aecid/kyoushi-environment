@@ -307,14 +307,34 @@ ok: [internal_employee_1]
 ...
 ```
 
-The `out` folder will contain directories for all hosts. Inside `out/<host_name>/logs` are the collected log data:
+In case that some of the files fail to be transferred, this usually means that these files are not available (e.g., error files that are not created when no errors occur). The `out` folder will contain directories for all hosts. Inside `out/<host_name>/logs` are the collected log data:
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/ansible$ ls playbooks/run/gather/out/
-attacker_0/          cloud_share/         ext_user_1/          inet-firewall/       internal_employee_1/ intranet_server/     monitoring/          remote_employee_1/   webserver/
-clark_mail/          ext_user_0/          inet-dns/            internal_employee_0/ internal_share/      mail/                remote_employee_0/   vpn/
+attacker_0
+cloud_share
+ext_user_0
+ext_user_1
+harrisbarnett_mail
+inet-dns
+inet-firewall
+internal_employee_0
+internal_employee_1
+internal_share
+intranet_server
+mail
+monitoring
+remote_employee_0
+remote_employee_1
+vpn
+webserver
 user@ubuntu:~/kyoushi/env/provisioning/ansible$ ls playbooks/run/gather/out/intranet_server/logs/
-apache2/     auth.log     auth.log.1   journal/     syslog       syslog.1     syslog.2.gz  syslog.3.gz  syslog.4.gz  syslog.5.gz  syslog.6.gz  syslog.7.gz
+apache2
+audit
+auth.log
+journal
+suricata
+syslog
 ```
 
 Moreover, the script extracted server configurations and facts in `out/<host_name>/configs/` and `out/<host_name>/facts.json`. If you just want to use the log data as is and all you need are the attack times (available in `out/attacker_0/logs/ait.aecid.attacker.wpdiscuz/sm.log`), then you are done at this point. In case that you want to apply labeling rules to mark single events according to their corresponding attack step, continue to the next section.

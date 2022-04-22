@@ -124,7 +124,7 @@ roles:
   
   - src: git@github.com:ait-cs-IaaS/ansible-horde.git
     scm: git
-    version: v1.2.1
+    version: master
     name: horde
 
   - src: git@github.com:ait-cs-IaaS/ansible-debiansnapshot.git

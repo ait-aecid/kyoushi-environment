@@ -67,6 +67,15 @@
         state: present
       tags: [install, wpscan]
 
+    - name: Install yajl for wpscan
+      become: yes
+      community.general.gem:
+        name: yajl-ruby
+        version: 1.4.1
+        user_install: no
+        state: present
+      tags: [install, wpscan]
+
     - name: Install wpscan
       become: yes
       community.general.gem:

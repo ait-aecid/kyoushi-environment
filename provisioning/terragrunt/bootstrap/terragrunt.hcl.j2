@@ -1,5 +1,10 @@
 terraform {
     source = ".//module"
+
+    extra_arguments "parallelism" {
+      commands  = ["apply"]
+      arguments = ["-parallelism=${get_env("TF_VAR_parallelism", "10")}"]
+    }
 }
 
 inputs = {

@@ -19,7 +19,7 @@ module "vmnets" {
   host_userdata          = local.host_userdata_file
   ext_subnet             = var.ext_subnet
   extnet                 = var.extnet
-  extnet_create          = true
+  extnet_create          = var.extnet_create
   ext_cidr               = var.ext_cidr
   ext_dns                = concat([cidrhost(var.ext_cidr, var.ext_dns_address_index)], var.ext_additional_dns)
   router_name            = var.router_name
@@ -43,4 +43,5 @@ module "internet_dns" {
   subnet             = module.vmnets.extnet.subnet
   userdatafile       = local.ext_dns_userdata_file
   userdata_vars      = var.ext_dns_userdata_vars
+  depends_on         = [module.vmnets]
 }

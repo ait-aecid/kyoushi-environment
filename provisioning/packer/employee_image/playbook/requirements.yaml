@@ -1,11 +1,15 @@
 - src: git@github.com:ait-cs-IaaS/ansible-cifs-mounts.git
   scm: git
   version: v1.0
+  name: cifs-mounts
 - src: git@github.com:ait-cs-IaaS/ansible-mate-desktop.git
   scm: git
   version: v1.0
+  name: mate-desktop
 - src: git@github.com:ait-cs-IaaS/ansible-x2go_server.git
   scm: git
   version: v1.0
+  name: x2go-server
 - src: git@github.com:ait-cs-IaaS/ansible-manage_unattended_upgrades.git
   scm: git
+  name: manage_unattended_upgrades

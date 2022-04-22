@@ -10,8 +10,8 @@ The testbed simulates an enterprise IT network, involving mail servers, file sha
 # Overview
  
 The Kyoushi Testbed comprises a network with three zones: Intranet, DMZ, and Intranet. Ubuntu VMs that simulate employees are located in all zones, where remote employees access the Intranet through a VPN connection. Employees utilize the Horde Mail platform, access the WordPress platform, share files, browse the web, and access the servers via SSH, while external users only send and respond to mails. The following figure shows an overview of the network.
- 
-![Network overview](https://i.ibb.co/KVwc6hk/network.png)
+
+<p align="center"><img src="https://i.ibb.co/KVwc6hk/network.png" width=50% height=50%></p>
  
 Several attacks are launched against the network from an attacker host. Thereby, the attacker gets access to the infrastructure through stolen VPN credentials. The following attacks are implemented:
 
@@ -24,7 +24,9 @@ Several attacks are launched against the network from an attacker host. Thereby,
  
 ## Getting Started
 
-This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 30 VCPUs, 800 GB of disk space, and 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in an OVH cloud platform. For the instructions stated in this getting-started, we assume that the following packages are installed:
+This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 30 VCPUs, 800 GB of disk space, and 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in a local OpenStack infrastructure as well as an OVH cloud platform. Note that for OVH deployment, it is necessary to use an account with maximum privileges, deploy the kyoushi environment on a GRA9 project (because GRA9 has some required beta features), and add the project to vracks.
+
+For the instructions stated in this getting-started, we assume that the following packages are installed in the correct versions:
 
 ```
 Python 3.8.5
@@ -106,35 +108,36 @@ From the OpenStack platform where you plan to deploy the testbed you first need 
 user@ubuntu:~/kyoushi$ source /home/user/openrc.sh
 ```
 
-The Kyoushi testbed is designed for deployment with Consul, so make sure that Consul is available in your infrastructure and that your have a Consul HTTP token with write access for the keystore. There are two main settings that need to be done. First, create an environment variable `CONSUL_HTTP_TOKEN` and point it to your Consul. Second, open the file `/home/user/kyoushi/env/provisioning/terragrunt/terragrunt.hcl` and set the `path` and `address` parameters of the Consul configuration to fit your infrastructure. If you use OVH, you will also have to set the environment variable `TF_VAR_parallelism=1`.
+The Kyoushi testbed is designed for deployment with Consul, so make sure that Consul is available in your infrastructure and that your have a Consul HTTP token with write access for the keystore. There are two main settings that need to be done. First, create an environment variable `CONSUL_HTTP_TOKEN` and point it to your Consul. Second, open the file `/home/user/kyoushi/env/provisioning/terragrunt/terragrunt.hcl` and set the `path` and `address` parameters of the Consul configuration to fit your infrastructure. If you use a public cloud infrastructure such as OVH, you will also have to set the environment variable `TF_VAR_parallelism=1`.
 
-Then, create a key pair and add your key in the `terragrunt.hcl` file. You may also need to update the `path` parameter. Then apply the changes:
+Then, create a key pair and add your key in the `terragrunt.hcl` file. You likely also need to update the `path` parameter. Then apply the changes:
 
 ```bash
 user@ubuntu:~/kyoushi$ cd /home/user/kyoushi/env/provisioning/terragrunt/keys/
-user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cat terragrunt.hcl
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ terragrunt apply
 Initializing modules...
 ...
 Terraform has been successfully initialized!
 ```
 
-Once this step is completed, check in your cloud provider that the key was actually uploaded. Next, download the Ubuntu image `focal-server-cloudimg-amd64.img` from the [Ubuntu cloud images repository](https://cloud-images.ubuntu.com/) and upload it to your cloud provider with the name `kyoushi-ubuntu-focal` and the format `Raw`. Then create the following flavors:
+Once this step is completed, check in your cloud provider that the key was actually uploaded. Next, download the Ubuntu image `bionic-server-cloudimg-amd64.img` from the [Ubuntu cloud images repository](https://cloud-images.ubuntu.com/) and upload it to your cloud provider with the name `kyoushi-ubuntu-bionic` and the format `Raw`. Then create the following flavors:
 
 | Name | VCPUs | Disk space | RAM |
 | ---- | ----- | ---------- | --- |
 | m1.small | 1 | 20 GB      | 2 GB |
+| aecid.d1.small | 1 | 50 GB      | 2 GB |
 | m1.medium | 2 | 40 GB     | 4 GB |
+| m1.xlarge | 8 | 160 GB     | 16 GB |
 
-Then go to the bootstrap directory and configure the settings to fit your virtualization provider if necessary, e.g., the router (default: `kyoushi-router`). If you are using OVH, you have to make the following changes:
+Then go to the bootstrap directory and configure the settings to fit your virtualization provider if necessary, e.g., the router (default: `kyoushi-router`). If you are using a public cloud, you have to make the following changes:
 * Comment out `host_ext_address_index` and `floating_ip_pool` in `inputs` in `bootstrap/terragrunt.hcl`
-* Add `provider_net_uuid` in `inputs` in `bootstrap/terragrunt.hcl`
+* Add `provider_net_uuid` and set it to the Ext-Net ID from the cloud provider in `inputs` in `bootstrap/terragrunt.hcl`
 * Add `access = false` in `inputs.networks.local` in `bootstrap/terragrunt.hcl`
 * Add `access = true` in `inputs.networks.dmz` in `bootstrap/terragrunt.hcl`
 * Set the source version of module `vmnets` to `git@github.com:ait-cs-IaaS/terraform-openstack-vmnets.git?ref=v1.5.6` in `bootstrap/module/main.tf`
 * Comment out `host_ext_address_index` and `ext_dns` in module `vmnets` in `bootstrap/module/main.tf`
-* Set `router_create` to `true` in module `vmnets` in `bootstrap/module/main.tf`
-* Set `provider_net_uuid` to `var.provider_net_uuid` in module `vmnets` in `bootstrap/module/main.tf`
+* Set `router_create = true` in module `vmnets` in `bootstrap/module/main.tf`
+* Set `provider_net_uuid = var.provider_net_uuid` in module `vmnets` in `bootstrap/module/main.tf`
 * Comment out module `internet_dns` in `bootstrap/module/main.tf`
 * Add `access = bool` to the variable networks object in `bootstrap/module/variables.tf`
 * Add the following variable  in `bootstrap/module/variables.tf`
@@ -149,16 +152,49 @@ These changes are not necessary when using a local OpenStack platform. Then use 
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cd ../bootstrap/
-user@ubuntu:~/kyoushi/env/provisioning/terragrunt/bootstrap$ cat terragrunt.hcl
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/bootstrap$ terragrunt apply
 Initializing modules...
 ```
 
-Similarly, update the `terragrunt.hcl` file of the hosts directory and again apply the changes:
+Now change to the packer directory to create the images for employee hosts and the share. Again, for local cloud instances, no changes are necessary; however, in case that public cloud infrastructures such as OVH are used, it is necessary to carry out the following changes:
+* Set `base_image` to `Ubuntu 18.04` in `employee_image/default.json` and `share_image/default.json` or use any other appropriate image name that is available in the cloud infrastructure
+* Set `network` to the Ext-Net ID where the floating IP pool is provided in `employee_image/default.json` and `share_image/default.json`
+* Comment out `floating_ip_network` in `employee_image/source.pkr.hcl` and `share_image/source.pkr.hcl`
+
+Then you are ready to generate the image for the employee hosts. For this, install the required packages and then run packer as shown in the following.
 
 ```bash
-user@ubuntu:~/kyoushi/env/provisioning/terragrunt/keys$ cd ../hosts/
-user@ubuntu:~/kyoushi/env/provisioning/terragrunt/hosts$ cat terragrunt.hcl
+user@ubuntu:~/kyoushi/env/provisioning/terragrunt/bootstrap$ cd ../../packer/employee_image/playbook/
+user@ubuntu:~/kyoushi/env/provisioning/packer/employee_image/playbook$ ansible-galaxy install -r requirements.yaml
+...
+user@ubuntu:~/kyoushi/env/provisioning/packer/employee_image/playbook$ cd ..
+user@ubuntu:~/kyoushi/env/provisioning/packer/employee_image$ packer build -var-file=default.json .
+...
+error writing '/tmp/whitespace': No space left on device
+...
+Build 'openstack.builder' finished after 24 minutes 39 seconds.
+```
+
+Note that some errors stating `No space left on device` may appear during image generation. These errors do not appear to cause any problems for successfully generating working images; so just wait until the process stops on its own. Now you also need to repeat these commands for creating the share image:
+
+```bash
+user@ubuntu:~/kyoushi/env/provisioning/packer/employee_image$ cd ../share_image/playbook/
+user@ubuntu:~/kyoushi/env/provisioning/packer/share_image/playbook$ ansible-galaxy install -r requirements.yaml
+user@ubuntu:~/kyoushi/env/provisioning/packer/share_image/playbook$ cd ..
+user@ubuntu:~/kyoushi/env/provisioning/packer/share_image$ packer build -var-file=default.json .
+```
+
+Once this step is complete, make sure that the images are successfully uploaded onto the cloud infrastructure. Just as before, some changes are necessary in case that a public cloud infrastructure is used:
+* Commend out `host_address_index` in `hosts/module/01-management.tf`
+* Comment out the output `mgmthost_floating_ip` in `hosts/module/outputs.tf`
+* Set `floating_ip_pool = "Ext-Net"` in `hosts/terragrunt.hcl`
+* Set `image` to `Ubuntu 20.04` and set `mail_image` and `ext_mail_image` to `Debian 9` in `hosts/terragrunt.hcl` or use any other appropriate image names that are available in the cloud infrastructure
+* Set `employee_image` and `ext_user_image` to the name of the employee image and set `share_image` to the name of the share image that were generated using packer in the previous step, in `hosts/terragrunt.hcl`
+
+While these changes are not necessary on local cloud instances, you still need to make sure that the `terragrunt.hcl` file of the hosts directory fits your infrastructure. Then, apply the changes:
+
+```bash
+user@ubuntu:~/kyoushi/env/provisioning/packer/share_image$ cd ../../terragrunt/hosts/
 user@ubuntu:~/kyoushi/env/provisioning/terragrunt/hosts$ terragrunt apply
 Initializing modules...
 ```
@@ -271,14 +307,34 @@ ok: [internal_employee_1]
 ...
 ```
 
-The `out` folder will contain directories for all hosts. Inside `out/<host_name>/logs` are the collected log data:
+In case that some of the files fail to be transferred, this usually means that these files are not available (e.g., error files that are not created when no errors occur). The `out` folder will contain directories for all hosts. Inside `out/<host_name>/logs` are the collected log data:
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/ansible$ ls playbooks/run/gather/out/
-attacker_0/          cloud_share/         ext_user_1/          inet-firewall/       internal_employee_1/ intranet_server/     monitoring/          remote_employee_1/   webserver/
-clark_mail/          ext_user_0/          inet-dns/            internal_employee_0/ internal_share/      mail/                remote_employee_0/   vpn/
+attacker_0
+cloud_share
+ext_user_0
+ext_user_1
+harrisbarnett_mail
+inet-dns
+inet-firewall
+internal_employee_0
+internal_employee_1
+internal_share
+intranet_server
+mail
+monitoring
+remote_employee_0
+remote_employee_1
+vpn
+webserver
 user@ubuntu:~/kyoushi/env/provisioning/ansible$ ls playbooks/run/gather/out/intranet_server/logs/
-apache2/     auth.log     auth.log.1   journal/     syslog       syslog.1     syslog.2.gz  syslog.3.gz  syslog.4.gz  syslog.5.gz  syslog.6.gz  syslog.7.gz
+apache2
+audit
+auth.log
+journal
+suricata
+syslog
 ```
 
 Moreover, the script extracted server configurations and facts in `out/<host_name>/configs/` and `out/<host_name>/facts.json`. If you just want to use the log data as is and all you need are the attack times (available in `out/attacker_0/logs/ait.aecid.attacker.wpdiscuz/sm.log`), then you are done at this point. In case that you want to apply labeling rules to mark single events according to their corresponding attack step, continue to the next section.
@@ -395,5 +451,5 @@ For more information on kyoushi-dataset, check out the [documentation](https://a
 If you use the Kyoushi Testbed Environment or any of the generated datasets, please cite the following publications: 
 
 * Landauer M., Skopik F., Wurzenberger M., Hotwagner W., Rauber A. (2021): [Have It Your Way: Generating Customized Log Data Sets with a Model-driven Simulation Testbed.](https://ieeexplore.ieee.org/document/9262078) IEEE Transactions on Reliability, Vol.70, Issue 1, pp. 402-415. IEEE. \[[PDF](https://www.skopik.at/ait/2020_trel.pdf)\]
-* Landauer M., Skopik F., Frank M., Hotwagner W., Wurzenberger M., Rauber A. (2022): Maintainable Log Datasets for Evaluation of Intrusion Detection Systems. Under Review.
+* Landauer M., Skopik F., Frank M., Hotwagner W., Wurzenberger M., Rauber A. (2022): Maintainable Log Datasets for Evaluation of Intrusion Detection Systems. Under Review. [arXiv:2203.08580](https://arxiv.org/abs/2203.08580). \[[PDF](https://arxiv.org/pdf/2203.08580.pdf)\]
 * Landauer M., Frank M., Skopik F., Hotwagner W., Wurzenberger M., Rauber A. (2022): A Framework for Automatic Labeling of Log Datasets from Model-driven Testbeds for HIDS Evaluation. Proceedings of the Workshop on Secure and Trustworthy Cyber-Physical Systems, forthcoming. ACM.

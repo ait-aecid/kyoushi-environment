@@ -24,7 +24,7 @@ Several attacks are launched against the network from an attacker host. Thereby,
  
 ## Getting Started
 
-This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 30 VCPUs, 800 GB of disk space, and 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in a local OpenStack infrastructure as well as an OVH cloud platform. Note that for OVH deployment, it is necessary to use an account with maximum privileges, deploy the kyoushi environment on a GRA9 project (because GRA9 has some required beta features), and add the project to vracks.
+This is the main repository for the Kyoushi Testbed Environment that contains all models of the testbed infrastructure; it relies on several other repositories that are responsible for generating testbeds from the models, running user and attacker simulations, labeling log data, etc. The following instructions cover the whole procedure to create a testbed and collect log data from scratch. *Please note*: The Kyoushi Testbed Environment is designed for deployment on cloud infrastructure and will require at least 30 VCPUs, 800 GB of disk space, and 60 GB of RAM. This getting-started relies on OpenStack, Ansible, and Terragrunt, and assumes that the user is experienced with infrastructure/software provisioning. We tested the getting-started in a local OpenStack infrastructure as well as an OVH cloud platform. Note that for OVH deployment, it is necessary to use an account with maximum privileges, deploy the kyoushi environment on a GRA9 project (because GRA9 has some required beta features), and add the project to vracks. In the following we use local installation as default and outline necessary changes for public cloud deployment.
 
 For the instructions stated in this getting-started, we assume that the following packages are installed in the correct versions:
 
@@ -110,7 +110,7 @@ user@ubuntu:~/kyoushi$ source /home/user/openrc.sh
 
 The Kyoushi testbed is designed for deployment with Consul, so make sure that Consul is available in your infrastructure and that your have a Consul HTTP token with write access for the keystore. There are two main settings that need to be done. First, create an environment variable `CONSUL_HTTP_TOKEN` and point it to your Consul. Second, open the file `/home/user/kyoushi/env/provisioning/terragrunt/terragrunt.hcl` and set the `path` and `address` parameters of the Consul configuration to fit your infrastructure. If you use a public cloud infrastructure such as OVH, you will also have to set the environment variable `TF_VAR_parallelism=1`.
 
-Then, create a key pair and add your key in the `terragrunt.hcl` file. You likely also need to update the `path` parameter. Then apply the changes:
+Then, create a key pair and add your key in the `terragrunt.hcl` file. You likely also need to update the `path` parameter in that file. Then apply the changes:
 
 ```bash
 user@ubuntu:~/kyoushi$ cd /home/user/kyoushi/env/provisioning/terragrunt/keys/
@@ -138,7 +138,6 @@ Then go to the bootstrap directory and configure the settings to fit your virtua
 * Comment out `host_ext_address_index` and `ext_dns` in module `vmnets` in `bootstrap/module/main.tf`
 * Set `router_create = true` in module `vmnets` in `bootstrap/module/main.tf`
 * Set `provider_net_uuid = var.provider_net_uuid` in module `vmnets` in `bootstrap/module/main.tf`
-* Comment out module `internet_dns` in `bootstrap/module/main.tf`
 * Add `access = bool` to the variable networks object in `bootstrap/module/variables.tf`
 * Add the following variable  in `bootstrap/module/variables.tf`
 ```bash
@@ -175,7 +174,7 @@ error writing '/tmp/whitespace': No space left on device
 Build 'openstack.builder' finished after 24 minutes 39 seconds.
 ```
 
-Note that some errors stating `No space left on device` may appear during image generation. These errors do not appear to cause any problems for successfully generating working images; so just wait until the process stops on its own. Now you also need to repeat these commands for creating the share image:
+Note that some errors stating `No space left on device` may appear during image generation. These errors do not indicate any problems for successfully generating working images; so just wait until the process stops on its own. Now you also need to repeat these commands for creating the share image:
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/packer/employee_image$ cd ../share_image/playbook/
@@ -184,11 +183,11 @@ user@ubuntu:~/kyoushi/env/provisioning/packer/share_image/playbook$ cd ..
 user@ubuntu:~/kyoushi/env/provisioning/packer/share_image$ packer build -var-file=default.json .
 ```
 
-Once this step is complete, make sure that the images are successfully uploaded onto the cloud infrastructure. Just as before, some changes are necessary in case that a public cloud infrastructure is used:
+Once this step is complete, make sure that the images are successfully uploaded and available in the cloud infrastructure. Just as before, some changes are necessary in case that a public cloud infrastructure is used:
 * Commend out `host_address_index` in `hosts/module/01-management.tf`
 * Comment out the output `mgmthost_floating_ip` in `hosts/module/outputs.tf`
 * Set `floating_ip_pool = "Ext-Net"` in `hosts/terragrunt.hcl`
-* Set `image` to `Ubuntu 20.04` and set `mail_image` and `ext_mail_image` to `Debian 9` in `hosts/terragrunt.hcl` or use any other appropriate image names that are available in the cloud infrastructure
+* Set `image` to `Ubuntu 18.04` and set `mail_image` and `ext_mail_image` to `Debian 9` in `hosts/terragrunt.hcl` or use any other appropriate image names that are available in the cloud infrastructure
 * Set `employee_image` and `ext_user_image` to the name of the employee image and set `share_image` to the name of the share image that were generated using packer in the previous step, in `hosts/terragrunt.hcl`
 
 While these changes are not necessary on local cloud instances, you still need to make sure that the `terragrunt.hcl` file of the hosts directory fits your infrastructure. Then, apply the changes:
@@ -274,7 +273,7 @@ root@attacker-0:~# tail /var/log/kyoushi/ait.aecid.attacker.wpdiscuz/sm.log
 {"level": "info", "message": "Created state machine", "run": "e5a66416-8fbf-4773-b4f4-3173b1b6b4ff", "seed": 672088864, "timestamp": 1646296446.5048175}
 ```
 
-The `run_all.sh` script that configured all servers also launched the data exfiltration attack, which is assumed to be already ongoing from the beginning of the simulation and stops at some point in time. Check out the logs of this attack case to ensure that the exfiltration script is actually transferring the data. The logs should appear similar to the following sample:
+The `run_all.sh` script that configured all servers also launched the data exfiltration attack, which is assumed to be already ongoing from the beginning of the simulation and stops at some point in time (in case that it is not starting, make sure that the endtime is set to a future date). Check out the logs of this attack case to ensure that the exfiltration script is actually transferring the data. The logs should appear similar to the following sample:
 
 ```bash
 root@attacker-0:~# tail /var/log/dnsteal.log
@@ -293,7 +292,7 @@ Once the simulation is completed (i.e., the attacker simulation has successfully
 user@ubuntu:~/kyoushi/env/provisioning/ansible$ ansible-playbook playbooks/run/gather/stop_suricata.yml
 ```
 
-Then, use the following command to copy all logs. The playbook will additionally copy relevant facts from the servers, e.g., IP addresses and configurations. When running the playbook, it is necessary to enter the name of the output directory. In the following, the name `out` is used.
+Then, use the following command to copy all logs to your local system. The playbook will additionally copy relevant facts from the servers, e.g., IP addresses and configurations. When running the playbook, it is necessary to enter the name of the output directory. In the following, the name `out` is used.
 
 ```bash
 user@ubuntu:~/kyoushi/env/provisioning/ansible$ ansible-playbook playbooks/run/gather/main.yml
@@ -341,7 +340,7 @@ Moreover, the script extracted server configurations and facts in `out/<host_nam
 
 ### Log data Labeling
 
-Labeling of log data is accomplished by processing the data in a pipeline that trims the logs according to the simulation time, parses them with logstash, stores them in an elasticsearch database, and queries the log events corresponding to attacker activities with predefined rules. Accordingly, the machine where labeling takes place should have at least 16 GB of RAM and the following dependencies installed:
+Labeling of log data is accomplished by processing the data in a pipeline that trims the logs according to the simulation time, parses them with logstash, stores them in an elasticsearch database, and queries the log events corresponding to attacker activities with predefined rules. Accordingly, the machine where labeling takes place should have at least 16 GB RAM and the following dependencies installed:
 
 ```
 elasticsearch 7.16.2
@@ -375,7 +374,7 @@ Copying the processing configuration into the dataset ...
 Dataset initialized in: /home/user/kyoushi/processed
 ```
 
-Before going to the next step, make sure that the elasticsearch database is empty and no legacy files from previous runs exist (this should not apply when kyoushi-dataset is executed for the first time). If such legacy files exist, the kyoushi-generator will get stuck in the following step. Therefore, make sure to run the following commands to clear the database and delete existing sincedb files.
+Before going to the next step, make sure that the elasticsearch database is empty and no legacy files from previous runs exist (this should not apply when kyoushi-dataset is executed for the first time). If such legacy files exist, the kyoushi-generator will get stuck in the following step without error messages or timeout. Therefore, make sure to run the following commands to clear the database and delete existing sincedb files.
 
 ```bash
 (kyoushi-dataset-L9Pkzr_M-py3.8) user@ubuntu:~/kyoushi/processed$ curl -XDELETE localhost:9200/_all

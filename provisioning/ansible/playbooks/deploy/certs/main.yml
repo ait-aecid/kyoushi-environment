@@ -2,7 +2,7 @@
   import_playbook: ./certificate_authority.yml
   tags: [ca]
 
-- name: Gather facts abouts other hosts
+- name: Gather facts about other hosts
   hosts: all
   gather_facts: yes
   become: true

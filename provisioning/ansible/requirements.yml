@@ -129,7 +129,7 @@ roles:
 
   - src: git@github.com:ait-cs-IaaS/ansible-debiansnapshot.git
     scm: git
-    version: v1.0
+    version: master
     name: debiansnapshot
 
   - src: git@github.com:ait-cs-IaaS/ansible-clamav.git

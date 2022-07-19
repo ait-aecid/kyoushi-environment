@@ -1,10 +1,13 @@
 remote_state {
-  backend = "consul" 
+  backend = "http"
   config = {
-    address = "consul.castle.local:8501"
-    scheme  = "https"
-    path    = "${get_env("OS_USER_DOMAIN_NAME","aecid")}/projects/${get_env("OS_PROJECT_NAME","aecid-testbed")}/environment/${path_relative_to_include()}/terraform.tfstate"
-    lock = true
-    access_token = "${get_env("CONSUL_HTTP_TOKEN")}"
+    address        = "https://git-service.ait.ac.at/api/v4/projects/2197/terraform/state/${get_env("OS_PROJECT_NAME")}_${get_env("OS_USER_DOMAIN_NAME")}_${path_relative_to_include()}_${basename(get_repo_root())}"
+    lock_address   = "https://git-service.ait.ac.at/api/v4/projects/2197/terraform/state/${get_env("OS_PROJECT_NAME")}_${get_env("OS_USER_DOMAIN_NAME")}_${path_relative_to_include()}_${basename(get_repo_root())}/lock"
+    unlock_address = "https://git-service.ait.ac.at/api/v4/projects/2197/terraform/state/${get_env("OS_PROJECT_NAME")}_${get_env("OS_USER_DOMAIN_NAME")}_${path_relative_to_include()}_${basename(get_repo_root())}/lock"
+    username       = "${get_env("GITLAB_USERNAME")}"
+    password       = "${get_env("CR_GITLAB_ACCESS_TOKEN")}"
+    lock_method    = "POST"
+    unlock_method  = "DELETE"
+    retry_wait_min = "5"
   }
 }

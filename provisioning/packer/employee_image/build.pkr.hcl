@@ -16,6 +16,7 @@ build {
     groups        = "${var.ansible_groups}"
     playbook_file = "playbook/main.yaml"
     user          = "${var.build_user}"
+    use_proxy     = false
   }
 
   provisioner "shell" {

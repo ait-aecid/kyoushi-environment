@@ -1,6 +1,8 @@
 # Kyoushi Testbed Environment
 This tool allows to generate labeled log datasets in simulation testbeds for security evaluations, e.g., IDSs, alert aggregation, or federated learning. 
 
+<p align="center"><img src="https://i.ibb.co/LCdqzZg/kyoushi-logo.jpg" width=25% height=25%></p>
+
 The testbed simulates an enterprise IT network, involving mail servers, file share, firewall, intranet, DMZ, DNS, VPN, etc. Log data is collected from many sources, including network traffic, apache access logs, DNS logs, syslog, authentication logs, audit logs, suricata logs, exim/mail logs, monitoring logs, etc. The Kyoushi testbed was used to generate the following publicly available log datasets:
 
  * [AIT-LDSv1](https://zenodo.org/record/4264796)

@@ -1,5 +1,5 @@
 
-- name: Fact gathering pre firewall conifguration
+- name: Fact gathering pre firewall configuration
   hosts: all
   gather_facts: yes
 

@@ -175,9 +175,9 @@ roles:
     version: v1.3
     name: elastic-beats-modules
 
-  - src: git@git-service.ait.ac.at:sct-cyberrange/ansible-roles/logstash.git
+  - src: git@github.com:ait-cs-IaaS/ansible-logstash.git
     scm: git
-    version: v1.2
+    version: master
     name: logstash
 
   - src: git@github.com:ait-cs-IaaS/ansible-elasticsearch.git

@@ -149,7 +149,7 @@ roles:
   
   - src: git@github.com:ait-cs-IaaS/ansible-kyoushi-simulation.git
     scm: git
-    version: v1.1
+    version: v1.2
     name: kyoushi-simulation
   
   - src: git@github.com:ait-cs-IaaS/ansible-auditd.git
